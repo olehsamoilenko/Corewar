@@ -17,6 +17,7 @@
 #define ERR_MAGIC_HEADER "Magic header is broken"
 #define ERR_NULL_AFTER_NAME "There aren't empty octets next to the name"
 #define ERR_NULL_AFTER_COMMENT "There aren't empty octets next to the comment"
+#define ERR_BIG_CHAMP "Too big champion"
 
 t_war	*init()
 {
@@ -46,14 +47,15 @@ void	print_map(unsigned char *map)
 
 void	print_champion(t_champion *champ)
 {
-	printf("NAME: %s\n", champ->name);
-	printf("COMMENT: %s\n", champ->comment);
-	printf("SIZE: %d\n", champ->size);
+	printf("NAME: %s\n", champ->header->prog_name);
+	printf("COMMENT: %s\n", champ->header->comment);
+	printf("SIZE: %d\n", champ->header->prog_size);
 }
 
 void	usage()
 {
 	printf("Usage: ./vm champion.cor\n");
+	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
 
@@ -82,6 +84,7 @@ void	fill_map(unsigned char *map, unsigned char value)
 void	error(char *message)
 {
 	printf("Error: %s\n", message);
+	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
 
@@ -89,6 +92,7 @@ int	read_magic_header(int fd, unsigned char *map)
 {
 	int i;
 	int res;
+
 	union magic_header header;
 	header.hex = COREWAR_EXEC_MAGIC;
 
@@ -169,11 +173,18 @@ void	read_exec_code(int fd, unsigned char *map, int code_size)
 {
 	int i = -1;
 	int res;
-	while (++i <= code_size)
+	while (++i < code_size)
 	{
 		res = read_bytes(fd, 1);
 		fill_map(map, res);
 	}
+}
+
+t_champion	*create_champion()
+{
+	t_champion *champ = ft_memalloc(sizeof(t_champion));
+	champ->header = ft_memalloc(sizeof(header_t));
+	return (champ);
 }
 
 int		main(int argc, char **argv)
@@ -187,8 +198,6 @@ int		main(int argc, char **argv)
 
 	t_war *war = init();
 
-	
-
 	if (argc == 2)
 	{
 		int fd = open(argv[1], O_RDONLY);
@@ -196,18 +205,20 @@ int		main(int argc, char **argv)
 			usage();
 		
 		
-		t_champion *zork = ft_memalloc(sizeof(t_champion));
+		t_champion *zork = create_champion();
 		
 		if (!read_magic_header(fd, war->map))
 			error(ERR_MAGIC_HEADER);
-		read_name(fd, war->map, zork->name);
+		read_name(fd, war->map, zork->header->prog_name);
 		if (!read_null(fd, war->map))
 			error(ERR_NULL_AFTER_NAME);
-		zork->size = read_exec_code_size(fd, war->map);
-		read_comment(fd, war->map, zork->comment);
+		zork->header->prog_size = read_exec_code_size(fd, war->map);
+		if (zork->header->prog_size > CHAMP_MAX_SIZE)
+			error(ERR_BIG_CHAMP);
+		read_comment(fd, war->map, zork->header->comment);
 		if (!read_null(fd, war->map))
 			error(ERR_NULL_AFTER_COMMENT);
-		read_exec_code(fd, war->map, zork->size);
+		read_exec_code(fd, war->map, zork->header->prog_size);
 		// change struct to standart
 
 		print_map(war->map);
@@ -215,6 +226,6 @@ int		main(int argc, char **argv)
 	}
 	else
 		usage();
-
+	// system("leaks vm | grep 'leaked bytes'");
 	return (0);
 }
