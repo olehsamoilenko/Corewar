@@ -219,10 +219,12 @@ int		main(int argc, char **argv)
 		if (!read_null(fd, war->map))
 			error(ERR_NULL_AFTER_COMMENT);
 		read_exec_code(fd, war->map, zork->header->prog_size);
-		// change struct to standart
+
 
 		print_map(war->map);
 		print_champion(zork);
+
+		// several champions on map
 	}
 	else
 		usage();

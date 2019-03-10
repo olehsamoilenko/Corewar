@@ -34,9 +34,6 @@ typedef struct	s_war
 
 typedef struct	s_champion
 {
-	// char			name[PROG_NAME_LENGTH];
-	// char			comment[COMMENT_LENGTH];
-	// int				size;
 	header_t		*header;
 }				t_champion;
 
