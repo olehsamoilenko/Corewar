@@ -14,10 +14,15 @@
 
 #include <fcntl.h>
 
+// champ parsing
 #define ERR_MAGIC_HEADER "Magic header is broken"
 #define ERR_NULL_AFTER_NAME "There aren't empty octets next to the name"
 #define ERR_NULL_AFTER_COMMENT "There aren't empty octets next to the comment"
 #define ERR_BIG_CHAMP "Too big champion"
+
+// args parsing
+#define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
+#define ERR_OPEN_CHAMP "Can't open the champion"
 
 t_war	*init()
 {
@@ -33,7 +38,7 @@ t_war	*init()
 	return (war);
 }
 
-void	print_map(unsigned char *map)
+void	print_champion_hex(unsigned char *map)
 {
 	int i = 0;
 	while (i < MEM_SIZE)
@@ -54,7 +59,7 @@ void	print_champion(t_champion *champ)
 
 void	usage()
 {
-	printf("Usage: ./vm champion.cor\n");
+	printf("Usage: ./vm <champion1.cor> <...>\n");
 	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
@@ -74,12 +79,12 @@ int		read_bytes(int fd, int amount)
 	return (res);
 }
 
-void	fill_map(unsigned char *map, unsigned char value)
-{
-	static int i = -1;
-	map[++i] = value;
-	// printf("%i = %02x\n", i, value);
-}
+// void	fill_map(unsigned char *map, unsigned char value)
+// {
+// 	static int i = -1;
+// 	map[++i] = value;
+// 	// printf("%i = %02x\n", i, value);
+// }
 
 void	error(char *message)
 {
@@ -88,7 +93,7 @@ void	error(char *message)
 	exit(0);
 }
 
-int	read_magic_header(int fd, unsigned char *map)
+int	read_magic_header(int fd)
 {
 	int i;
 	int res;
@@ -100,14 +105,14 @@ int	read_magic_header(int fd, unsigned char *map)
 	while (++i < 4)
 	{
 		res = read_bytes(fd, 1);
-		fill_map(map, res);
+
 		if (res != header.bytes[3 - i])
 			return (0);
 	}
 	return (1);
 }
 
-void	read_name(int fd, unsigned char *map, char *name)
+void	read_name(int fd, char *name)
 {
 	int i;
 	i = -1;
@@ -117,11 +122,11 @@ void	read_name(int fd, unsigned char *map, char *name)
 		res = read_bytes(fd, 1);
 		if (res != 0)
 			name[i] = res;
-		fill_map(map, res);
+
 	}
 }
 
-int		read_null(int fd, unsigned char *map)
+int		read_null(int fd)
 {
 	int i;
 	int res;
@@ -132,12 +137,12 @@ int		read_null(int fd, unsigned char *map)
 		res = read_bytes(fd, 1);
 		if (res != 0)
 			return (0);
-		fill_map(map, res);
+
 	}
 	return (1);
 }
 
-int		read_exec_code_size(int fd, unsigned char *map)
+int		read_exec_code_size(int fd)
 {
 	union magic_header size;
 	int i = -1;
@@ -146,14 +151,12 @@ int		read_exec_code_size(int fd, unsigned char *map)
 	{
 		res = read_bytes(fd, 1);
 		size.bytes[3 - i] = res;
-		fill_map(map, res);
+
 	}
-	
 	return (size.hex);
-	
 }
 
-void	read_comment(int fd, unsigned char *map, char *comment)
+void	read_comment(int fd, char *comment)
 {
 	int i = -1;
 	int res;
@@ -165,26 +168,59 @@ void	read_comment(int fd, unsigned char *map, char *comment)
 			// printf("%i symbol\n", i);
 			comment[i] = res;
 		}
-		fill_map(map, res);
+
 	}
 }
 
-void	read_exec_code(int fd, unsigned char *map, int code_size)
+void	read_exec_code(int fd, unsigned char *map, int *mem_num, int code_size)
 {
 	int i = -1;
 	int res;
 	while (++i < code_size)
 	{
 		res = read_bytes(fd, 1);
-		fill_map(map, res);
+		map[(*mem_num)++] = res;
 	}
 }
 
-t_champion	*create_champion()
+t_champion	*create_champion(char *file, unsigned char *map, int mem_start)
 {
 	t_champion *champ = ft_memalloc(sizeof(t_champion));
 	champ->header = ft_memalloc(sizeof(header_t));
+
+	int mem_num = mem_start;
+
+	int fd = open(file, O_RDONLY);
+	if (fd == -1)
+		error(ERR_OPEN_CHAMP);
+	if (!read_magic_header(fd)) // to var from header
+		error(ERR_MAGIC_HEADER);
+	read_name(fd, champ->header->prog_name);
+	if (!read_null(fd))
+		error(ERR_NULL_AFTER_NAME);
+	champ->header->prog_size = read_exec_code_size(fd);
+	if (champ->header->prog_size > CHAMP_MAX_SIZE)
+		error(ERR_BIG_CHAMP);
+	read_comment(fd, champ->header->comment);
+	if (!read_null(fd))
+		error(ERR_NULL_AFTER_COMMENT);
+	read_exec_code(fd, map, &mem_num, champ->header->prog_size);
+
+	close(fd);
+
 	return (champ);
+}
+
+void	print_memory(unsigned char *map)
+{
+	int i = 0;
+	while (i < MEM_SIZE)
+	{
+		ft_printf("%02x ", map[i]);
+		i++;
+		if (i % 64 == 0)
+			ft_printf("\n");
+	}
 }
 
 int		main(int argc, char **argv)
@@ -198,36 +234,21 @@ int		main(int argc, char **argv)
 
 	t_war *war = init();
 
-	if (argc == 2)
-	{
-		int fd = open(argv[1], O_RDONLY);
-		if (fd == -1)
-			usage();
-		
-		
-		t_champion *zork = create_champion();
-		
-		if (!read_magic_header(fd, war->map))
-			error(ERR_MAGIC_HEADER);
-		read_name(fd, war->map, zork->header->prog_name);
-		if (!read_null(fd, war->map))
-			error(ERR_NULL_AFTER_NAME);
-		zork->header->prog_size = read_exec_code_size(fd, war->map);
-		if (zork->header->prog_size > CHAMP_MAX_SIZE)
-			error(ERR_BIG_CHAMP);
-		read_comment(fd, war->map, zork->header->comment);
-		if (!read_null(fd, war->map))
-			error(ERR_NULL_AFTER_COMMENT);
-		read_exec_code(fd, war->map, zork->header->prog_size);
-
-
-		print_map(war->map);
-		print_champion(zork);
-
-		// several champions on map
-	}
-	else
+	if (argc == 1)
 		usage();
-	// system("leaks vm | grep 'leaked bytes'");
+	if (argc > 5)
+		error(ERR_MANY_CHAMPS);
+	
+
+	int mem_delta = MEM_SIZE / (argc - 1);
+	int i = -1;
+	while (++i < argc - 1)
+	{
+		war->champs[i] = create_champion(argv[i + 1], war->map, i * mem_delta);
+		print_champion(war->champs[i]);
+	}
+	print_memory(war->map);
+
+	system("leaks vm");
 	return (0);
 }
