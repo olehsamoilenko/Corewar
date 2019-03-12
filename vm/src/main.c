@@ -42,9 +42,13 @@ t_war	*init()
 	t_war *war = ft_memalloc(sizeof(t_war));
 	int i = -1;
 
-	// fake
+	
 	while (++i < MEM_SIZE)
-		war->map[i] = 0xFF;
+	{
+		war->map[i] = ft_memalloc(sizeof(t_mem_cell));
+		// fake
+		war->map[i]->value = 0xFF;
+	}
 	init_curses();
 
 	return (war);
@@ -172,24 +176,24 @@ void	read_comment(int fd, char *comment)
 	}
 }
 
-void	read_exec_code(int fd, unsigned char *map, int *map_color, int champ_number, int mem_start, int code_size)
+void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int mem_start)
 {
 	int i = -1;
 	int res;
-	while (++i < code_size)
+	while (++i < champ->header->prog_size)
 	{
 		res = read_bytes(fd, 1);
-		map[mem_start + i] = res;
-		map_color[mem_start + i] = champ_number;
+		map[mem_start + i]->value = res;
+		map[mem_start + i]->color = champ->number;
 	}
 }
 
-t_champion	*create_champion(char *file, unsigned char *map, int *map_color, int champ_number, int mem_start)
+t_champion	*create_champion(char *file, t_mem_cell *map[], int champ_number, int mem_start)
 {
 	t_champion *champ = ft_memalloc(sizeof(t_champion));
 	champ->header = ft_memalloc(sizeof(header_t));
 
-	int mem_num = mem_start;
+	// int mem_num = champ_number * mem_de;
 
 	int fd = open(file, O_RDONLY);
 	if (fd == -1)
@@ -205,53 +209,54 @@ t_champion	*create_champion(char *file, unsigned char *map, int *map_color, int 
 	read_comment(fd, champ->header->comment);
 	if (!read_null(fd))
 		error(ERR_NULL_AFTER_COMMENT);
-	read_exec_code(fd, map, map_color, champ_number, mem_start, champ->header->prog_size);
+	champ->number = champ_number;
+	read_exec_code(fd, map, champ, mem_start);
 
 	close(fd);
 
 	return (champ);
 }
 
-void	print_memory(unsigned char *map, int *map_color)
+void	print_memory(t_mem_cell *map[])
 {
 	int i = -1;
 	char s[3];
 	// attron(COLOR_PAIR(1));
 	while (++i < MEM_SIZE)
 	{
-		if (map_color[i] == 0)
+		if (map[i]->color == 0)
 			attroff(A_COLOR);
 		else
-			attron(COLOR_PAIR(map_color[i]));
-		sprintf(s, "%02x", map[i]);
+			attron(COLOR_PAIR(map[i]->color));
+		sprintf(s, "%02x", map[i]->value);
 		mvaddstr(i / 64, (i % 64) * 3, s);
 	}
 	// attroff(COLOR_PAIR(1));
 }
 
-void	check_mem(unsigned char *map)
-{
-	int i = -1;
-	while (++i < MEM_SIZE)
-	{
-		if (i % 64 == 0)
-			printf("\n");
-		printf("%02x ", map[i]);
+// void	check_mem(unsigned char *map)
+// {
+// 	int i = -1;
+// 	while (++i < MEM_SIZE)
+// 	{
+// 		if (i % 64 == 0)
+// 			printf("\n");
+// 		printf("%02x ", map[i]);
 		
-	}
-}
+// 	}
+// }
 
-void	check_color(int *map_color)
-{
-	int i = -1;
-	while (++i < MEM_SIZE)
-	{
-		if (i % 64 == 0)
-			printf("\n");
-		printf("%d ", map_color[i]);
+// void	check_color(int *map_color)
+// {
+// 	int i = -1;
+// 	while (++i < MEM_SIZE)
+// 	{
+// 		if (i % 64 == 0)
+// 			printf("\n");
+// 		printf("%d ", map_color[i]);
 		
-	}
-}
+// 	}
+// }
 
 void	over_curses()
 {
@@ -278,10 +283,11 @@ int		main(int argc, char **argv)
 	int mem_delta = MEM_SIZE / (argc - 1);
 	int i = -1;
 	while (++i < argc - 1)
-		war->champs[i] = create_champion(argv[i + 1], war->map, war->map_color, i + 1, i * mem_delta);
+		war->champs[i] = create_champion(argv[i + 1], war->map, i + 1, i * mem_delta);
+		// war->champs[i] = create_champion(argv[i + 1], war->map, i + 1, i * mem_delta);
 
 	
-	print_memory(war->map, war->map_color);
+	print_memory(war->map);
 
 	over_curses();
 	

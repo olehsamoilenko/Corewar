@@ -28,14 +28,20 @@ union magic_header
 typedef struct	s_champion
 {
 	header_t			*header;
+	int					number;
 	// struct s_champion	*next;
 }				t_champion;
+
+typedef struct	s_map_cell
+{
+	unsigned char		value;
+	int					color;
+}				t_mem_cell;
 
 
 typedef struct	s_war
 {
-	unsigned char		map[MEM_SIZE];
-	int					map_color[MEM_SIZE];
+	t_mem_cell			*map[MEM_SIZE];
 	t_champion			*champs[4];
 
 }				t_war;
