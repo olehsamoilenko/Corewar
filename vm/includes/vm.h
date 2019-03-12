@@ -35,11 +35,15 @@ typedef struct	s_champion
 typedef struct	s_war
 {
 	unsigned char		map[MEM_SIZE];
+	int					map_color[MEM_SIZE];
 	t_champion			*champs[4];
 
 }				t_war;
 
-
+typedef struct	s_carriage
+{
+	int			position;
+}				t_carriage;
 
 
 

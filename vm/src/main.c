@@ -13,6 +13,7 @@
 #include "vm.h"
 
 #include <fcntl.h>
+#include <curses.h>
 
 // champ parsing
 #define ERR_MAGIC_HEADER "Magic header is broken"
@@ -24,6 +25,18 @@
 #define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
 #define ERR_OPEN_CHAMP "Can't open the champion"
 
+void	init_curses()
+{
+	initscr();
+	curs_set(0);
+	start_color();
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	init_pair(2, COLOR_BLUE, COLOR_BLACK);
+	init_pair(3, COLOR_RED, COLOR_BLACK);
+	init_pair(4, COLOR_CYAN, COLOR_BLACK);
+
+}
+
 t_war	*init()
 {
 	t_war *war = ft_memalloc(sizeof(t_war));
@@ -31,10 +44,9 @@ t_war	*init()
 
 	// fake
 	while (++i < MEM_SIZE)
-	{
 		war->map[i] = 0xFF;
-	}
-	// fake
+	init_curses();
+
 	return (war);
 }
 
@@ -79,13 +91,6 @@ int		read_bytes(int fd, int amount)
 	return (res);
 }
 
-// void	fill_map(unsigned char *map, unsigned char value)
-// {
-// 	static int i = -1;
-// 	map[++i] = value;
-// 	// printf("%i = %02x\n", i, value);
-// }
-
 void	error(char *message)
 {
 	printf("Error: %s\n", message);
@@ -96,7 +101,7 @@ void	error(char *message)
 int	read_magic_header(int fd)
 {
 	int i;
-	int res;
+	// int res;
 
 	union magic_header header;
 	header.hex = COREWAR_EXEC_MAGIC;
@@ -104,9 +109,9 @@ int	read_magic_header(int fd)
 	i = -1;
 	while (++i < 4)
 	{
-		res = read_bytes(fd, 1);
+		// res = 
 
-		if (res != header.bytes[3 - i])
+		if (read_bytes(fd, 1) != header.bytes[3 - i])
 			return (0);
 	}
 	return (1);
@@ -129,13 +134,13 @@ void	read_name(int fd, char *name)
 int		read_null(int fd)
 {
 	int i;
-	int res;
+	// int res;
 
 	i = -1;
 	while (++i < 4)
 	{
-		res = read_bytes(fd, 1);
-		if (res != 0)
+		// res = ;
+		if (read_bytes(fd, 1) != 0)
 			return (0);
 
 	}
@@ -146,12 +151,11 @@ int		read_exec_code_size(int fd)
 {
 	union magic_header size;
 	int i = -1;
-	int res;
+	// int res;
 	while (++i < 4)
 	{
-		res = read_bytes(fd, 1);
-		size.bytes[3 - i] = res;
-
+		// res = 
+		size.bytes[3 - i] = read_bytes(fd, 1);
 	}
 	return (size.hex);
 }
@@ -164,26 +168,23 @@ void	read_comment(int fd, char *comment)
 	{
 		res = read_bytes(fd, 1);
 		if (res != 0)
-		{
-			// printf("%i symbol\n", i);
 			comment[i] = res;
-		}
-
 	}
 }
 
-void	read_exec_code(int fd, unsigned char *map, int *mem_num, int code_size)
+void	read_exec_code(int fd, unsigned char *map, int *map_color, int champ_number, int mem_start, int code_size)
 {
 	int i = -1;
 	int res;
 	while (++i < code_size)
 	{
 		res = read_bytes(fd, 1);
-		map[(*mem_num)++] = res;
+		map[mem_start + i] = res;
+		map_color[mem_start + i] = champ_number;
 	}
 }
 
-t_champion	*create_champion(char *file, unsigned char *map, int mem_start)
+t_champion	*create_champion(char *file, unsigned char *map, int *map_color, int champ_number, int mem_start)
 {
 	t_champion *champ = ft_memalloc(sizeof(t_champion));
 	champ->header = ft_memalloc(sizeof(header_t));
@@ -204,23 +205,58 @@ t_champion	*create_champion(char *file, unsigned char *map, int mem_start)
 	read_comment(fd, champ->header->comment);
 	if (!read_null(fd))
 		error(ERR_NULL_AFTER_COMMENT);
-	read_exec_code(fd, map, &mem_num, champ->header->prog_size);
+	read_exec_code(fd, map, map_color, champ_number, mem_start, champ->header->prog_size);
 
 	close(fd);
 
 	return (champ);
 }
 
-void	print_memory(unsigned char *map)
+void	print_memory(unsigned char *map, int *map_color)
 {
-	int i = 0;
-	while (i < MEM_SIZE)
+	int i = -1;
+	char s[3];
+	// attron(COLOR_PAIR(1));
+	while (++i < MEM_SIZE)
 	{
-		ft_printf("%02x ", map[i]);
-		i++;
-		if (i % 64 == 0)
-			ft_printf("\n");
+		if (map_color[i] == 0)
+			attroff(A_COLOR);
+		else
+			attron(COLOR_PAIR(map_color[i]));
+		sprintf(s, "%02x", map[i]);
+		mvaddstr(i / 64, (i % 64) * 3, s);
 	}
+	// attroff(COLOR_PAIR(1));
+}
+
+void	check_mem(unsigned char *map)
+{
+	int i = -1;
+	while (++i < MEM_SIZE)
+	{
+		if (i % 64 == 0)
+			printf("\n");
+		printf("%02x ", map[i]);
+		
+	}
+}
+
+void	check_color(int *map_color)
+{
+	int i = -1;
+	while (++i < MEM_SIZE)
+	{
+		if (i % 64 == 0)
+			printf("\n");
+		printf("%d ", map_color[i]);
+		
+	}
+}
+
+void	over_curses()
+{
+	getch();
+	endwin();
 }
 
 int		main(int argc, char **argv)
@@ -239,16 +275,18 @@ int		main(int argc, char **argv)
 	if (argc > 5)
 		error(ERR_MANY_CHAMPS);
 	
-
 	int mem_delta = MEM_SIZE / (argc - 1);
 	int i = -1;
 	while (++i < argc - 1)
-	{
-		war->champs[i] = create_champion(argv[i + 1], war->map, i * mem_delta);
-		print_champion(war->champs[i]);
-	}
-	print_memory(war->map);
+		war->champs[i] = create_champion(argv[i + 1], war->map, war->map_color, i + 1, i * mem_delta);
 
+	
+	print_memory(war->map, war->map_color);
+
+	over_curses();
+	
+
+	// check_color(war->map_color);
 	system("leaks vm");
 	return (0);
 }
