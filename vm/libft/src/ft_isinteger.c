@@ -1,33 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strnequ.c                                       :+:      :+:    :+:   */
+/*   ft_isinteger.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: osamoile <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/03/27 14:30:02 by osamoile          #+#    #+#             */
-/*   Updated: 2018/03/27 14:30:04 by osamoile         ###   ########.fr       */
+/*   Created: 2018/03/21 18:00:27 by osamoile          #+#    #+#             */
+/*   Updated: 2018/03/21 18:00:28 by osamoile         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strsub(char const *s, unsigned int start, size_t len)
+int		ft_isinteger(char *line)
 {
-	size_t	i;
-	char	*a;
-
-	if (!s || start >= ft_strlen(s))
-		return (0);
-	a = ft_strnew(len);
-	if (!a)
-		return (0);
-	i = 0;
-	while (i < len)
-	{
-		a[i] = s[i + start];
-		i++;
-	}
-	a[i] = '\0';
-	return (a);
+	int num = ft_atoi(line);
+	char *itoa = ft_itoa(num);
+	int res;
+	if (ft_strequ(itoa, line))
+		res = 1;
+	else
+		res = 0;
+	ft_strdel(&itoa);
+	return (res);
 }

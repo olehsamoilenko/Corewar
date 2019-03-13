@@ -27,9 +27,10 @@ union magic_header
 
 typedef struct	s_champion
 {
+	char				*file;
 	header_t			*header;
-	int					number;
-	// struct s_champion	*next;
+	// int					number;
+	// int					flag_n;
 }				t_champion;
 
 typedef struct	s_map_cell

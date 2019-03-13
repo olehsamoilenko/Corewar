@@ -25,6 +25,12 @@
 #define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
 #define ERR_OPEN_CHAMP "Can't open the champion"
 
+#define ERR_N_NUMBER "Flag -n needs a number in range of 1 to 4"
+#define ERR_N_CHAMP "Flag -n needs a champion"
+#define ERR_SAME_N "Duplication of champion's number is forbidden"
+#define ERR_CHAMP_FORMAT "Champion format must be 'name.cor'"
+#define ERR_BIG_N "Champion's number exceeds their amount"
+
 void	init_curses()
 {
 	initscr();
@@ -49,7 +55,7 @@ t_war	*init()
 		// fake
 		war->map[i]->value = 0xFF;
 	}
-	init_curses();
+	// init_curses();
 
 	return (war);
 }
@@ -68,14 +74,20 @@ void	print_champion_hex(unsigned char *map)
 
 void	print_champion(t_champion *champ)
 {
-	printf("NAME: %s\n", champ->header->prog_name);
-	printf("COMMENT: %s\n", champ->header->comment);
-	printf("SIZE: %d\n", champ->header->prog_size);
+	if (champ == NULL)
+	{
+		printf("Empty.\n");
+		return ;
+	}
+	printf("File: %s\n", champ->file);
+	// printf("NAME: %s\n", champ->header->prog_name);
+	// printf("COMMENT: %s\n", champ->header->comment);
+	// printf("SIZE: %d\n", champ->header->prog_size);
 }
 
 void	usage()
 {
-	printf("Usage: ./vm <champion1.cor> <...>\n");
+	printf("Usage: ./vm <[-n 1] champion1.cor> <...>\n");
 	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
@@ -176,43 +188,44 @@ void	read_comment(int fd, char *comment)
 	}
 }
 
-void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int mem_start)
-{
-	int i = -1;
-	int res;
-	while (++i < champ->header->prog_size)
-	{
-		res = read_bytes(fd, 1);
-		map[mem_start + i]->value = res;
-		map[mem_start + i]->color = champ->number;
-	}
-}
+// void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int mem_start)
+// {
+// 	int i = -1;
+// 	int res;
+// 	while (++i < champ->header->prog_size)
+// 	{
+// 		res = read_bytes(fd, 1);
+// 		map[mem_start + i]->value = res;
+// 		map[mem_start + i]->color = champ->number;
+// 	}
+// }
 
-t_champion	*create_champion(char *file, t_mem_cell *map[], int champ_number, int mem_start)
+t_champion	*create_champion(char *file, t_mem_cell *map[])
 {
 	t_champion *champ = ft_memalloc(sizeof(t_champion));
-	champ->header = ft_memalloc(sizeof(header_t));
+	champ->file = file;
+	// champ->header = ft_memalloc(sizeof(header_t));
 
 	// int mem_num = champ_number * mem_de;
+	
 
-	int fd = open(file, O_RDONLY);
-	if (fd == -1)
-		error(ERR_OPEN_CHAMP);
-	if (!read_magic_header(fd)) // to var from header
-		error(ERR_MAGIC_HEADER);
-	read_name(fd, champ->header->prog_name);
-	if (!read_null(fd))
-		error(ERR_NULL_AFTER_NAME);
-	champ->header->prog_size = read_exec_code_size(fd);
-	if (champ->header->prog_size > CHAMP_MAX_SIZE)
-		error(ERR_BIG_CHAMP);
-	read_comment(fd, champ->header->comment);
-	if (!read_null(fd))
-		error(ERR_NULL_AFTER_COMMENT);
-	champ->number = champ_number;
-	read_exec_code(fd, map, champ, mem_start);
-
-	close(fd);
+	// int fd = open(file, O_RDONLY);
+	// if (fd == -1)
+	// 	error(ERR_OPEN_CHAMP);
+	// if (!read_magic_header(fd)) // to var from header
+	// 	error(ERR_MAGIC_HEADER);
+	// read_name(fd, champ->header->prog_name);
+	// if (!read_null(fd))
+	// 	error(ERR_NULL_AFTER_NAME);
+	// champ->header->prog_size = read_exec_code_size(fd);
+	// if (champ->header->prog_size > CHAMP_MAX_SIZE)
+	// 	error(ERR_BIG_CHAMP);
+	// read_comment(fd, champ->header->comment);
+	// if (!read_null(fd))
+	// 	error(ERR_NULL_AFTER_COMMENT);
+	// champ->number = champ_number;
+	// read_exec_code(fd, map, champ, mem_start);
+	// close(fd);
 
 	return (champ);
 }
@@ -258,41 +271,131 @@ void	print_memory(t_mem_cell *map[])
 // 	}
 // }
 
+int		is_champion(char *name)
+{
+	int res;
+	char *cor = ft_strsub(name, ft_strlen(name) - 4, 4);
+	if (ft_strlen(name) > 4 && ft_strequ(cor, ".cor"))
+		res = 1;
+	else
+		res = 0;
+	ft_strdel(&cor);
+	return (res);
+
+}
+
+void	parse_params(int argc, char **argv, t_war *war)
+{
+	if (argc == 1)
+		usage();
+
+	int champs = 0;
+
+	int buf_champs_counter = 0;
+	t_champion	**buf_champs = ft_memalloc(4 * sizeof(t_champion));
+
+	int i = 0;
+	int num;
+	while (++i < argc)
+	{
+		if (ft_strequ(argv[i], "-n"))
+		{
+			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || 
+				(num = ft_atoi(argv[i + 1])) < 1 || num > MAX_PLAYERS)
+				error(ERR_N_NUMBER);
+
+			if (i < argc - 2)
+			{
+				if (!is_champion(argv[i + 2]))
+					error(ERR_CHAMP_FORMAT);
+				if (war->champs[num - 1] == NULL)
+					war->champs[num - 1] = create_champion(argv[i + 2], war->map);
+				else
+					error(ERR_SAME_N);
+				i += 2;
+			}
+			else
+				error(ERR_N_CHAMP);
+		}
+		else if (!is_champion(argv[i]))
+			usage();
+		else
+		{
+			buf_champs[buf_champs_counter++] = create_champion(argv[i], war->map);
+			if (buf_champs_counter == MAX_PLAYERS)
+				error(ERR_MANY_CHAMPS);
+		}
+	}
+
+
+	// put buf champs to general
+	i = -1;
+	while (buf_champs[++i] != NULL)
+	{
+		int j = -1;
+		while (war->champs[++j] != NULL)
+		{
+			if (j == MAX_PLAYERS - 1)
+				error(ERR_MANY_CHAMPS);
+		}
+		war->champs[j] = buf_champs[i];
+	}
+
+	// empty chapms ?
+	i = MAX_PLAYERS - 1;
+	while (war->champs[i] == NULL)
+		i--;
+	while (i-- >= 0)
+	{
+		if (war->champs[i] == NULL)
+			error(ERR_BIG_N);
+	}
+	free(buf_champs);
+}
+
 void	over_curses()
 {
 	getch();
 	endwin();
 }
 
+
 int		main(int argc, char **argv)
 {
 	/* TEST */
-	// printf("%s\n", header.bytes);
-	// printf("%02x %02x %02x %02x\n", header.bytes[0], header.bytes[1], header.bytes[2], header.bytes[3]);
-	// if (header.bytes[0] == 0xF3)
-	// 	printf("OK!\n");
+
+	// char *line = "123";
+	// printf("|%s|\n", ft_strsub(line, 3, 1));
+
 	/* TEST */
 
 	t_war *war = init();
 
-	if (argc == 1)
-		usage();
-	if (argc > 5)
-		error(ERR_MANY_CHAMPS);
+	int i;
+
+	parse_params(argc, argv, war);
+
+	i = -1;
+	while (++i < 4)
+	{
+		printf("\t%i: \n", i + 1);
+		print_champion(war->champs[i]);
+	}
 	
-	int mem_delta = MEM_SIZE / (argc - 1);
-	int i = -1;
-	while (++i < argc - 1)
-		war->champs[i] = create_champion(argv[i + 1], war->map, i + 1, i * mem_delta);
-		// war->champs[i] = create_champion(argv[i + 1], war->map, i + 1, i * mem_delta);
 
 	
-	print_memory(war->map);
+	// int mem_delta = MEM_SIZE / (argc - 1);
+	// int i = -1;
+	// while (++i < argc - 1)
+		
 
-	over_curses();
+	// init_curses();
+	// print_memory(war->map);
+	// over_curses();
 	
 
 	// check_color(war->map_color);
 	system("leaks vm");
+
 	return (0);
 }

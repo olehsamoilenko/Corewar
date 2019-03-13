@@ -91,7 +91,8 @@ LIST =		ft_memset \
 			ft_chartable \
 			ft_abs \
 			ft_arrlen \
-			ft_char_count
+			ft_char_count \
+			ft_isinteger
 OBJ =		$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)
