@@ -29,8 +29,6 @@ typedef struct	s_champion
 {
 	char				*file;
 	header_t			*header;
-	// int					number;
-	// int					flag_n;
 }				t_champion;
 
 typedef struct	s_map_cell
@@ -39,18 +37,22 @@ typedef struct	s_map_cell
 	int					color;
 }				t_mem_cell;
 
+typedef struct	s_carriage
+{
+	int					position;
+	int					color;
+	struct s_carriage	*next;
+}				t_carriage;
 
 typedef struct	s_war
 {
 	t_mem_cell			*map[MEM_SIZE];
-	t_champion			*champs[4];
+	t_champion			*champs[5];
+	t_carriage			*carriages;
 
 }				t_war;
 
-typedef struct	s_carriage
-{
-	int			position;
-}				t_carriage;
+
 
 
 

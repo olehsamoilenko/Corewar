@@ -24,7 +24,6 @@
 // args parsing
 #define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
 #define ERR_OPEN_CHAMP "Can't open the champion"
-
 #define ERR_N_NUMBER "Flag -n needs a number in range of 1 to 4"
 #define ERR_N_CHAMP "Flag -n needs a champion"
 #define ERR_SAME_N "Duplication of champion's number is forbidden"
@@ -40,6 +39,11 @@ void	init_curses()
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);
 	init_pair(3, COLOR_RED, COLOR_BLACK);
 	init_pair(4, COLOR_CYAN, COLOR_BLACK);
+	// carriage
+	init_pair(5, COLOR_BLACK, COLOR_GREEN);
+	init_pair(6, COLOR_BLACK, COLOR_BLUE);
+	init_pair(7, COLOR_BLACK, COLOR_RED);
+	init_pair(8, COLOR_BLACK, COLOR_CYAN);
 
 }
 
@@ -55,8 +59,7 @@ t_war	*init()
 		// fake
 		war->map[i]->value = 0xFF;
 	}
-	// init_curses();
-
+	war->carriages = NULL;
 	return (war);
 }
 
@@ -72,17 +75,29 @@ void	print_champion_hex(unsigned char *map)
 	}
 }
 
-void	print_champion(t_champion *champ)
+void	print_champions(t_champion *champs[])
 {
-	if (champ == NULL)
+	
+	int i = -1;
+	while (++i < 4)
 	{
-		printf("Empty.\n");
-		return ;
+		printf("\t%i: \n", i + 1);
+		if (champs[i] == NULL)
+		{
+			printf("Empty.\n");
+			return ;
+		}
+		else
+		{
+			printf("NAME: %s\n", champs[i]->header->prog_name);
+			printf("COMMENT: %s\n", champs[i]->header->comment);
+			printf("SIZE: %d\n", champs[i]->header->prog_size);
+		}
 	}
+
+	// t_carriage *list = NULL;
 	// printf("File: %s\n", champ->file);
-	printf("NAME: %s\n", champ->header->prog_name);
-	printf("COMMENT: %s\n", champ->header->comment);
-	printf("SIZE: %d\n", champ->header->prog_size);
+	
 }
 
 void	usage()
@@ -207,11 +222,11 @@ t_champion	*create_champion(char *file, t_mem_cell *map[])
 	return (champ);
 }
 
-void	print_memory(t_mem_cell *map[])
+void	print_memory(t_mem_cell *map[], t_carriage *carriages)
 {
 	int i = -1;
 	char s[3];
-	// attron(COLOR_PAIR(1));
+
 	while (++i < MEM_SIZE)
 	{
 		if (map[i]->color == 0)
@@ -221,7 +236,13 @@ void	print_memory(t_mem_cell *map[])
 		sprintf(s, "%02x", map[i]->value);
 		mvaddstr(i / 64, (i % 64) * 3, s);
 	}
-	// attroff(COLOR_PAIR(1));
+	while (carriages)
+	{
+		attron(COLOR_PAIR(4 + carriages->color));
+		sprintf(s, "%02x", map[carriages->position]->value);
+		mvaddstr(carriages->position / 64, (carriages->position % 64) * 3, s);
+		carriages = carriages->next;
+	}
 }
 
 // void	check_mem(unsigned char *map)
@@ -372,6 +393,49 @@ int		champions_count(t_champion **champs)
 }
 
 
+void	push_carriage(t_carriage *car, t_carriage **list)
+{
+	// if (*list == NULL)
+	// {
+	// 	*list = car;
+	// 	return ;
+	// }
+	// t_carriage *tmp = *list;
+	// while (tmp->next)
+	// 	tmp = tmp->next;
+	car->next = *list;
+	// tmp->next = car;
+	*list = car;
+}
+
+t_carriage	*create_carriage(int position, int color)
+{
+	t_carriage *car = ft_memalloc(sizeof(t_carriage));
+	car->position = position;
+	car->color = color;
+	return (car);
+}
+
+void		show_carriages(t_carriage *list)
+{
+	while (list)
+	{
+		printf("Position: %d\tColor: %d\n", list->position, list->color);
+		list = list->next;
+	}
+}
+
+void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta)
+{
+	int i = -1;
+	while (champs[++i] != NULL)
+	{
+		push_carriage(create_carriage(mem_delta * i, i + 1), carriages);
+	}
+}
+
+
+
 int		main(int argc, char **argv)
 {
 	/* TEST */
@@ -386,22 +450,17 @@ int		main(int argc, char **argv)
 	int i;
 
 	parse_params(argc, argv, war);
-	int mem_delta = MEM_SIZE / (champions_count(war->champs));
+	int champ_count = champions_count(war->champs);
+	int mem_delta = MEM_SIZE / champ_count;
 	parse_champions(war->champs, war->map, mem_delta);
 
-	// i = -1;
-	// while (++i < 4)
-	// {
-	// 	printf("\t%i: \n", i + 1);
-	// 	print_champion(war->champs[i]);
-	// }
+	// print_champions(war->champs);
 
+	throw_basic_carriages(war->champs, &war->carriages, mem_delta);
+	show_carriages(war->carriages);
 	
-	// int i = -1;
-	// while (++i < argc - 1)
-
 	init_curses();
-	print_memory(war->map);
+	print_memory(war->map, war->carriages);
 	over_curses();
 
 	// check_color(war->map_color);
