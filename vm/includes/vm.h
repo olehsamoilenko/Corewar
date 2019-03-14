@@ -18,6 +18,8 @@
 # include <stdio.h> // trash
 
 
+
+
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union magic_header
 {
@@ -40,6 +42,8 @@ typedef struct	s_map_cell
 typedef struct	s_carriage
 {
 	int					position;
+	int					op_code;
+	int					cooldown;
 	int					color;
 	struct s_carriage	*next;
 }				t_carriage;
@@ -52,8 +56,21 @@ typedef struct	s_war
 
 }				t_war;
 
+typedef struct	s_op
+{
+	char				*name;
+	int					code;
+	int					cooldown;
+}				t_op;
 
 
+t_op		op_tab[] =  // [17]
+{
+	{"ld",	2,	10	},
+	{"st",	3,	5	},
+	{"sti",	11,	25	},
+	{0,		0,	0	}
+};
 
 
 #endif

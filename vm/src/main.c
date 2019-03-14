@@ -436,14 +436,39 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 
 
 
+int		op_index(int code)
+{
+	int i = -1;
+	while (op_tab[++i].name)
+	{
+		if (op_tab[i].code == code)
+			return (i);
+	}
+	return (-1);
+}
+
+
+void	curriage_info(t_carriage *car)
+{
+	printf("INFO pos %d, op %s, cooldown %d\n",
+		car->position, op_tab[op_index(car->op_code)].name, car->cooldown);
+}
+
+char	*define_arg(int arg_code)
+{
+	if (arg_code == REG_CODE)
+		return("T_REG");
+	else if (arg_code == DIR_CODE)
+		return("T_DIR");
+	else if (arg_code == IND_CODE)
+		return ("T_IND");
+	else
+		return ("---");
+}
+
 int		main(int argc, char **argv)
 {
-	/* TEST */
-
-	// char *line = "123";
-	// printf("|%s|\n", ft_strsub(line, 3, 1));
-
-	/* TEST */
+	
 
 	t_war *war = init();
 
@@ -458,12 +483,49 @@ int		main(int argc, char **argv)
 
 	throw_basic_carriages(war->champs, &war->carriages, mem_delta);
 	show_carriages(war->carriages);
-	
-	init_curses();
-	print_memory(war->map, war->carriages);
-	over_curses();
 
-	// check_color(war->map_color);
+	t_carriage *car = war->carriages;
+	printf("step 1\n");
+	car->op_code = war->map[car->position]->value;
+	int index = op_index(car->op_code);
+	printf("FOUND code %d, index %d, name %s, cooldown %i\n", car->op_code, index, op_tab[index].name, op_tab[index].cooldown);
+	car->cooldown = op_tab[index].cooldown;
+	car->cooldown--;
+	curriage_info(car);
+
+	printf("step 2\n");
+	car->cooldown--;
+	curriage_info(car);
+
+	printf("step 3\n");
+	car->cooldown--;
+	curriage_info(car);
+
+	printf("step 4\n");
+	car->cooldown--;
+	curriage_info(car);
+
+	printf("step 5\n");
+	car->cooldown--;
+	if (car->cooldown == 0)
+	{
+		car->position++;
+		int arg_code = war->map[car->position]->value;
+		int first = arg_code >> 6;
+		int second = arg_code >> 4 & 0b0011;
+		int third = arg_code >> 2 & 0b000011;
+		printf("ARGS first code=%d %s second code=%d %s third code=%d %s\n",
+			first, define_arg(first), second, define_arg(second), third, define_arg(third));
+	}
+	curriage_info(car);
+
+
+
+
+	// init_curses();
+	// print_memory(war->map, war->carriages);
+	// over_curses();
+
 	system("leaks vm");
 
 	return (0);
