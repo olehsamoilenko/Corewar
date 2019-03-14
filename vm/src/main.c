@@ -79,10 +79,10 @@ void	print_champion(t_champion *champ)
 		printf("Empty.\n");
 		return ;
 	}
-	printf("File: %s\n", champ->file);
-	// printf("NAME: %s\n", champ->header->prog_name);
-	// printf("COMMENT: %s\n", champ->header->comment);
-	// printf("SIZE: %d\n", champ->header->prog_size);
+	// printf("File: %s\n", champ->file);
+	printf("NAME: %s\n", champ->header->prog_name);
+	printf("COMMENT: %s\n", champ->header->comment);
+	printf("SIZE: %d\n", champ->header->prog_size);
 }
 
 void	usage()
@@ -188,45 +188,22 @@ void	read_comment(int fd, char *comment)
 	}
 }
 
-// void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int mem_start)
-// {
-// 	int i = -1;
-// 	int res;
-// 	while (++i < champ->header->prog_size)
-// 	{
-// 		res = read_bytes(fd, 1);
-// 		map[mem_start + i]->value = res;
-// 		map[mem_start + i]->color = champ->number;
-// 	}
-// }
+void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, int mem_start)
+{
+	int i = -1;
+	int res;
+	while (++i < champ->header->prog_size)
+	{
+		res = read_bytes(fd, 1);
+		map[mem_start + i]->value = res;
+		map[mem_start + i]->color = number + 1;
+	}
+}
 
 t_champion	*create_champion(char *file, t_mem_cell *map[])
 {
 	t_champion *champ = ft_memalloc(sizeof(t_champion));
 	champ->file = file;
-	// champ->header = ft_memalloc(sizeof(header_t));
-
-	// int mem_num = champ_number * mem_de;
-	
-
-	// int fd = open(file, O_RDONLY);
-	// if (fd == -1)
-	// 	error(ERR_OPEN_CHAMP);
-	// if (!read_magic_header(fd)) // to var from header
-	// 	error(ERR_MAGIC_HEADER);
-	// read_name(fd, champ->header->prog_name);
-	// if (!read_null(fd))
-	// 	error(ERR_NULL_AFTER_NAME);
-	// champ->header->prog_size = read_exec_code_size(fd);
-	// if (champ->header->prog_size > CHAMP_MAX_SIZE)
-	// 	error(ERR_BIG_CHAMP);
-	// read_comment(fd, champ->header->comment);
-	// if (!read_null(fd))
-	// 	error(ERR_NULL_AFTER_COMMENT);
-	// champ->number = champ_number;
-	// read_exec_code(fd, map, champ, mem_start);
-	// close(fd);
-
 	return (champ);
 }
 
@@ -359,6 +336,41 @@ void	over_curses()
 	endwin();
 }
 
+void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
+{
+	int i = -1;
+	while (champs[++i] != NULL)
+	{
+		t_champion *champ = champs[i];
+		champ->header = ft_memalloc(sizeof(header_t));
+		int fd = open(champ->file, O_RDONLY);
+		if (fd == -1)
+			error(ERR_OPEN_CHAMP);
+		if (!read_magic_header(fd)) // to var from header
+			error(ERR_MAGIC_HEADER);
+		read_name(fd, champ->header->prog_name);
+		if (!read_null(fd))
+			error(ERR_NULL_AFTER_NAME);
+		champ->header->prog_size = read_exec_code_size(fd);
+		if (champ->header->prog_size > CHAMP_MAX_SIZE)
+			error(ERR_BIG_CHAMP);
+		read_comment(fd, champ->header->comment);
+		if (!read_null(fd))
+			error(ERR_NULL_AFTER_COMMENT);
+		read_exec_code(fd, map, champ, i, i * mem_delta);
+		close(fd);
+	}
+}
+
+int		champions_count(t_champion **champs)
+{
+	int count = 0;
+	int i = -1;
+	while (champs[++i] != NULL)
+		count++;
+	return (count);
+}
+
 
 int		main(int argc, char **argv)
 {
@@ -374,25 +386,23 @@ int		main(int argc, char **argv)
 	int i;
 
 	parse_params(argc, argv, war);
+	int mem_delta = MEM_SIZE / (champions_count(war->champs));
+	parse_champions(war->champs, war->map, mem_delta);
 
-	i = -1;
-	while (++i < 4)
-	{
-		printf("\t%i: \n", i + 1);
-		print_champion(war->champs[i]);
-	}
-	
+	// i = -1;
+	// while (++i < 4)
+	// {
+	// 	printf("\t%i: \n", i + 1);
+	// 	print_champion(war->champs[i]);
+	// }
 
 	
-	// int mem_delta = MEM_SIZE / (argc - 1);
 	// int i = -1;
 	// while (++i < argc - 1)
-		
 
-	// init_curses();
-	// print_memory(war->map);
-	// over_curses();
-	
+	init_curses();
+	print_memory(war->map);
+	over_curses();
 
 	// check_color(war->map_color);
 	system("leaks vm");
