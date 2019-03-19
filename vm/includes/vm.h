@@ -59,6 +59,8 @@ typedef struct	s_war
 typedef struct	s_op
 {
 	char				*name;
+	int					args;
+	int					args_type[3];
 	int					code;
 	int					cooldown;
 }				t_op;
@@ -66,10 +68,10 @@ typedef struct	s_op
 
 t_op		op_tab[] =  // [17]
 {
-	{"ld",	2,	10	},
-	{"st",	3,	5	},
-	{"sti",	11,	25	},
-	{0,		0,	0	}
+	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5	},
+	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5	},
+	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25	},
+	{0,		0,	0,															0,	0	}
 };
 
 

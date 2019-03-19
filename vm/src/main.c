@@ -482,7 +482,9 @@ int		main(int argc, char **argv)
 	// print_champions(war->champs);
 
 	throw_basic_carriages(war->champs, &war->carriages, mem_delta);
-	show_carriages(war->carriages);
+	// show_carriages(war->carriages);
+
+	// MORTEL
 
 	t_carriage *car = war->carriages;
 	printf("step 1\n");
@@ -516,6 +518,12 @@ int		main(int argc, char **argv)
 		int third = arg_code >> 2 & 0b000011;
 		printf("ARGS first code=%d %s second code=%d %s third code=%d %s\n",
 			first, define_arg(first), second, define_arg(second), third, define_arg(third));
+		if ((first | op_tab[index].args_type[0]) == op_tab[index].args_type[0])
+			printf("first ok\n");
+		if ((second | op_tab[index].args_type[1]) == op_tab[index].args_type[1])
+			printf("second ok\n");
+		if ((third | op_tab[index].args_type[2]) == op_tab[index].args_type[2])
+			printf("third ok\n");
 	}
 	curriage_info(car);
 
