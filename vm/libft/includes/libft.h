@@ -94,5 +94,6 @@ char				**ft_chartable(int x, int y);
 int					ft_abs(int n);
 int					ft_arrlen(char **arr);
 int					ft_char_count(char c, char *line);
+int					ft_isinteger(char *line);
 
 #endif

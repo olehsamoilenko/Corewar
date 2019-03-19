@@ -11,16 +11,17 @@
 # **************************************************************************** #
 
 NAME =			vm
+HEADER =		./includes/vm.h
 INC =			-I ./includes \
 				-I ./libft/includes
-LIB =			-lft -L ./libft
+LIB =			-lncurses -lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
 LIST =			main
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)
 
-obj/%.o: src/%.c
+obj/%.o: src/%.c $(HEADER)
 	@gcc $(FLAGS) -c $< -o $@ $(INC)
 
 $(NAME): obj $(OBJ)
