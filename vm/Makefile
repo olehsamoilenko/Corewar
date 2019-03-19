@@ -13,7 +13,7 @@
 NAME =			vm
 INC =			-I ./includes \
 				-I ./libft/includes
-LIB =			-lft -L ./libft
+LIB =			-lncurses -lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
 LIST =			main
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
