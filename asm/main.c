@@ -163,24 +163,26 @@ void	cut_command(t_asm *asm_parsing, char *line)
 	add_word_to_list(asm_parsing, create_word(substring, COMMAND));
 }
 
-// void	cut_doubles(t_asm *asm_parsing, char *line)
-// {
-// 	int		start;
-// 	char	*substring;
+void	cut_doubles(t_asm *asm_parsing, char *line)
+{
+	int		start;
+	char	*substring;
 
-// 	start = asm_parsing->symbol++;
-// 	while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
-// 		asm_parsing->symbol++;
-// 	substring = take_word(++asm_parsing->symbol, line, start);
-// 	add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
-// 	// printf("CUT = %s\n", substring);
-// }
+	start = asm_parsing->symbol++;
+	while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
+		asm_parsing->symbol++;
+	substring = take_word(++asm_parsing->symbol, line, start);
+	add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
+	// printf("CUT = %s\n", substring);
+}
 
 void	parse_word(t_asm *asm_parsing, char *line)
 {
 	int	start;
 	char	*substring;
 	char	*temp_join;
+
+	char *str;
 
 	if (line[asm_parsing->symbol] == '.')
 	{
@@ -197,8 +199,35 @@ void	parse_word(t_asm *asm_parsing, char *line)
 		start = asm_parsing->symbol++;
 		while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
 			asm_parsing->symbol++;
-		substring = take_word(++asm_parsing->symbol, line, start);
-		add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
+			// printf("FD = %d\n", asm_parsing->fd);
+		if (line[asm_parsing->symbol] != '"')
+		{
+			substring = take_word(asm_parsing->symbol, line, start);
+			printf("SUBSTRING = %s\n", substring);
+			temp_join = substring;
+			while (get_next_line(asm_parsing->fd, &line))
+			{
+				asm_parsing->row++;
+				printf("ROW = %d\n", asm_parsing->row);
+				printf("LINE = %s\n", line);
+				if (ft_strchr(line, '"'))
+					break ;
+				temp_join = ft_strjoin(substring, line);
+				substring = temp_join;
+				printf("temp_join = %s\n", temp_join);	
+			}
+			substring = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
+			substring = ft_strjoin(temp_join, substring);
+			asm_parsing->symbol++;
+			printf("SUBSTRING2 = %s\n", substring);
+			add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
+		}
+		else
+		{
+			substring = take_word(++asm_parsing->symbol, line, start);
+			add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
+		}
+		
 		// printf("CUT = %s\n", substring);
 	}
 	else if (line[asm_parsing->symbol] == LABEL_CHAR)
@@ -290,6 +319,7 @@ void	interpreter(const char *filename)
 
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		ft_arg_error("Can't open this file");
+	// printf("FD = %d\n", fd);	
 	asm_parsing = init_asm(fd);
 	// print_asm_structure(asm_parsing);
 	while ((ret = get_next_line(fd, &line)) > 0 && line != NULL)
@@ -308,6 +338,7 @@ void	interpreter(const char *filename)
 	free_list(asm_parsing);
 	free(asm_parsing);
 }
+
 
 int main(int argc, char const *argv[])
 {
