@@ -42,6 +42,7 @@ typedef struct	s_map_cell
 typedef struct	s_carriage
 {
 	int					position;
+	int					reg[REG_NUMBER + 1];
 	int					op_code;
 	int					cooldown;
 	int					color;
@@ -53,6 +54,7 @@ typedef struct	s_war
 	t_mem_cell			*map[MEM_SIZE];
 	t_champion			*champs[5];
 	t_carriage			*carriages;
+	int					cycle;
 
 }				t_war;
 
@@ -63,15 +65,16 @@ typedef struct	s_op
 	int					args_type[3];
 	int					code;
 	int					cooldown;
+	int					label;
 }				t_op;
 
 
 t_op		op_tab[] =  // [17]
 {
-	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5	},
-	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5	},
-	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25	},
-	{0,		0,	0,															0,	0	}
+	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5,	0},
+	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5,	0},
+	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25,	1},
+	{0,		0,	0,															0,	0,	0}
 };
 
 

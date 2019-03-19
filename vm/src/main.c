@@ -408,11 +408,12 @@ void	push_carriage(t_carriage *car, t_carriage **list)
 	*list = car;
 }
 
-t_carriage	*create_carriage(int position, int color)
+t_carriage	*create_carriage(int position, int number)
 {
 	t_carriage *car = ft_memalloc(sizeof(t_carriage));
 	car->position = position;
-	car->color = color;
+	car->color = number;
+	car->reg[1] = -number;
 	return (car);
 }
 
@@ -434,8 +435,6 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 	}
 }
 
-
-
 int		op_index(int code)
 {
 	int i = -1;
@@ -454,6 +453,14 @@ void	curriage_info(t_carriage *car)
 		car->position, op_tab[op_index(car->op_code)].name, car->cooldown);
 }
 
+void	reg_info(int *reg)
+{
+	int i = -1;
+	while (++i <= REG_NUMBER)
+		printf("%d ", reg[i]);
+	printf("\n");
+}
+
 char	*define_arg(int arg_code)
 {
 	if (arg_code == REG_CODE)
@@ -466,6 +473,125 @@ char	*define_arg(int arg_code)
 		return ("---");
 }
 
+int		define_size(int arg_code, int label)
+{
+	if (arg_code == REG_CODE)
+		return(1);
+	else if (arg_code == DIR_CODE)
+	{
+		if (label == 0)
+			return (4);
+		else
+			return (2);
+	}
+	else if (arg_code == IND_CODE)
+		return (2);
+	else
+		return (0);
+}
+
+int		get_bytes(int start, int amount, t_mem_cell *map[])
+{
+	int res = 0;
+	int i = -1;
+	while (++i < amount)
+	{
+		if (i != 0)
+			res <<= 8;
+		res |= map[start + i]->value /*& 0xFF*/;
+	}
+	return (res);
+}
+
+int		get_command(t_carriage *car, t_mem_cell *map[]) // returns index
+{
+	car->op_code = map[car->position]->value;
+	int index = op_index(car->op_code);
+	printf("FOUND code %d, index %d, name %s, cooldown %i\n", car->op_code, index, op_tab[index].name, op_tab[index].cooldown);
+	car->cooldown = op_tab[index].cooldown;
+	return (index);
+}
+
+void	verbose_ld(int player, int arg_1, int arg_2, t_carriage *car)
+{
+	printf("P    %d | ld %d r%d\n", player, arg_1, arg_2);
+	printf("ADV 7 (%#06x -> %#06x)\n", car->position, car->position);
+}
+
+void	verbose_sti(int player, int arg_1, int arg_2, int arg_3, t_carriage *car)
+{
+	printf("P    %d | sti r%d %d %d\n", player, arg_1, arg_2, arg_3);
+	// printf("ADV 7 (%#06x -> %#06x)\n", car->position, car->position);
+}
+
+int	get_args(t_carriage *car, t_mem_cell *map[], int index)
+{
+	int v[7];
+
+	int delta = 0;
+	// car->position++;
+	delta++;
+	int arg_code = map[car->position + delta]->value;
+	// v[0] = arg_code;
+	int first = arg_code >> 6;
+	int second = arg_code >> 4 & 0b0011;
+	int third = arg_code >> 2 & 0b000011;
+	printf("args types %s %s %s\n", define_arg(first), define_arg(second), define_arg(third));
+	// if ((first | op_tab[index].args_type[0]) == op_tab[index].args_type[0])
+	// 	printf("first ok\n");
+	// if ((second | op_tab[index].args_type[1]) == op_tab[index].args_type[1])
+	// 	printf("second ok\n");
+	// if ((third | op_tab[index].args_type[2]) == op_tab[index].args_type[2])
+	// 	printf("third ok\n");
+	int arg_1_size = define_size(first, op_tab[index].label);
+	int arg_2_size = define_size(second, op_tab[index].label);
+	int arg_3_size = define_size(third, op_tab[index].label);
+	printf("args_sizes: %d %d %d\n", arg_1_size, arg_2_size, arg_3_size);
+	delta++;
+	int arg_1, arg_2, arg_3;
+	arg_1 = get_bytes(car->position + delta, arg_1_size, map);
+	delta += arg_1_size;
+	if (arg_2_size != 0)
+	{
+		arg_2 = get_bytes(car->position + delta, arg_2_size, map);
+		delta += arg_2_size;
+	}
+	if (arg_3_size != 0)
+	{
+		arg_3 = get_bytes(car->position + delta, arg_3_size, map);
+		delta += arg_3_size;
+	}
+	printf("args: %d %d %d\n", arg_1, arg_2, arg_3);
+
+	if (op_tab[index].code == 2) // ld
+	{
+		car->reg[arg_2] = arg_1; // check < 16
+		verbose_ld(1, arg_1, arg_2, car);
+	}
+	else if (op_tab[index].code == 11)
+	{
+		union magic_header number;
+		number.hex = car->reg[arg_1];
+		int i = -1;
+		while (++i < 4)
+		{
+			map[car->position + (arg_2 + arg_3) % IDX_MOD + i]->value = number.bytes[i];
+			printf("map[%d] = %x\n", car->position + (arg_2 + arg_3) % IDX_MOD + i, number.bytes[i]);
+		}
+		
+		verbose_sti(1, arg_1, arg_2, arg_3, car);
+	}
+	return (delta);
+}
+
+void	next_cycle(t_war *war, t_carriage *car)
+{
+	war->cycle++;
+	printf("It is now cycle %d\n", war->cycle);
+	car->cooldown--;
+	curriage_info(car);
+}
+
 int		main(int argc, char **argv)
 {
 	
@@ -473,6 +599,7 @@ int		main(int argc, char **argv)
 	t_war *war = init();
 
 	int i;
+	int index;
 
 	parse_params(argc, argv, war);
 	int champ_count = champions_count(war->champs);
@@ -487,52 +614,45 @@ int		main(int argc, char **argv)
 	// MORTEL
 
 	t_carriage *car = war->carriages;
-	printf("step 1\n");
-	car->op_code = war->map[car->position]->value;
-	int index = op_index(car->op_code);
-	printf("FOUND code %d, index %d, name %s, cooldown %i\n", car->op_code, index, op_tab[index].name, op_tab[index].cooldown);
-	car->cooldown = op_tab[index].cooldown;
-	car->cooldown--;
-	curriage_info(car);
 
-	printf("step 2\n");
-	car->cooldown--;
-	curriage_info(car);
-
-	printf("step 3\n");
-	car->cooldown--;
-	curriage_info(car);
-
-	printf("step 4\n");
-	car->cooldown--;
-	curriage_info(car);
-
-	printf("step 5\n");
-	car->cooldown--;
+	index = get_command(car, war->map);
+	while (car->cooldown != 0)
+		next_cycle(war, car);
 	if (car->cooldown == 0)
-	{
-		car->position++;
-		int arg_code = war->map[car->position]->value;
-		int first = arg_code >> 6;
-		int second = arg_code >> 4 & 0b0011;
-		int third = arg_code >> 2 & 0b000011;
-		printf("ARGS first code=%d %s second code=%d %s third code=%d %s\n",
-			first, define_arg(first), second, define_arg(second), third, define_arg(third));
-		if ((first | op_tab[index].args_type[0]) == op_tab[index].args_type[0])
-			printf("first ok\n");
-		if ((second | op_tab[index].args_type[1]) == op_tab[index].args_type[1])
-			printf("second ok\n");
-		if ((third | op_tab[index].args_type[2]) == op_tab[index].args_type[2])
-			printf("third ok\n");
-	}
-	curriage_info(car);
+		car->position += get_args(car, war->map, index);
+	
+	
+	index = get_command(car, war->map);
+	while (car->cooldown != 0)
+		next_cycle(war, car);
+	if (car->cooldown == 0)
+		car->position += get_args(car, war->map, index);
+	reg_info(car->reg);
+
+	index = get_command(car, war->map);
+	while (car->cooldown != 0)
+		next_cycle(war, car);
+	if (car->cooldown == 0)
+		car->position += get_args(car, war->map, index);
+	reg_info(car->reg);
+
+	index = get_command(car, war->map);
+	while (car->cooldown != 0)
+		next_cycle(war, car);
+	if (car->cooldown == 0)
+		car->position += get_args(car, war->map, index);
+	// reg_info(car->reg);
+
+	index = get_command(car, war->map);
+	while (car->cooldown != 0)
+		next_cycle(war, car);
+	if (car->cooldown == 0)
+		car->position += get_args(car, war->map, index);
 
 
-
-
-	// init_curses();
-	// print_memory(war->map, war->carriages);
-	// over_curses();
+	init_curses();
+	print_memory(war->map, war->carriages);
+	over_curses();
 
 	system("leaks vm");
 
