@@ -18,9 +18,6 @@
 # include <stdio.h> // trash
 # include <curses.h>
 
-
-
-
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union magic_header
 {
@@ -38,12 +35,13 @@ typedef struct	s_map_cell
 {
 	unsigned char		value;
 	int					color;
+	int					bold;
 }				t_mem_cell;
 
 typedef struct	s_carriage
 {
 	int					position;
-	int					reg[REG_NUMBER + 1];
+	int					reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
 	int					op_code;
 	int					cooldown;
 	int					color;
@@ -59,8 +57,8 @@ typedef struct	s_war
 	t_champion			*champs[5];
 	t_carriage			*carriages;
 	int					cycle;
-	int					flag_verbose;
-	int					flag_visual;
+	t_bool				flag_verbose;
+	t_bool				flag_visual;
 }				t_war;
 
 typedef struct	s_op
@@ -73,7 +71,6 @@ typedef struct	s_op
 	int					label;
 }				t_op;
 
-
 t_op		op_tab[] =  // [17]
 {
 	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5,	0},
@@ -81,6 +78,5 @@ t_op		op_tab[] =  // [17]
 	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25,	1},
 	{0,		0,	0,															0,	0,	0}
 };
-
 
 #endif

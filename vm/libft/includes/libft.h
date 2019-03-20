@@ -17,6 +17,12 @@
 # include "get_next_line.h"
 # include "printf.h"
 
+typedef	enum
+{
+	false,
+	true
+}		t_bool;
+
 typedef struct		s_list
 {
 	void			*content;

@@ -26,6 +26,7 @@
 
 // args parsing
 #define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
+#define ERR_NO_CHAMPS "There are any champions present"
 #define ERR_OPEN_CHAMP "Can't open the champion"
 #define ERR_N_NUMBER "Flag -n needs a number in range of 1 to 4"
 #define ERR_N_CHAMP "Flag -n needs a champion"
@@ -33,12 +34,46 @@
 #define ERR_CHAMP_FORMAT "Champion format must be 'name.cor'"
 #define ERR_BIG_N "Champion's number exceeds their amount"
 
+#define ERR_DUMP "Flag -dump needs a number"
+
 void	status(char *line, t_war *war)
 {
 	// wdeleteln(war->win_info);
 	mvwaddstr(war->win_info, 4, 2, "                       ");
 	mvwaddstr(war->win_info, 4, 2, line);
 	wrefresh(war->win_info);
+}
+
+void	print_memory(t_war *war)
+{
+	int i = -1;
+	char s[3];
+
+	// war->map[0]->value = 0; // trash oleha
+	while (++i < MEM_SIZE)
+	{
+		// color on
+		if (war->map[i]->color == 0)
+			wattroff(war->win_mem, A_COLOR);
+		else
+			wattron(war->win_mem, COLOR_PAIR(war->map[i]->color));
+
+		// bold
+		if (war->map[i]->bold == 1)
+			wattron(war->win_mem, A_BOLD);
+		sprintf(s, "%02x", war->map[i]->value);
+		mvwaddstr(war->win_mem, i / 64 + 1, (i % 64) * 3 + 2, s);
+		wattroff(war->win_mem, A_BOLD);
+	}
+	t_carriage *tmp = war->carriages; // need?
+	while (tmp)
+	{
+		wattron(war->win_mem, COLOR_PAIR(4 + tmp->color));
+		sprintf(s, "%02x", war->map[tmp->position]->value);
+		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
+		tmp = tmp->next;
+	}
+	wrefresh(war->win_mem);
 }
 
 void	init_curses(t_war *war)
@@ -60,7 +95,8 @@ void	init_curses(t_war *war)
 	wrefresh(war->win_getch);
 	// box(war->win_mem, 0, 0);
 
-	status("starting", war);
+
+	
 
 
 	start_color();
@@ -75,6 +111,9 @@ void	init_curses(t_war *war)
 	init_pair(8, COLOR_BLACK, COLOR_CYAN);
 
 	init_pair(9, COLOR_BLACK, COLOR_BLACK);
+
+	status("starting", war);
+	// print_memory(war);
 
 }
 
@@ -253,31 +292,7 @@ t_champion	*create_champion(char *file, t_mem_cell *map[])
 	return (champ);
 }
 
-void	print_memory(t_war *war)
-{
-	int i = -1;
-	char s[3];
 
-	war->map[0]->value = 0; // trash
-	while (++i < MEM_SIZE)
-	{
-		if (war->map[i]->color == 0)
-			wattroff(war->win_mem, A_COLOR);
-		else
-			wattron(war->win_mem, COLOR_PAIR(war->map[i]->color));
-		sprintf(s, "%02x", war->map[i]->value);
-		mvwaddstr(war->win_mem, i / 64 + 1, (i % 64) * 3 + 2, s);
-	}
-	t_carriage *tmp = war->carriages; // need?
-	while (tmp)
-	{
-		wattron(war->win_mem, COLOR_PAIR(4 + tmp->color));
-		sprintf(s, "%02x", war->map[tmp->position]->value);
-		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
-		tmp = tmp->next;
-	}
-	wrefresh(war->win_mem);
-}
 
 // void	check_mem(unsigned char *map)
 // {
@@ -350,9 +365,15 @@ void	parse_params(int argc, char **argv, t_war *war)
 				error(ERR_N_CHAMP);
 		}
 		else if (ft_strequ(argv[i], "-v"))
-			war->flag_verbose = 1;
+			war->flag_verbose = true;
 		else if (ft_strequ(argv[i], "-visual"))
-			war->flag_visual = 1;
+			war->flag_visual = true;
+		else if (ft_strequ(argv[i], "-dump"))
+		{
+			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (num = ft_atoi(argv[i + 1])) < 0)
+				error(ERR_DUMP);
+			i += 1;
+		}
 		else if (!is_champion(argv[i]))
 			usage();
 		else
@@ -386,6 +407,8 @@ void	parse_params(int argc, char **argv, t_war *war)
 		if (war->champs[i] == NULL)
 			error(ERR_BIG_N);
 	}
+	if (war->champs[0] == NULL)
+		error(ERR_NO_CHAMPS);
 	free(buf_champs);
 }
 
@@ -569,10 +592,9 @@ int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns inde
 	if (war->flag_verbose)
 	{
 		printf("FOUND code %d, index %d, name %s, cooldown %i\n", car->op_code, index, op_tab[index].name, op_tab[index].cooldown);
-		mvwaddstr(war->win_info, 10, 5, "command!");
-		wrefresh(war->win_info);
 	}
 	car->cooldown = op_tab[index].cooldown;
+	status("reading operation", war);
 	return (index);
 }
 
@@ -583,13 +605,14 @@ void	verbose_ld(int player, int arg_1, int arg_2, t_carriage *car, t_war *war)
 		printf("P    %d | ld %d r%d\n", player, arg_1, arg_2);
 		printf("ADV 7 (%#06x -> %#06x)\n", car->position, car->position);
 	}
+	status("doing ld", war);
 }
 
 void	verbose_sti(int player, int arg_1, int arg_2, int arg_3, t_carriage *car, t_war *war)
 {
 	if (war->flag_verbose)
 		printf("P    %d | sti r%d %d %d\n", player, arg_1, arg_2, arg_3);
-	// printf("ADV 7 (%#06x -> %#06x)\n", car->position, car->position);
+	status("doing sti", war);
 }
 
 int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
@@ -639,7 +662,7 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 		car->reg[arg_2] = arg_1; // check < 16
 		verbose_ld(1, arg_1, arg_2, car, war);
 	}
-	else if (op_tab[index].code == 11)
+	else if (op_tab[index].code == 11) // sti
 	{
 		union magic_header number;
 		number.hex = car->reg[arg_1];
@@ -647,13 +670,12 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 		while (++i < 4)
 		{
 			map[car->position + (arg_2 + arg_3) % IDX_MOD + i]->value = number.bytes[i];
-			if (war->flag_verbose)
-				printf("map[%d] = %x\n", car->position + (arg_2 + arg_3) % IDX_MOD + i, number.bytes[i]);
+			map[car->position + (arg_2 + arg_3) % IDX_MOD + i]->bold = 1;
+			// if (war->flag_verbose)
+			// 	printf("map[%d] = %x\n", car->position + (arg_2 + arg_3) % IDX_MOD + i, number.bytes[i]);
 		}
-		
 		verbose_sti(1, arg_1, arg_2, arg_3, car, war);
 	}
-	status("operation", war);
 	return (delta);
 }
 
@@ -662,29 +684,38 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 void	next_cycle(t_war *war, t_carriage *car)
 {
 	int key = wgetch(war->win_getch);
+	// printf("%d\n", key);
 	if (key == 27)
 		over_over(war);
-	status("cooldown", war);
+	// status("cooldown", war);
 	if (key == KEY_S)
 	{
+		war->cycle++;
+		car->cooldown--;
 		// if (war->flag_visual)
 		// {
-			print_memory(war);
+			// print_memory(war);
 			char *itoa = ft_itoa(war->cycle);
 			mvwaddstr(war->win_info, 2, 10, itoa);
 			ft_strdel(&itoa);
 			wrefresh(war->win_info);
 		// }
-		war->cycle++;
 		if (war->flag_verbose)
+		{
 			printf("It is now cycle %d\n", war->cycle);
-		car->cooldown--;
-		if (war->flag_verbose)
 			curriage_info(car);
+		}
 	}
 }
 
-
+void	cooldown(t_war *war)
+{
+	while (war->carriages->cooldown != 0)
+	{
+		// status("cooldown", war);
+		next_cycle(war, war->carriages);
+	}
+}
 
 int		main(int argc, char **argv)
 {
@@ -712,36 +743,35 @@ int		main(int argc, char **argv)
 	if (war->flag_visual)
 		init_curses(war);
 
-	
-
+	// status(ft_itoa(war->carriages->position), war);
 	// print_memory(war);
+	// wrefresh(war->win_mem);
+	print_memory(war);	
 
 	index = get_command(car, war->map, war);
-	while (car->cooldown != 0)
-		next_cycle(war, car);
+	cooldown(war);
 	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 	
 	index = get_command(car, war->map, war);
-	while (car->cooldown != 0)
-		next_cycle(war, car);
+	cooldown(war);
 	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
 	index = get_command(car, war->map, war);
-	while (car->cooldown != 0)
-		next_cycle(war, car);
+	cooldown(war);
 	car->position += get_args(car, war->map, index, war);
-	// reg_info(car->reg, war);
+	print_memory(war);
 
 	index = get_command(car, war->map, war);
-	while (car->cooldown != 0)
-		next_cycle(war, car);
+	cooldown(war);
 	car->position += get_args(car, war->map, index, war);
-	// reg_info(car->reg);
+	print_memory(war);
 
 	index = get_command(car, war->map, war);
-	while (car->cooldown != 0)
-		next_cycle(war, car);
+	cooldown(war);
 	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
 
 
