@@ -199,7 +199,7 @@ void	parse_word(t_asm *asm_parsing, char *line)
 		start = asm_parsing->symbol++;
 		while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
 			asm_parsing->symbol++;
-			// printf("FD = %d\n", asm_parsing->fd);
+		// printf("FD = %d\n", asm_parsing->fd);
 		if (line[asm_parsing->symbol] != '"')
 		{
 			substring = take_word(asm_parsing->symbol, line, start);
@@ -213,13 +213,29 @@ void	parse_word(t_asm *asm_parsing, char *line)
 				if (ft_strchr(line, '"'))
 					break ;
 				temp_join = ft_strjoin(substring, line);
+				ft_strdel(&substring);
 				substring = temp_join;
-				printf("temp_join = %s\n", temp_join);	
+				// ft_strdel(&temp_join);
+				printf("temp_join = %s\n", temp_join);
+				ft_strdel(&line);
 			}
-			substring = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
-			substring = ft_strjoin(temp_join, substring);
-			asm_parsing->symbol++;
-			printf("SUBSTRING2 = %s\n", substring);
+			str = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
+			char *temp = substring;
+			substring = ft_strjoin(temp_join, str);
+			ft_strdel(&temp);
+			ft_strdel(&str);
+			int pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
+			printf("line[pos] = %d\n", pos);
+			while (ft_strlen(line) > 0 && line[pos])
+			{
+				if (ft_isspace(line[pos]))
+					pos++;
+				else if (line[pos] == '#')
+					break ;
+				else
+					error_word(asm_parsing, &line[pos]);
+			}
+			ft_strdel(&line);
 			add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
 		}
 		else
