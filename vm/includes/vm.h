@@ -16,6 +16,7 @@
 # include "libft.h"
 # include "op.h"
 # include <stdio.h> // trash
+# include <curses.h>
 
 
 
@@ -51,11 +52,15 @@ typedef struct	s_carriage
 
 typedef struct	s_war
 {
+	WINDOW				*win_mem;
+	WINDOW				*win_info;
+	WINDOW				*win_getch;
 	t_mem_cell			*map[MEM_SIZE];
 	t_champion			*champs[5];
 	t_carriage			*carriages;
 	int					cycle;
-
+	int					flag_verbose;
+	int					flag_visual;
 }				t_war;
 
 typedef struct	s_op
