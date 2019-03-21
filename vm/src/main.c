@@ -57,7 +57,7 @@ void	print_memory(t_war *war)
 	t_carriage *tmp = war->carriages; // need?
 	while (tmp)
 	{
-		wattron(war->win_mem, COLOR_PAIR(4 + 1)); // number
+		wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
 		sprintf(s, "%02x", war->map[tmp->position]->value);
 		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
 		tmp = tmp->next;
@@ -257,8 +257,8 @@ void	verbose_live(int arg_1, t_carriage *car, t_war *war)
 {
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | live %d\n", car->player, arg_1);
-		ft_printf("Player %d (%s) is said to be alive\n", car->player, "bliat");
+		ft_printf("P    %d | live %d\n", car->player->number, arg_1);
+		ft_printf("Player %d (%s) is said to be alive\n", car->player->number, car->player->header->prog_name);
 	}
 
 }
@@ -296,7 +296,8 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 	int third;
 	if (op_tab[index].codage == true)
 	{
-		ft_printf("codage on\n");
+		if (war->flag_verbose)
+			ft_printf("codage on\n");
 		int arg_code = map[car->position + delta]->value;
 		if (war->flag_verbose)
 			ft_printf("args code: %d\n", arg_code);
@@ -320,13 +321,14 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 				ft_printf("third ok\n");
 			else
 				ft_printf("third KO!\n");
-			delta++;
 		}
-	// check args types
+		// check args types
+		delta++;
 	}
 	else
 	{
-		ft_printf("codage off\n");
+		if (war->flag_verbose)
+			ft_printf("codage off\n");
 		first = op_tab[index].args_type[0];
 		second = op_tab[index].args_type[1];
 		third = op_tab[index].args_type[2];
@@ -464,49 +466,51 @@ int		main(int argc, char **argv)
 	parse_champions(war->champs, war->map, mem_delta);
 	print_champions(war->champs);
 
-	// throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
+	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
 
 	// MORTEL
 
-	// t_carriage *car = war->carriages;
+	t_carriage *car = war->carriages;
 
-	// if (war->flag_visual)
-	// 	init_curses(war);
 
-	// print_memory(war);
 
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
-	// print_memory(war);
+	if (war->flag_visual)
+		init_curses(war);
+
+	print_memory(war);
+
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 	
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
-	// print_memory(war);
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
-	// print_memory(war);
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
-	// print_memory(war);
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
-	// print_memory(war);
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
+	print_memory(war);
 
-	// index = get_command(car, war->map, war);
-	// cooldown(war);
-	// car->position += get_args(car, war->map, index, war);
+	index = get_command(car, war->map, war);
+	cooldown(war);
+	car->position += get_args(car, war->map, index, war);
 
 
-	// if (war->flag_visual)
-	// 	over_curses(war);
+	if (war->flag_visual)
+		over_curses(war);
 
 	system("leaks vm");
 
