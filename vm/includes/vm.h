@@ -17,6 +17,7 @@
 # include "op.h"
 # include <stdio.h> // trash
 # include <curses.h>
+# include <fcntl.h>
 
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union magic_header
@@ -71,12 +72,19 @@ typedef struct	s_op
 	int					label;
 }				t_op;
 
-t_op		op_tab[] =  // [17]
-{
-	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5,	0},
-	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5,	0},
-	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25,	1},
-	{0,		0,	0,															0,	0,	0}
-};
+extern t_op op_tab[];
+
+// main
+void	error(char *message);
+
+// params
+void	parse_params(int argc, char **argv, t_war *war);
+
+// champion
+void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta);
+
+// init
+t_war	*init();
+void	init_curses(t_war *war);
 
 #endif

@@ -16,7 +16,11 @@ INC =			-I ./includes \
 				-I ./libft/includes
 LIB =			-lncurses -lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
-LIST =			main
+LIST =			main \
+				op \
+				params \
+				champion \
+				init
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)
