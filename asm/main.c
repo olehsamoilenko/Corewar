@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "asm.h"
-#include <stdio.h>
 
 void	ft_arg_error(char *message)
 {
@@ -36,6 +35,13 @@ void	error_word(t_asm *asm_parsing, char *message)
 	printf("Not valid word on row %d \"%s\"\n", asm_parsing->row, message);
 	system("leaks asm");
 	exit(1);
+}
+
+void	error_word2(t_word *word, char *message)
+{
+	printf("ERROR: \"%s\" on row %d\n", message, word->row);
+	system("leaks asm");
+	exit(1);	
 }
 
 // delete this
@@ -63,11 +69,6 @@ t_asm	*init_asm(int fd)
 	return (asm_parsing);
 }
 
-void	define_cmd(t_asm *asm_parsing, char *line)
-{
-	
-}
-
 void	ignore_comment(t_asm *asm_parsing, char *line)
 {
 	if (line[asm_parsing->symbol] == COMMENT_CHAR)
@@ -93,6 +94,8 @@ void	print_list(t_asm *asm_parsing)
 	{
 		printf("current->name = %s\n", current->name);
 		printf("current->word_type = %s\n", test[current->word_type - 1]);
+		printf("current->row = %d\n", current->row);
+		// printf("current->symbol = %d\n", current->symbol);		
 		printf("======================================\n");
 		current = current->next;
 	}
@@ -150,179 +153,48 @@ int		check_for_number(t_asm *asm_parsing, char *name)
 	return (1);
 }
 
-void	cut_command(t_asm *asm_parsing, char *line)
+void	determine_commands(t_asm *asm_parsing)
 {
-	int		start;
-	char	*substring;
+	t_word *current;
 
-	start = asm_parsing->symbol++;
-	while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-		asm_parsing->symbol++;
-	substring = take_word(asm_parsing->symbol, line, start);
-	// printf("CUT = %s\n", substring);
-	add_word_to_list(asm_parsing, create_word(substring, COMMAND));
-}
-
-void	cut_doubles(t_asm *asm_parsing, char *line)
-{
-	int		start;
-	char	*substring;
-
-	start = asm_parsing->symbol++;
-	while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
-		asm_parsing->symbol++;
-	substring = take_word(++asm_parsing->symbol, line, start);
-	add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
-	// printf("CUT = %s\n", substring);
-}
-
-void	parse_word(t_asm *asm_parsing, char *line)
-{
-	int	start;
-	char	*substring;
-	char	*temp_join;
-
-	char *str;
-
-	if (line[asm_parsing->symbol] == '.')
+	current = asm_parsing->words;
+	while (asm_parsing->name_champ == NULL || asm_parsing->comment == NULL)
 	{
-		// start = asm_parsing->symbol++;
-		// while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-		// 	asm_parsing->symbol++;
-		// substring = take_word(asm_parsing->symbol, line, start);
-		// // printf("CUT = %s\n", substring);
-		// add_word_to_list(asm_parsing, create_word(substring, COMMAND));
-		cut_command(asm_parsing, line);
-	}
-	else if (line[asm_parsing->symbol] == '"')
-	{
-		start = asm_parsing->symbol++;
-		while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
-			asm_parsing->symbol++;
-		// printf("FD = %d\n", asm_parsing->fd);
-		if (line[asm_parsing->symbol] != '"')
+		if (current->word_type == COMMAND)
 		{
-			substring = take_word(asm_parsing->symbol, line, start);
-			printf("SUBSTRING = %s\n", substring);
-			temp_join = substring;
-			while (get_next_line(asm_parsing->fd, &line))
+			if (ft_strequ(current->name, ".name"))
 			{
-				asm_parsing->row++;
-				printf("ROW = %d\n", asm_parsing->row);
-				printf("LINE = %s\n", line);
-				if (ft_strchr(line, '"'))
-					break ;
-				temp_join = ft_strjoin(substring, line);
-				ft_strdel(&substring);
-				substring = temp_join;
-				// ft_strdel(&temp_join);
-				printf("temp_join = %s\n", temp_join);
-				ft_strdel(&line);
-			}
-			str = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
-			char *temp = substring;
-			substring = ft_strjoin(temp_join, str);
-			ft_strdel(&temp);
-			ft_strdel(&str);
-			int pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
-			printf("line[pos] = %d\n", pos);
-			while (ft_strlen(line) > 0 && line[pos])
-			{
-				if (ft_isspace(line[pos]))
-					pos++;
-				else if (line[pos] == '#')
-					break ;
+				current = current->next;
+				if ((asm_parsing->name_champ == NULL) && (current->word_type == DOUBLES) && 
+													ft_strlen(current->name) < PROG_NAME_LENGTH)
+				{
+					asm_parsing->name_champ = current->name;
+					current = current->next;
+				}
+				else if (asm_parsing->name_champ != NULL)
+					error_word2(current, "Duplicate of name");
 				else
-					error_word(asm_parsing, &line[pos]);
+					error_word2(current, "Name is missed");
 			}
-			ft_strdel(&line);
-			add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
-		}
-		else
-		{
-			substring = take_word(++asm_parsing->symbol, line, start);
-			add_word_to_list(asm_parsing, create_word(substring, DOUBLES));
-		}
-		
-		// printf("CUT = %s\n", substring);
-	}
-	else if (line[asm_parsing->symbol] == LABEL_CHAR)
-	{
-		start = asm_parsing->symbol++;
-		while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-			asm_parsing->symbol++;
-		substring = take_word(asm_parsing->symbol, line, start);
-		if (ft_strlen(substring) > 1)
-			add_word_to_list(asm_parsing, create_word(substring, INDIRECT));
-		else
-			ft_error(asm_parsing, "Lexical error");
-	}
-	else if (line[asm_parsing->symbol] == DIRECT_CHAR)
-	{
-		start = asm_parsing->symbol++;
-		if (line[asm_parsing->symbol] == LABEL_CHAR || line[asm_parsing->symbol] == '-')
-			asm_parsing->symbol++;
-		while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-			asm_parsing->symbol++;
-		substring = take_word(asm_parsing->symbol, line, start);
-		// if (ft_strlen(substring) == 1)
-		// 	ft_error(asm_parsing, "DICK");
-		add_word_to_list(asm_parsing, create_word(substring, DIRECT_ARG));
-	}
-	else if (line[asm_parsing->symbol] == ',')
-	{
-		start = asm_parsing->symbol++;
-		substring = take_word(asm_parsing->symbol, line, start);
-		add_word_to_list(asm_parsing, create_word(substring, SEPARATOR));
-	}
-	else if (line[asm_parsing->symbol])
-	{
-		// printf("symbol = %c\n", line[asm_parsing->symbol]);
-		// printf("asm_parsing->row = %d | asm_parsing->symbol = %d\n", asm_parsing->row, asm_parsing->symbol);
-		start = asm_parsing->symbol;
-		if (line[asm_parsing->symbol] == '-')
-			asm_parsing->symbol++;
-		if (!ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-			ft_error(asm_parsing, "Lexical errorss");
-		while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-		{
-			// printf("%d->%d ", asm_parsing->symbol, line[asm_parsing->symbol]);
-			asm_parsing->symbol++;
-		}
-		// printf("\n");
-		if (line[asm_parsing->symbol] == LABEL_CHAR)
-		{
-			// ft_strlen(substring = take_word(++asm_parsing->symbol, line, start)) > 1 ? 1 : ft_error("Lexical error");
-			substring = take_word(++asm_parsing->symbol, line, start);
-			// if label contains not only ':'
-			if (ft_strlen(substring) > 1)
-				add_word_to_list(asm_parsing, create_word(substring, LABEL));
-			else
-				ft_error(asm_parsing, "Lexical error");
-		}
-		else
-		{
-			substring = take_word(asm_parsing->symbol, line, start);
-			if (check_for_instruction(substring))
-				add_word_to_list(asm_parsing, create_word(substring, INSTRUCTION));
-			else if (check_for_register(asm_parsing, substring))
-				add_word_to_list(asm_parsing, create_word(substring, REGISTER));
-			else if (check_for_number(asm_parsing, substring))
-				add_word_to_list(asm_parsing, create_word(substring, INDIRECT));
-			else
-				error_word(asm_parsing, substring);
-		}
-	}
-}
+			else if (ft_strequ(current->name, ".comment"))
+			{
 
-void	parse_line(t_asm *asm_parsing, char *line)
-{
-	while (line[asm_parsing->symbol])
-	{
-		while (ft_isspace(line[asm_parsing->symbol]))
-			asm_parsing->symbol++;
-		ignore_comment(asm_parsing, line);
-		parse_word(asm_parsing, line);
+				current = current->next;
+				if ((asm_parsing->comment == NULL) && (current->word_type == DOUBLES) &&
+													ft_strlen(current->name) < COMMENT_LENGTH)
+				{
+					asm_parsing->comment = current->name;
+					current = current->next;
+				}
+				else if (asm_parsing->comment != NULL)
+					error_word2(current, "Duplicate of comment");
+				else
+					error_word2(current, "Comment is missed");
+			}
+		}
+		if (current->word_type != NEXT_LINE)
+			error_word2(current, "Name or comment is missed");
+		current = current->next;
 	}
 }
 
@@ -335,22 +207,22 @@ void	interpreter(const char *filename)
 
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		ft_arg_error("Can't open this file");
-	// printf("FD = %d\n", fd);	
 	asm_parsing = init_asm(fd);
 	// print_asm_structure(asm_parsing);
 	while ((ret = get_next_line(fd, &line)) > 0 && line != NULL)
 	{
 		asm_parsing->row++;
-		// printf("Line = %s\n", line);
 		parse_line(asm_parsing, line);
 		asm_parsing->symbol = 0;
 		ft_strdel(&line);
-		add_word_to_list(asm_parsing, create_word(ft_strdup("next line"), NEXT_LINE));
+		add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("next line"), NEXT_LINE));
 	}
-	print_list(asm_parsing);
-	print_asm_structure(asm_parsing);
 	if (ret == -1)
 		ft_arg_error("You can't open directory");
+	print_list(asm_parsing);
+	print_asm_structure(asm_parsing);
+
+	determine_commands(asm_parsing);
 	free_list(asm_parsing);
 	free(asm_parsing);
 }

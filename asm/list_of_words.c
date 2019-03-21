@@ -12,7 +12,7 @@
 
 #include "asm.h"
 
-t_word	*create_word(char *name, int type)
+t_word	*create_word(t_asm *asm_parsing, char *name, int type)
 {
 	t_word	*new_word;
 
@@ -20,6 +20,8 @@ t_word	*create_word(char *name, int type)
 		ft_arg_error("Can't allocate memory");
 	new_word->name = name;
 	new_word->word_type = type;
+	new_word->row = asm_parsing->row;
+	// new_word->symbol = asm_parsing->symbol;
 	new_word->next = NULL;
 	return (new_word);
 }

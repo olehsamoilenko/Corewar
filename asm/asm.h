@@ -13,6 +13,9 @@
 #ifndef ASM_H
 # define ASM_H
 
+// DELETE
+#include <stdio.h>
+
 # include "libft.h"
 # include "get_next_line.h"
 
@@ -64,6 +67,8 @@ typedef	struct	s_word
 {
 	char					*name;
 	unsigned				word_type;
+	unsigned				row;
+	// unsigned				symbol;
 	struct	s_word			*next;
 }				t_word;
 
@@ -81,16 +86,31 @@ typedef	struct	s_asm
 }				t_asm;
 
 /*
+** main.c
+*/
+char	*take_word(int end , char *line, int start);
+void	ignore_comment(t_asm *asm_parsing, char *line);
+int		check_for_register(t_asm *asm_parsing, char *name);
+int		check_for_number(t_asm *asm_parsing, char *name);
+int		check_for_instruction(char *name);
+
+/*
 **	Functions for errors
 */
 void	ft_arg_error(char *message);
+void	error_word(t_asm *asm_parsing, char *message);
+void	ft_error(t_asm *asm_parsing, char *message);
 
 /*
 **	list_of_worrds.c
 */
-t_word	*create_word(char *name, int type);
+t_word	*create_word(t_asm *asm_parsing, char *name, int type);
 void	add_word_to_list(t_asm *asm_parsing, t_word *new_word);
 void	free_list(t_asm *asm_parsing);
 
+/*
+**	parsing_lines.c
+*/
+void	parse_line(t_asm *asm_parsing, char *line);
 
 #endif
