@@ -56,29 +56,32 @@ void	parse_params(int argc, char **argv, t_war *war)
 	if (argc == 1)
 		usage();
 
-	int champs = 0;
+	int cur_champs = 0;
 
-	int buf_champs_counter = 0;
-	t_champion	**buf_champs = ft_memalloc(4 * sizeof(t_champion));
+	// int buf_champs_counter = 0;
+	// t_champion	**buf_champs = ft_memalloc(4 * sizeof(t_champion));
 
 	int i = 0;
-	int num;
+	int n;
 	while (++i < argc)
 	{
 		if (ft_strequ(argv[i], "-n"))
 		{
 			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || 
-				(num = ft_atoi(argv[i + 1])) < 1 || num > MAX_PLAYERS)
+				(n = ft_atoi(argv[i + 1])) < 1 || n > MAX_PLAYERS)
 				error(ERR_N_NUMBER);
 
 			if (i < argc - 2)
 			{
 				if (!is_champion(argv[i + 2]))
 					error(ERR_CHAMP_FORMAT);
-				if (war->champs[num - 1] == NULL)
-					war->champs[num - 1] = create_champion(argv[i + 2], war->map);
-				else
-					error(ERR_SAME_N);
+				if (cur_champs == 4)
+					error(ERR_MANY_CHAMPS);
+				war->champs[cur_champs] = create_champion(argv[i + 2], war->map);
+				war->champs[cur_champs]->number = n;
+				cur_champs++;
+				// else
+					// error(ERR_SAME_N);
 				i += 2;
 			}
 			else
@@ -90,7 +93,7 @@ void	parse_params(int argc, char **argv, t_war *war)
 			war->flag_visual = true;
 		else if (ft_strequ(argv[i], "-dump"))
 		{
-			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (num = ft_atoi(argv[i + 1])) < 0)
+			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (n = ft_atoi(argv[i + 1])) < 0)
 				error(ERR_DUMP);
 			war->flag_dump = ft_atoi(argv[i + 1]);
 			i += 1;
@@ -99,41 +102,51 @@ void	parse_params(int argc, char **argv, t_war *war)
 			usage();
 		else
 		{
-			buf_champs[buf_champs_counter++] = create_champion(argv[i], war->map);
-			if (buf_champs_counter == MAX_PLAYERS)
+			if (cur_champs == 4)
 				error(ERR_MANY_CHAMPS);
+			war->champs[cur_champs++] = create_champion(argv[i], war->map);
+			// if (buf_champs_counter == MAX_PLAYERS)
+			// 	error(ERR_MANY_CHAMPS);
 		}
 	}
 
+	if (war->champs[0] == NULL)
+		error(ERR_NO_CHAMPS);
+	
+
+	t_bool nums[4] = {false, false, false, false};
+	int zero_count = 0;
+	i = -1;
+	while (++i < cur_champs)
+	{
+		if (war->champs[i]->number == 0)
+			zero_count++;
+		else if (war->champs[i]->number > cur_champs)
+			error(ERR_BIG_N);
+		else if (nums[war->champs[i]->number - 1] == true)
+			error(ERR_SAME_N);
+		else
+			nums[war->champs[i]->number - 1] = true;
+	}
+
+	i = -1;
+	while (++i < cur_champs)
+	{
+		if (war->champs[i]->number == 0)
+		{
+			int j = 0;
+			while (nums[j] != false)
+				j++;
+			war->champs[i]->number = j + 1;
+			nums[j] = true;
+		}
+	}
+
+
+	
 	if (war->flag_verbose && war->flag_visual)
 		error(ERR_VER_VIS);
 	if (war->flag_verbose && war->flag_dump != -1)
 		error(ERR_VER_DUMP);
 
-
-	// put buf champs to general
-	i = -1;
-	while (buf_champs[++i] != NULL)
-	{
-		int j = -1;
-		while (war->champs[++j] != NULL)
-		{
-			if (j == MAX_PLAYERS - 1)
-				error(ERR_MANY_CHAMPS);
-		}
-		war->champs[j] = buf_champs[i];
-	}
-
-	// empty chapms ?
-	i = MAX_PLAYERS - 1;
-	while (war->champs[i] == NULL)
-		i--;
-	while (i-- >= 0)
-	{
-		if (war->champs[i] == NULL)
-			error(ERR_BIG_N);
-	}
-	if (war->champs[0] == NULL)
-		error(ERR_NO_CHAMPS);
-	free(buf_champs);
 }

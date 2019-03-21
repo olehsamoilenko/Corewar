@@ -83,17 +83,17 @@ void	print_champions(t_champion *champs[])
 	int i = -1;
 	while (++i < 4)
 	{
-		ft_printf("\t%i: \n", i + 1);
+		// ft_printf("\t%i: \n", i + 1);
 		if (champs[i] == NULL)
 		{
 			ft_printf("Empty.\n");
-			return ;
+			// return ;
 		}
 		else
 		{
-			ft_printf("NAME: %s\n", champs[i]->header->prog_name);
-			ft_printf("COMMENT: %s\n", champs[i]->header->comment);
-			ft_printf("SIZE: %d\n", champs[i]->header->prog_size);
+			ft_printf("n = %d, NAME: %s\n", champs[i]->number, champs[i]->header->prog_name);
+			// ft_printf("COMMENT: %s\n", champs[i]->header->comment);
+			// ft_printf("SIZE: %d\n", champs[i]->header->prog_size);
 		}
 	}
 }

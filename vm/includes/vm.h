@@ -29,6 +29,7 @@ union magic_header
 typedef struct	s_champion
 {
 	char				*file;
+	int					number;
 	header_t			*header;
 }				t_champion;
 
@@ -56,7 +57,7 @@ typedef struct	s_war
 	WINDOW				*win_info;
 	WINDOW				*win_getch;
 	t_mem_cell			*map[MEM_SIZE];
-	t_champion			*champs[5];
+	t_champion			*champs[4];
 	t_carriage			*carriages;
 	int					cycle;
 	t_bool				flag_verbose;
