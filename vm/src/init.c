@@ -61,5 +61,6 @@ t_war	*init()
 		war->map[i]->value = 0xFF; // fake 
 	}
 	war->carriages = NULL;
+	war->flag_dump = -1;
 	return (war);
 }

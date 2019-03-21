@@ -45,7 +45,8 @@ typedef struct	s_carriage
 	int					reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
 	int					op_code;
 	int					cooldown;
-	int					color;
+	t_champion			*player;
+	int					last_live;
 	struct s_carriage	*next;
 }				t_carriage;
 
@@ -60,7 +61,7 @@ typedef struct	s_war
 	int					cycle;
 	t_bool				flag_verbose;
 	t_bool				flag_visual;
-	int					flag_dump;
+	int					flag_dump; // -1 if not defined
 }				t_war;
 
 typedef struct	s_op
@@ -70,7 +71,8 @@ typedef struct	s_op
 	int					args_type[3];
 	int					code;
 	int					cooldown;
-	int					label;
+	int					label; // bool
+	t_bool				codage;
 }				t_op;
 
 extern t_op op_tab[];

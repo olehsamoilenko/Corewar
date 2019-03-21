@@ -16,8 +16,9 @@
 
 t_op		op_tab[] =  // [17]
 {
-	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5,	0},
-	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5,	0},
-	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25,	1},
-	{0,		0,	0,															0,	0,	0}
+	{"live",1,	{T_DIR,			0,						0				},	1,	10,	0, 0},
+	{"ld",	2,	{T_DIR | T_IND,	T_REG,					0				},	2,	5,	0, 1},
+	{"st",	2,	{T_REG,			T_IND | T_REG,			0				},	3,	5,	0, 1},
+	{"sti",	3,	{T_REG,			T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	25,	1, 1},
+	{0,		0,	0,															0,	0,	0, 0}
 };
