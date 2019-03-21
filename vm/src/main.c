@@ -26,10 +26,12 @@ void	error(char *message) // .h
 
 void	status(char *line, t_war *war)
 {
-	// wdeleteln(war->win_info);
-	mvwaddstr(war->win_info, 4, 2, "                       ");
-	mvwaddstr(war->win_info, 4, 2, line);
-	wrefresh(war->win_info);
+	if (war->flag_visual)
+	{
+		mvwaddstr(war->win_info, 4, 2, "                       ");
+		mvwaddstr(war->win_info, 4, 2, line);
+		wrefresh(war->win_info);
+	}
 }
 
 void	print_memory(t_war *war)
@@ -37,7 +39,6 @@ void	print_memory(t_war *war)
 	int i = -1;
 	char s[3];
 
-	// war->map[0]->value = 0; // trash oleha
 	while (++i < MEM_SIZE)
 	{
 		// color on
@@ -121,7 +122,6 @@ void	over_over(t_war *war)
 void	over_curses(t_war *war)
 {
 	int key;
-	
 	status("overing", war);
 	while ((key = wgetch(war->win_getch)) != KEY_ESC)
 	{
@@ -346,29 +346,32 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 
 void	next_cycle(t_war *war, t_carriage *car)
 {
-	int key = wgetch(war->win_getch);
-	// printf("%d\n", key);
-	if (key == 27)
-		over_over(war);
-	// status("cooldown", war);
-	if (key == KEY_S)
+	int key = 0;
+	if (war->flag_visual)
+	{
+		key = wgetch(war->win_getch);
+		if (key == 27)
+			over_over(war);
+	}
+	
+	if (key == KEY_S || !war->flag_visual)
 	{
 		war->cycle++;
 		car->cooldown--;
-		// if (war->flag_visual)
-		// {
-			// print_memory(war);
-			char *itoa = ft_itoa(war->cycle);
-			mvwaddstr(war->win_info, 2, 10, itoa);
-			ft_strdel(&itoa);
-			wrefresh(war->win_info);
-		// }
-		if (war->flag_verbose)
-		{
-			printf("It is now cycle %d\n", war->cycle);
-			curriage_info(car);
-		}
 	}
+	if (war->flag_visual && key == KEY_S)
+	{
+		char *itoa = ft_itoa(war->cycle);
+		mvwaddstr(war->win_info, 2, 10, itoa);
+		ft_strdel(&itoa);
+		wrefresh(war->win_info);
+	}
+	if (war->flag_verbose)
+	{
+		printf("It is now cycle %d\n", war->cycle);
+		curriage_info(car);
+	}
+
 }
 
 void	cooldown(t_war *war)
@@ -409,6 +412,7 @@ int		main(int argc, char **argv)
 	// status(ft_itoa(war->carriages->position), war);
 	// print_memory(war);
 	// wrefresh(war->win_mem);
+
 	print_memory(war);	
 
 	index = get_command(car, war->map, war);

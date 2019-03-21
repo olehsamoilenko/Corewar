@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "vm.h"
+#include "vm.h" // mb flags agrs
 
 // args parsing
 #define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
@@ -21,10 +21,11 @@
 #define ERR_CHAMP_FORMAT "Champion format must be 'name.cor'"
 #define ERR_BIG_N "Champion's number exceeds their amount"
 #define ERR_DUMP "Flag -dump needs a number"
+#define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
 
 void	usage()
 {
-	printf("Usage: ./vm <[-n 1] champion1.cor> <...> [-v] [-visual]\n");
+	printf("Usage: ./vm <[-n 1] champion1.cor> <...> [-verbose] [-visual]\n");
 	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
@@ -82,7 +83,7 @@ void	parse_params(int argc, char **argv, t_war *war)
 			else
 				error(ERR_N_CHAMP);
 		}
-		else if (ft_strequ(argv[i], "-v"))
+		else if (ft_strequ(argv[i], "-verbose"))
 			war->flag_verbose = true;
 		else if (ft_strequ(argv[i], "-visual"))
 			war->flag_visual = true;
@@ -90,6 +91,7 @@ void	parse_params(int argc, char **argv, t_war *war)
 		{
 			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (num = ft_atoi(argv[i + 1])) < 0)
 				error(ERR_DUMP);
+			war->flag_dump = ft_atoi(argv[i + 1]);
 			i += 1;
 		}
 		else if (!is_champion(argv[i]))
@@ -101,6 +103,9 @@ void	parse_params(int argc, char **argv, t_war *war)
 				error(ERR_MANY_CHAMPS);
 		}
 	}
+
+	if (war->flag_verbose && war->flag_visual)
+		error(ERR_VER_VIS);
 
 
 	// put buf champs to general

@@ -60,6 +60,7 @@ typedef struct	s_war
 	int					cycle;
 	t_bool				flag_verbose;
 	t_bool				flag_visual;
+	int					flag_dump;
 }				t_war;
 
 typedef struct	s_op
