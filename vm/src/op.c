@@ -26,7 +26,9 @@ void	op_live(int index, t_carriage *car, t_war *war, int *arg)
 		t_champion *player = find_champ(arg[1], war);
 		ft_printf("Player %d (%s) is said to be alive\n",
 			player->number, player->header->prog_name);
-		// free(player);
+		
+
+		// ft_printf("ADV %d (%x -> %x)\n", delta, car->position, car->position + delta);
 	}
 }
 
@@ -95,7 +97,7 @@ void	op_fork(int index, t_carriage *car, t_war *war, int *arg)
 	// new->player = car->player;
 	// copy carry
 	// new->op_code = car->op_code;
-	
+
 	// verbose
 	if (war->flag_verbose)
 	{
