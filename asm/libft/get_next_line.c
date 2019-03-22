@@ -10,13 +10,14 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdio.h>
 #include "get_next_line.h"
 
 void	save_after_new(t_gnl *gnl, char *end_str)
 {
 	char *dup_end;
 
-	gnl->length = ft_strlen(end_str) - 1;
+	gnl->length = ft_strlen(end_str);
 	end_str += 1;
 	dup_end = ft_strdup(end_str);
 	ft_bzero(gnl->string, ft_strlen(gnl->string));
@@ -32,7 +33,7 @@ void	help_func(t_gnl *gnl, char **line, char *end_str)
 	if (end_str != NULL)
 	{
 		temp = ft_strsub(gnl->string, 0,
-		ft_strlen(gnl->string) - ft_strlen(end_str));
+		ft_strlen(gnl->string) - ft_strlen(end_str) + 1);
 		save_after_new(gnl, end_str);
 	}
 	else

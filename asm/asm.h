@@ -32,10 +32,11 @@
 # define UNKNOWN 4
 # define LABEL 5
 # define DIRECT_ARG 6
-# define INDIRECT 7
+# define INDIRECT_ARG 7
 # define INSTRUCTION 8
 # define SEPARATOR 9
 # define REGISTER 10
+# define END_LINE 11
 
 static	char *test[] = 
 {
@@ -45,19 +46,27 @@ static	char *test[] =
 	"UNKNOWN",
 	"LABEL",
 	"DIRECT_ARG",
-	"INDIRECT",
+	"INDIRECT_ARG",
 	"INSTRUCTION",
 	"SEPARATOR",
-	"REGISTER"
+	"REGISTER",
+	"END_LINE"
 };
 
 typedef struct	s_op
 {
 	char	*name;
 	int		count_args;
+	int		type_args[3];
+	int		opcode;
+	int		cycles;
+	char	*description;
+	int		codage_octal;
+	int		label_size;
+
 }				t_op;
 
-extern t_op g_op_tab[17];
+extern t_op g_op_tab[];
 
 
 /*

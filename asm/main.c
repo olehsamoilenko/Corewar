@@ -153,7 +153,7 @@ int		check_for_number(t_asm *asm_parsing, char *name)
 	return (1);
 }
 
-void	determine_commands(t_asm *asm_parsing)
+t_word		*determine_commands(t_asm *asm_parsing)
 {
 	t_word *current;
 
@@ -196,6 +196,107 @@ void	determine_commands(t_asm *asm_parsing)
 			error_word2(current, "Name or comment is missed");
 		current = current->next;
 	}
+	return (current);
+}
+
+int	find_instruction(t_word *current)
+{
+	int i;
+
+	i = 0;
+	while (i < 17)
+	{
+		if (ft_strequ(current->name, g_op_tab[i].name))
+			return (i);
+		i++;
+	}
+	return (-1);
+}
+
+t_word	*process_instruction(t_word *current)
+{
+	int		instruction;
+	int		count_args;
+	int		sum;
+
+	count_args = 0;
+	instruction = find_instruction(current);
+	if (instruction == -1)
+		error_word2(current, "Incorrect instruction");
+	current = current->next;
+	printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);	
+	while (current->word_type != NEXT_LINE && current->word_type != END_LINE)
+	{
+		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
+		{
+			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			sum = 2 | g_op_tab[instruction].type_args[count_args];
+			if (sum != g_op_tab[instruction].type_args[count_args])
+				error_word2(current, "Incorrect argument");
+			count_args++;
+		}
+		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
+		{
+			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			sum = 3 | g_op_tab[instruction].type_args[count_args];
+			if (sum != g_op_tab[instruction].type_args[count_args])
+				error_word2(current, "Incorrect argument");
+			count_args++;
+		}
+		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
+		{
+			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			sum = 1 | g_op_tab[instruction].type_args[count_args];
+			if (sum != g_op_tab[instruction].type_args[count_args])
+				error_word2(current, "Incorrect argument");
+			count_args++;
+		}
+		current = current->next;
+		printf("type = %d\n", current->word_type);
+		if (count_args == g_op_tab[instruction].count_args)
+		{
+			// current = current->next;
+			if (current->word_type != NEXT_LINE && current->word_type != END_LINE)
+				error_word2(current, "Wrong instruction");		
+		}
+		else if (current->word_type == SEPARATOR)
+			current = current->next;
+		else
+			error_word2(current, "Separator is missed");
+	}
+	if (count_args != g_op_tab[instruction].count_args)
+		error_word2(current, "Wrong number of arguments");
+	return (current);
+}
+
+void	determine_instructions(t_asm *asm_parsing, t_word *current)
+{
+	
+	while (current->word_type != END_LINE)
+	{
+		if (current->word_type == NEXT_LINE)
+			current = current->next;
+		else if (current->word_type == LABEL)
+		{
+			current = current->next;
+			if (current->word_type == INSTRUCTION)
+			{
+				current = process_instruction(current);
+				printf("label is OK\n");
+			}
+			else
+				error_word2(current, "Error with labels");
+		}
+		else if (current->word_type == INSTRUCTION)
+		{
+			current = process_instruction(current);
+		}
+		else
+		{
+			error_word2(current, "INCORRECT");
+		}
+
+	}
 }
 
 void	interpreter(const char *filename)
@@ -204,6 +305,7 @@ void	interpreter(const char *filename)
 	char	*line;
 	int		ret;
 	t_asm	*asm_parsing;
+	t_word	*current;
 
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		ft_arg_error("Can't open this file");
@@ -214,15 +316,19 @@ void	interpreter(const char *filename)
 		asm_parsing->row++;
 		parse_line(asm_parsing, line);
 		asm_parsing->symbol = 0;
+		if (line[ft_strlen(line) - 1] == '\n')
+			add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("next line"), NEXT_LINE));	
+		else					
+			add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("end line"), END_LINE));	
 		ft_strdel(&line);
-		add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("next line"), NEXT_LINE));
 	}
 	if (ret == -1)
 		ft_arg_error("You can't open directory");
 	print_list(asm_parsing);
 	print_asm_structure(asm_parsing);
 
-	determine_commands(asm_parsing);
+	current = determine_commands(asm_parsing);
+	determine_instructions(asm_parsing, current);
 	free_list(asm_parsing);
 	free(asm_parsing);
 }
@@ -244,3 +350,4 @@ int main(int argc, char const *argv[])
 	system("leaks asm");
 	return (0);
 }
+ 

@@ -2,13 +2,8 @@
 
 .comment "#just a basic%l"
 
-loop:
 
 
+sti	r2,%:live, %0
 
-	sti	-21,%:live,%0
-	and	r1, %0,r1
-live:	live	%1
-	zjmp	%:live
-
-live
+and	r1, %0,r1

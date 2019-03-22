@@ -81,7 +81,7 @@ void	cut_label(t_asm *asm_parsing, char *line)
 		asm_parsing->symbol++;
 	substring = take_word(asm_parsing->symbol, line, start);
 	if (ft_strlen(substring) > 1)
-		add_word_to_list(asm_parsing, create_word(asm_parsing, substring, INDIRECT));
+		add_word_to_list(asm_parsing, create_word(asm_parsing, substring, INDIRECT_ARG));
 	else
 		ft_error(asm_parsing, "Lexical error");
 }
@@ -129,7 +129,7 @@ void	cut_other(t_asm *asm_parsing, char *line)
 		else if (check_for_register(asm_parsing, substring))
 			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, REGISTER));
 		else if (check_for_number(asm_parsing, substring))
-			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, INDIRECT));
+			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, INDIRECT_ARG));
 		else
 			error_word(asm_parsing, substring);
 	}
