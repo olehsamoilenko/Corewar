@@ -37,8 +37,8 @@ typedef struct	s_map_cell
 {
 	unsigned char		value;
 	int					color;
-	// t_bool				bkgrnd;
-	int					bold;
+	int					cycles_live;
+	int					cycles_bold;
 }				t_mem_cell;
 
 typedef struct	s_carriage
