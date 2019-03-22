@@ -22,8 +22,11 @@ void	op_live(int index, t_carriage *car, t_war *war, int *arg)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | live %d\n", car->player->number, arg[1]);
-		ft_printf("Player %d (%s) is said to be alive\n", car->player->number, car->player->header->prog_name);
+		ft_printf("P    %d | live %d\n", car->number, arg[1]);
+		t_champion *player = find_champ(arg[1], war);
+		ft_printf("Player %d (%s) is said to be alive\n",
+			player->number, player->header->prog_name);
+		// free(player);
 	}
 }
 
@@ -34,7 +37,7 @@ void	op_ld(int index, t_carriage *car, t_war *war, int *arg)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ld %d r%d\n", car->player->number, arg[1], arg[2]);
+		ft_printf("P    %d | ld %d r%d\n", car->number, arg[1], arg[2]);
 	}
 }
 
@@ -45,7 +48,7 @@ void	op_ldi(int index, t_carriage *car, t_war *war, int *arg)
 
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ldi %d %d r%d\n", car->player->number, arg[1], arg[2], arg[3]);
+		ft_printf("P    %d | ldi %d %d r%d\n", car->number, arg[1], arg[2], arg[3]);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
 			arg[1],
 			arg[2],
@@ -73,7 +76,7 @@ void	op_sti(int index, t_carriage *car, t_war *war, int *arg)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | sti r%d %d %d\n", car->player->number, arg[1], arg[2], arg[3]);
+		ft_printf("P%5d | sti r%d %d %d\n", car->number, arg[1], arg[2], arg[3]);
 		ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
 			arg[2], arg[3], arg[2] + arg[3], car->position + (arg[2] + arg[3]) % IDX_MOD);
 	}
@@ -82,10 +85,24 @@ void	op_sti(int index, t_carriage *car, t_war *war, int *arg)
 
 void	op_fork(int index, t_carriage *car, t_war *war, int *arg)
 {
-
+	t_carriage *new = create_carriage(0, 0, war);
+	new->position = (car->position + arg[1]) % IDX_MOD;
+	push_carriage(new, &war->carriages);
+	int i = -1;
+	while (++i <= REG_NUMBER)
+		new->reg[i] = car->reg[i];
+	new->last_live = car->last_live;
+	// new->player = car->player;
+	// copy carry
+	// new->op_code = car->op_code;
+	
+	// verbose
+	if (war->flag_verbose)
+	{
+		ft_printf("P%5d | fork %d (%d)\n", car->number, arg[1], (car->position + arg[1]) % IDX_MOD);
+	}
+	
 }
-
-
 
 t_op		op_tab[] =  // [17]
 {

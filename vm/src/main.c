@@ -187,29 +187,8 @@ int		champions_count(t_champion **champs)
 }
 
 
-void	push_carriage(t_carriage *car, t_carriage **list)
-{
-	car->next = *list;
-	*list = car;
-}
 
-t_carriage	*create_carriage(int position, int number, t_war *war)
-{
-	t_carriage *car = ft_memalloc(sizeof(t_carriage));
-	car->position = position;
-	car->player = war->champs[number - 1];
-	car->reg[1] = -number;
-	return (car);
-}
 
-void		show_carriages(t_carriage *list)
-{
-	while (list)
-	{
-		ft_printf("Position: %d\tPlayer: %d\n", list->position, list->player);
-		list = list->next;
-	}
-}
 
 void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta, t_war *war)
 {
@@ -444,9 +423,7 @@ int		main(int argc, char **argv)
 
 	// MORTEL
 
-	t_carriage *car = war->carriages;
-
-
+	
 
 	if (war->flag_visual)
 		init_curses(war);
@@ -455,30 +432,34 @@ int		main(int argc, char **argv)
 	// next_cycle(war, car);
 	// print_info(war);
 
-	if (war->cycle > war->flag_dump)
+	if (war->cycle >= war->flag_dump)
 		print_memory(war);
 	// cooldown(war);
 
 
-	for(int i = 0; i < 17; i++)
+	for (int i = 0; i < 18; i++)
 	{
-		index = get_command(car, war->map, war); // ld
-		cooldown(war);
-		int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
-		int arg_type[4] = {0, 0, 0, 0}; 
-		int delta = get_args(car, war->map, index, war, arg, arg_type);
-
-		op_tab[index].func(index, car, war, arg);
-		// reg_info(car->reg, war);
-		// ft_printf("ARG_TYPE: %d %d %d\n", arg_type[1], arg_type[2], arg_type[3]);
-
-		car->position += delta;
-		// if (war->cycle >= war->flag_dump)
-		print_memory(war);
+		t_carriage *tmp = war->carriages;
+		while (tmp)
+		{
+			t_carriage *car = tmp;
+			index = get_command(car, war->map, war); // ld
+			cooldown(war);
+			int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
+			int arg_type[4] = {0, 0, 0, 0}; 
+			int delta = get_args(car, war->map, index, war, arg, arg_type);
+			op_tab[index].func(index, car, war, arg);
+			// reg_info(car->reg, war);
+			// ft_printf("ARG_TYPE: %d %d %d\n", arg_type[1], arg_type[2], arg_type[3]);
+			car->position += delta;
+			print_memory(war);
+			tmp = tmp->next;
+		}
+		
 		
 	}
 	
-
+	show_carriages(war);
 
 
 	if (war->flag_visual)

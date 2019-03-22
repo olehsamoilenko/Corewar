@@ -19,6 +19,17 @@
 #define ERR_NULL_AFTER_COMMENT "There aren't empty octets next to the comment"
 #define ERR_BIG_CHAMP "Too big champion"
 
+t_champion	*find_champ(int number, t_war *war)
+{
+	int i = -1;
+	while (++i < 4)
+	{
+		if (war->champs[i]->number == -number)
+			return (war->champs[i]);
+	}
+	return (NULL); // mb sf
+}
+
 int		read_bytes(int fd, int amount)
 {
 	unsigned char buf[amount];

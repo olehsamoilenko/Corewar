@@ -20,7 +20,8 @@ LIST =			main \
 				op \
 				params \
 				champion \
-				init
+				init \
+				carriage
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)
