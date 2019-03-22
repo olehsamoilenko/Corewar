@@ -73,8 +73,8 @@ typedef struct	s_op
 	int					args_type[3];
 	int					code;
 	int					cooldown;
-	int					label; // bool
 	t_bool				codage;
+	t_bool				label; // bool
 	void				(*func)(int, t_carriage *, t_war *, int *);
 }				t_op;
 

@@ -103,18 +103,18 @@ void	next_cycle(t_war *war, t_carriage *car)
 {
 	
 	int key = 0;
-	if (war->flag_visual)
+	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		key = wgetch(war->win_getch);
 		if (key == 27)
 			over_over(war);
 	}
-	if (key == KEY_S || !war->flag_visual)
+	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
 		war->cycle++;
 		car->cooldown--;
 	}
-	if (war->flag_visual && key == KEY_S)
+	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
 	{
 		// print_info(war);
 		print_memory(war);
@@ -264,7 +264,7 @@ int		define_size(int arg_code, int label)
 		return(1);
 	else if (arg_code == DIR_CODE)
 	{
-		if (label == 0)
+		if (label == false)
 			return (4);
 		else
 			return (2);
@@ -286,6 +286,8 @@ int		get_bytes(int start, int amount, t_mem_cell *map[])
 		res |= map[start + i]->value /*& 0xFF*/;
 		// printf("%x\n", res);
 	}
+	if (amount == 2)
+		return ((short)res);
 	return (res); // to unsigned ?
 }
 
@@ -309,7 +311,7 @@ int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns inde
 
 
 
-int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war, int *arg)
+int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war, int *arg, int *arg_type)
 {
 	int v[7];
 
@@ -359,12 +361,18 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war, int *arg
 		third = op_tab[index].args_type[2];
 	}
 
+	arg_type[1] = first;
+	arg_type[2] = second;
+	arg_type[3] = third;
+
 	int arg_1_size = define_size(first, op_tab[index].label);
 	int arg_2_size = define_size(second, op_tab[index].label);
 	int arg_3_size = define_size(third, op_tab[index].label);
 	if (war->flag_verbose)
 		ft_printf("args_sizes: %d %d %d\n", arg_1_size, arg_2_size, arg_3_size);
 	
+
+
 	int arg_1 = 0, arg_2 = 0, arg_3 = 0;
 	arg_1 = get_bytes(car->position + delta, arg_1_size, map);
 	delta += arg_1_size;
@@ -412,27 +420,9 @@ void	cooldown(t_war *war)
 {
 	while (war->carriages->cooldown != 0)
 	{
-		next_cycle(war, war->carriages);
-		if (war->cycle == war->flag_dump) // work ?
-		{
+		if (!war->flag_visual && war->cycle == war->flag_dump)
 			dump(war);
-		}
-	}
-}
-
-void	operation(int index, t_carriage *car, t_war *war, int *arg)
-{
-	if (op_tab[index].code == 2) // ld
-	{
-		
-	}
-	else if (op_tab[index].code == 11) // sti
-	{
-		
-	}
-	else if (op_tab[index].code == 1) // live
-	{
-		
+		next_cycle(war, war->carriages);
 	}
 }
 
@@ -465,21 +455,27 @@ int		main(int argc, char **argv)
 	// next_cycle(war, car);
 	// print_info(war);
 
-	print_memory(war);
+	if (war->cycle > war->flag_dump)
+		print_memory(war);
 	// cooldown(war);
 
 
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < 17; i++)
 	{
 		index = get_command(car, war->map, war); // ld
 		cooldown(war);
 		int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
-		int delta = get_args(car, war->map, index, war, arg);
-		// printf("%d\n", arg[0]);
+		int arg_type[4] = {0, 0, 0, 0}; 
+		int delta = get_args(car, war->map, index, war, arg, arg_type);
+
 		op_tab[index].func(index, car, war, arg);
-		// operation(index, car, war, arg);
+		// reg_info(car->reg, war);
+		// ft_printf("ARG_TYPE: %d %d %d\n", arg_type[1], arg_type[2], arg_type[3]);
+
 		car->position += delta;
+		// if (war->cycle >= war->flag_dump)
 		print_memory(war);
+		
 	}
 	
 
