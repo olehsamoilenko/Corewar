@@ -303,38 +303,13 @@ int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns inde
 	return (index);
 }
 
-void	verbose_live(int arg_1, t_carriage *car, t_war *war)
-{
-	if (war->flag_verbose)
-	{
-		ft_printf("P    %d | live %d\n", car->player->number, arg_1);
-		ft_printf("Player %d (%s) is said to be alive\n", car->player->number, car->player->header->prog_name);
-	}
 
-}
 
-void	verbose_ld(int arg_1, int arg_2, t_carriage *car, t_war *war)
-{
-	if (war->flag_verbose)
-	{
-		ft_printf("P    %d | ld %d r%d\n", car->player->number, arg_1, arg_2);
-	}
-	// status("doing ld", war);
-}
 
-void	verbose_sti(int arg_1, int arg_2, int arg_3, t_carriage *car, t_war *war)
-{
-	if (war->flag_verbose)
-	{
-		ft_printf("P%5d | sti r%d %d %d\n", car->player->number, arg_1, arg_2, arg_3);
-		ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
-			arg_2, arg_3, arg_2 + arg_3, car->position + (arg_2 + arg_3) % IDX_MOD); // 512 ?
-	}
 
-	// status("doing sti", war);
-}
 
-int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
+
+int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war, int *arg)
 {
 	int v[7];
 
@@ -383,7 +358,6 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 		second = op_tab[index].args_type[1];
 		third = op_tab[index].args_type[2];
 	}
-	
 
 	int arg_1_size = define_size(first, op_tab[index].label);
 	int arg_2_size = define_size(second, op_tab[index].label);
@@ -407,36 +381,11 @@ int	get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war)
 	if (war->flag_verbose)
 		ft_printf("args: %d %d %d\n", arg_1, arg_2, arg_3);
 
-	if (op_tab[index].code == 2) // ld
-	{
-		car->reg[arg_2] = arg_1; // check < 16
-		verbose_ld(arg_1, arg_2, car, war);
-	}
-	else if (op_tab[index].code == 11) // sti
-	{
-		union magic_header number;
-		number.hex = car->reg[arg_1];
-		int i = -1;
-		while (++i < 4)
-		{
-			map[car->position + (arg_2 + arg_3) % IDX_MOD + i]->value = number.bytes[i];
-			map[car->position + (arg_2 + arg_3) % IDX_MOD + i]->cycles_bold = war->cycle; // 50 ?
-		}
-		verbose_sti(arg_1, arg_2, arg_3, car, war);
-	}
-	else if (op_tab[index].code == 1) // live
-	{
-		car->last_live = war->cycle;
-		map[car->position]->cycles_live = war->cycle;
-		verbose_live(arg_1, car, war);
-
-	}
+	arg[1] = arg_1;
+	arg[2] = arg_2;
+	arg[3] = arg_3;
 	return (delta);
 }
-
-
-
-
 
 void	dump(t_war *war)
 {
@@ -468,7 +417,22 @@ void	cooldown(t_war *war)
 		{
 			dump(war);
 		}
-			
+	}
+}
+
+void	operation(int index, t_carriage *car, t_war *war, int *arg)
+{
+	if (op_tab[index].code == 2) // ld
+	{
+		
+	}
+	else if (op_tab[index].code == 11) // sti
+	{
+		
+	}
+	else if (op_tab[index].code == 1) // live
+	{
+		
 	}
 }
 
@@ -478,7 +442,6 @@ int		main(int argc, char **argv)
 
 	t_war *war = init();
 
-	int i;
 	int index;
 
 	parse_params(argc, argv, war);
@@ -506,59 +469,26 @@ int		main(int argc, char **argv)
 	// cooldown(war);
 
 
-	index = get_command(car, war->map, war); // ld
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
+	for(int i = 0; i < 10; i++)
+	{
+		index = get_command(car, war->map, war); // ld
+		cooldown(war);
+		int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
+		int delta = get_args(car, war->map, index, war, arg);
+		// printf("%d\n", arg[0]);
+		op_tab[index].func(index, car, war, arg);
+		// operation(index, car, war, arg);
+		car->position += delta;
+		print_memory(war);
+	}
 	
-	index = get_command(car, war->map, war); // ld
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
 
-	index = get_command(car, war->map, war); // ld
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // ld
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // sti
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // live
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // sti
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // sti
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-	
-	index = get_command(car, war->map, war); // sti
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
-
-	index = get_command(car, war->map, war); // sti
-	cooldown(war);
-	car->position += get_args(car, war->map, index, war);
-	print_memory(war);
 
 
 	if (war->flag_visual)
 		over_curses(war);
+
+
 
 	system("leaks vm");
 

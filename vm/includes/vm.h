@@ -75,6 +75,7 @@ typedef struct	s_op
 	int					cooldown;
 	int					label; // bool
 	t_bool				codage;
+	void				(*func)(int, t_carriage *, t_war *, int *);
 }				t_op;
 
 extern t_op op_tab[];
