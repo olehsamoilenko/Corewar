@@ -81,6 +81,11 @@ typedef	struct	s_word
 	struct	s_word			*next;
 }				t_word;
 
+typedef struct s_instruction
+{
+	t_word *args[3];
+}				t_instruction;
+
 /*
 **	Main structure
 */
@@ -92,6 +97,11 @@ typedef	struct	s_asm
 	unsigned	row;
 	unsigned	symbol;
 	t_word		*words;
+
+
+	// added
+	char *byte_code;
+	int	position;
 }				t_asm;
 
 /*
@@ -122,4 +132,7 @@ void	free_list(t_asm *asm_parsing);
 */
 void	parse_line(t_asm *asm_parsing, char *line);
 
+
+// added
+char		*ft_itoa_base(uintmax_t n, int base, int flag);
 #endif

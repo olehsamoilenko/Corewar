@@ -1,9 +1,11 @@
-.name " NAME"
+.name "Batman"
 
-.comment "#just a basic%l"
+.comment "This city needs me"
 
 
 
-sti	r2,%:live, %0
+#sti	r2, %10, %0
 
-and	r1, %0,r1
+#and	r1, %0,r1
+
+ld %7, r2

@@ -66,8 +66,32 @@ t_asm	*init_asm(int fd)
 	asm_parsing->row = 0;
 	asm_parsing->symbol = 0;
 	asm_parsing->words = NULL;
+
+	// added
+	asm_parsing->byte_code = NULL;
+	asm_parsing->position = 0;
 	return (asm_parsing);
 }
+
+// added 
+void	write_int_to_byte(t_asm *asm_parsing, int nbr, int size)
+{
+	int i;
+	int count_bits;
+
+	count_bits = 0;
+	i = 0;
+
+	asm_parsing->byte_code = realloc(asm_parsing->byte_code, asm_parsing->position + size);
+	while (size)
+	{
+		asm_parsing->byte_code[asm_parsing->position + size - 1] = (nbr >> count_bits) & 0xFF;
+		asm_parsing->position++;
+		count_bits += 8;
+		size--;
+	}
+}
+
 
 void	ignore_comment(t_asm *asm_parsing, char *line)
 {
@@ -213,43 +237,84 @@ int	find_instruction(t_word *current)
 	return (-1);
 }
 
-t_word	*process_instruction(t_word *current)
+t_instruction *init_instruction_args(void)
+{
+	t_instruction *instruction_args;
+	int i;
+
+	instruction_args = (t_instruction *)malloc(sizeof(t_instruction));
+	i = -1;
+	while (++i < 3)
+		instruction_args->args[i] = NULL;
+	return (instruction_args);
+}
+
+t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 {
 	int		instruction;
 	int		count_args;
 	int		sum;
+
+	t_instruction *instruction_args;
+
+
+	// for codage
+	unsigned char var_for_codage = 0;
+	char shift_left = 6;
 
 	count_args = 0;
 	instruction = find_instruction(current);
 	if (instruction == -1)
 		error_word2(current, "Incorrect instruction");
 	current = current->next;
-	printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);	
+	printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);
+
+	instruction_args = init_instruction_args();
+
 	while (current->word_type != NEXT_LINE && current->word_type != END_LINE)
 	{
 		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
+			char two = 2;
 			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 2 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
+			var_for_codage = var_for_codage | (two << shift_left);
+			shift_left -= 2;
+			// printf("var_for_codage =  %d\n", var_for_codage);		
+			instruction_args->args[count_args] = current;	
+
 			count_args++;
 		}
 		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
+			char three = 3;
 			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 3 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
-			count_args++;
+			var_for_codage = var_for_codage | (three << shift_left);
+			shift_left -= 2;
+			// printf("var_for_codage =  %d\n", var_for_codage);	
+			instruction_args->args[count_args] = current;			
+
+			count_args++;			
 		}
 		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
 		{
+			char one = 1;
 			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 1 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
+			var_for_codage = var_for_codage | (one << shift_left);
+			shift_left -= 2;
+			// printf("var_for_codage =  %d\n", var_for_codage);	
+			instruction_args->args[count_args] = current;			
+						
 			count_args++;
+
 		}
 		current = current->next;
 		printf("type = %d\n", current->word_type);
@@ -264,6 +329,44 @@ t_word	*process_instruction(t_word *current)
 		else
 			error_word2(current, "Separator is missed");
 	}
+	// write opcode of instruction
+	write_int_to_byte(asm_parsing, instruction + 1, 1);
+
+	// write codage of instruction
+	write_int_to_byte(asm_parsing, var_for_codage, 1);
+
+	// writing args of instruction
+	int i = 0;
+	int number;
+	while (i < 3)
+	{
+		if (instruction_args->args[i] != NULL)
+		{
+			if (instruction_args->args[i]->word_type == INDIRECT_ARG)
+			{
+				number = ft_atoi(instruction_args->args[i]->name);
+				write_int_to_byte(asm_parsing, number, 2);
+			}
+			else if (instruction_args->args[i]->word_type == DIRECT_ARG)
+			{
+				number = ft_atoi(&instruction_args->args[i]->name[1]);
+				if (g_op_tab[instruction].label_size == 1)
+					write_int_to_byte(asm_parsing, number, 2);
+				else
+				{
+					write_int_to_byte(asm_parsing, number, 4);					
+				}
+			}
+			else if (instruction_args->args[i]->word_type == REGISTER)
+			{
+				number = ft_atoi(&instruction_args->args[i]->name[1]);
+				write_int_to_byte(asm_parsing, number, 1);
+			}
+		}
+		i++;
+	}
+
+	printf("var_for_codage =  %d\n", var_for_codage);		
 	if (count_args != g_op_tab[instruction].count_args)
 		error_word2(current, "Wrong number of arguments");
 	return (current);
@@ -271,7 +374,6 @@ t_word	*process_instruction(t_word *current)
 
 void	determine_instructions(t_asm *asm_parsing, t_word *current)
 {
-	
 	while (current->word_type != END_LINE)
 	{
 		if (current->word_type == NEXT_LINE)
@@ -281,21 +383,67 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 			current = current->next;
 			if (current->word_type == INSTRUCTION)
 			{
-				current = process_instruction(current);
 				printf("label is OK\n");
+				current = process_instruction(asm_parsing, current);
 			}
 			else
 				error_word2(current, "Error with labels");
 		}
 		else if (current->word_type == INSTRUCTION)
 		{
-			current = process_instruction(current);
+			current = process_instruction(asm_parsing, current);
 		}
 		else
 		{
 			error_word2(current, "INCORRECT");
 		}
 
+	}
+}
+
+void	write_data_to_all(char *all, int start, int data, int size)
+{
+	int i;
+	int count_bits;
+
+	count_bits = 0;
+	i = 0;
+	while (size)
+	{
+		all[start + size - 1] = (data >> count_bits) & 0xFF;
+		count_bits += 8;
+		size--;
+	}
+}
+
+void	write_to_file(t_asm *asm_parsing)
+{
+	int position_all = 0;
+
+	int len = asm_parsing->position;
+	char *all_code = ft_strnew(4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
+	ft_bzero(all_code, 4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
+	// added
+	{
+		write_data_to_all(all_code, position_all, COREWAR_EXEC_MAGIC, 4);
+		position_all += 4;
+		char *name_without = ft_strsub(asm_parsing->name_champ, 1, ft_strlen(asm_parsing->name_champ) - 2);
+		ft_memcpy(&all_code[position_all], name_without, ft_strlen(name_without));
+		// ft_strdel(&name_without);
+		position_all += PROG_NAME_LENGTH + 4;
+		// write size of champion
+		write_data_to_all(all_code, position_all, asm_parsing->position, 2);
+		position_all += 2;
+
+		char *comment_without = ft_strsub(asm_parsing->comment, 1, ft_strlen(asm_parsing->comment) - 2);
+		ft_memcpy(&all_code[position_all], comment_without, ft_strlen(comment_without));
+		position_all += COMMENT_LENGTH + 4;
+
+
+		// error with code of champion
+		ft_memcpy(&all_code[position_all], asm_parsing->byte_code, 5);
+		int new_fd = open("our_test.cor", O_CREAT | O_WRONLY, 0644);
+		write(new_fd, all_code, 4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
 	}
 }
 
@@ -329,6 +477,12 @@ void	interpreter(const char *filename)
 
 	current = determine_commands(asm_parsing);
 	determine_instructions(asm_parsing, current);
+
+	// added
+	{
+		write_to_file(asm_parsing);
+	}
+
 	free_list(asm_parsing);
 	free(asm_parsing);
 }
