@@ -271,7 +271,7 @@ int		get_bytes(int start, int amount, t_mem_cell *map[])
 }
 
 
-int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns index
+t_op		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns index
 {
 	car->op_code = map[car->position]->value;
 	int index = op_index(car->op_code);
@@ -281,7 +281,7 @@ int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns inde
 	}
 	car->cooldown = op_tab[index].cooldown;
 	status("reading operation", war);
-	return (index);
+	return (op_tab[index]);
 }
 
 
@@ -290,7 +290,7 @@ int		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns inde
 
 
 
-t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *war, int *arg, int *arg_type, int *arg_size)
+t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op op, t_war *war)
 {
 	int v[7];
 
@@ -303,7 +303,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *w
 	int second;
 	int third;
 	int codage;
-	if (op_tab[index].codage == true)
+	if (op.codage == true)
 	{
 		// if (war->flag_verbose)
 		// 	ft_printf("codage on\n");
@@ -321,40 +321,35 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *w
 		// if (war->flag_verbose)
 		// {
 		// 	ft_printf("args types %s %s %s\n", define_arg(first), define_arg(second), define_arg(third));
-		// 	if ((first | op_tab[index].args_type[0]) == op_tab[index].args_type[0])
+		// 	if ((first | op.args_type[0]) == op.args_type[0])
 		// 		ft_printf("first ok\n");
 		// 	else
 		// 		ft_printf("first KO!\n");
-		// 	if ((second | op_tab[index].args_type[1]) == op_tab[index].args_type[1])
+		// 	if ((second | op.args_type[1]) == op.args_type[1])
 		// 		ft_printf("second ok\n");
 		// 	else
 		// 		ft_printf("second KO!\n");
-		// 	if ((third | op_tab[index].args_type[2]) == op_tab[index].args_type[2])
+		// 	if ((third | op.args_type[2]) == op.args_type[2])
 		// 		ft_printf("third ok\n");
 		// 	else
 		// 		ft_printf("third KO!\n");
 		// }
 		// check args types
+
 		delta++;
 	}
 	else
 	{
 		// if (war->flag_verbose)
 		// 	ft_printf("codage off\n");
-		first = op_tab[index].args_type[0];
-		second = op_tab[index].args_type[1];
-		third = op_tab[index].args_type[2];
+		first = op.args_type[0];
+		second = op.args_type[1];
+		third = op.args_type[2];
 	}
 
-	
-
-	arg_type[1] = first;
-	arg_type[2] = second;
-	arg_type[3] = third;
-
-	int arg_1_size = define_size(first, op_tab[index].label);
-	int arg_2_size = define_size(second, op_tab[index].label);
-	int arg_3_size = define_size(third, op_tab[index].label);
+	int arg_1_size = define_size(first, op.label);
+	int arg_2_size = define_size(second, op.label);
+	int arg_3_size = define_size(third, op.label);
 
 	params->sizes[1] = arg_1_size;
 	params->sizes[2] = arg_2_size;
@@ -379,20 +374,11 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], int index, t_war *w
 		arg_3 = get_bytes(car->position + delta, arg_3_size, map);
 		delta += arg_3_size;
 	}
-	arg_size[1] = arg_1_size;
-	arg_size[2] = arg_2_size;
-	arg_size[3] = arg_3_size;
-	// if (war->flag_verbose)
-	// 	ft_printf("args: %d %d %d\n", arg_1, arg_2, arg_3);
-
-	arg[1] = arg_1;
-	arg[2] = arg_2;
-	arg[3] = arg_3;
 
 	params->params[1].integer = arg_1;
 	params->params[2].integer = arg_2;
 	params->params[3].integer = arg_3;
-	// if (codage)
+
 	return (params);
 }
 
@@ -424,6 +410,30 @@ void	cooldown(t_war *war)
 		if (!war->flag_visual && war->cycle == war->flag_dump)
 			dump(war);
 		next_cycle(war, war->carriages);
+	}
+}
+
+void	agv(t_war *war, t_op op, int instr_len, t_carriage *car, t_instr_params *params)
+{
+	if (war->flag_verbose)
+	{
+		ft_printf("ADV %d (%#06x -> %#06x) %02x ",
+			instr_len,
+			car->position,
+			car->position + instr_len,
+			op.code,
+			params->codage);
+		if (op.codage) // why index ?? t_op *op !
+			ft_printf("%02x ", params->codage);
+		int j = 0;
+		while (++j < 4)
+		{
+			int k = params->sizes[j];
+			while(--k >= 0)
+				ft_printf("%02x ", params->params[j].bytes[k]);
+			
+		}
+		ft_printf("\n");
 	}
 }
 
@@ -463,38 +473,16 @@ int		main(int argc, char **argv)
 		while (tmp)
 		{
 			t_carriage *car = tmp;
-			index = get_command(car, war->map, war); // ld
+			t_op op = get_command(car, war->map, war); // ld
 			cooldown(war);
-			int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
-			int arg_type[4] = {0, 0, 0, 0}; 
-			int arg_size[4] = {0, 0, 0, 0};
-			// int arg_size[4] = { 0, 0, 0, 0}
-			t_instr_params *params = get_args(car, war->map, index, war, arg, arg_type, arg_size);
-			op_tab[index].func(index, car, war, arg);
+			// int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
 
-			int instr_len = 1 + op_tab[index].codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
-			if (war->flag_verbose)
-			{
-				ft_printf("ADV %d (%#06x -> %#06x) %02x ",
-					instr_len,
-					car->position,
-					car->position + instr_len,
-					op_tab[index].code,
-					params->codage);
-				if (op_tab[index].codage) // why index ?? t_op *op !
-					ft_printf("%02x ", params->codage);
-				int j = 0;
-				while (++j < 4)
-				{
-					int k = params->sizes[j];
-					while(--k >= 0)
-						ft_printf("%02x ", params->params[j].bytes[k]);
-					
-				}
-				ft_printf("\n");
-			}
+			t_instr_params *params = get_args(car, war->map, op, war);
+			op.func(car, war, params);
+
+			int instr_len = 1 + op.codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
+			agv(war, op, instr_len, car, params);
 			free(params);
-			ft_printf("ARG_TYPE: %d %d %d\n", arg_type[1], arg_type[2], arg_type[3]);
 			car->position += instr_len;
 			print_memory(war);
 			tmp = tmp->next;

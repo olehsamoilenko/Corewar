@@ -70,6 +70,14 @@ typedef struct	s_war
 	int					processes;
 }				t_war;
 
+typedef struct	s_instr_params
+{
+	int					codage;
+	// int					amount;
+	int					sizes[4]; // 0 is unused
+	union converter		params[4]; // 0 is unused
+}				t_instr_params;
+
 typedef struct	s_op
 {
 	char				*name;
@@ -79,16 +87,9 @@ typedef struct	s_op
 	int					cooldown;
 	t_bool				codage;
 	t_bool				label; // bool
-	void				(*func)(int, t_carriage *, t_war *, int *);
+	void				(*func)(t_carriage *, t_war *, t_instr_params *);
 }				t_op;
 
-typedef struct	s_instr_params
-{
-	int					codage;
-	// int					amount;
-	int					sizes[4]; // 0 is unused
-	union converter		params[4]; // 0 is unused
-}				t_instr_params;
 
 extern t_op op_tab[];
 

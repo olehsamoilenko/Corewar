@@ -14,7 +14,7 @@
 
 // SWAP WITH OP.C FROM SUBJ
 
-void	op_live(int index, t_carriage *car, t_war *war, int *arg)
+void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
@@ -22,8 +22,8 @@ void	op_live(int index, t_carriage *car, t_war *war, int *arg)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | live %d\n", car->number, arg[1]);
-		t_champion *player = find_champ(arg[1], war);
+		ft_printf("P    %d | live %d\n", car->number, p->params[1].integer);
+		t_champion *player = find_champ(p->params[1].integer, war);
 		ft_printf("Player %d (%s) is said to be alive\n",
 			player->number, player->header->prog_name);
 		
@@ -32,63 +32,63 @@ void	op_live(int index, t_carriage *car, t_war *war, int *arg)
 	}
 }
 
-void	op_ld(int index, t_carriage *car, t_war *war, int *arg)
+void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	car->reg[arg[2]] = arg[1]; // check < 16
+	car->reg[p->params[2].integer] = p->params[1].integer; // check < 16
 	
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ld %d r%d\n", car->number, arg[1], arg[2]);
+		ft_printf("P    %d | ld %d r%d\n", car->number, p->params[1].integer, p->params[2].integer);
 	}
 }
 
 
-void	op_ldi(int index, t_carriage *car, t_war *war, int *arg)
+void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	car->reg[arg[3]] = arg[1] + arg[2]; // only T_DIR
+	car->reg[p->params[3].integer] = p->params[1].integer + p->params[2].integer; // only T_DIR
 
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ldi %d %d r%d\n", car->number, arg[1], arg[2], arg[3]);
+		ft_printf("P    %d | ldi %d %d r%d\n", car->number, p->params[1].integer, p->params[2].integer, p->params[3].integer);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
-			arg[1],
-			arg[2],
-			arg[1] + arg[2],
-			(car->position + arg[1] + arg[2]) % IDX_MOD);
+			p->params[1].integer,
+			p->params[2].integer,
+			p->params[1].integer + p->params[2].integer,
+			(car->position + p->params[1].integer + p->params[2].integer) % IDX_MOD);
 	}
 }
 
-void	op_st(int index, t_carriage *car, t_war *war, int *arg)
+void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	
 }
 
-void	op_sti(int index, t_carriage *car, t_war *war, int *arg)
+void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	union converter number;
-	number.integer = car->reg[arg[1]];
+	number.integer = car->reg[p->params[1].integer];
 	int i = -1;
 	while (++i < 4)
 	{
-		war->map[car->position + (arg[2] + arg[3]) % IDX_MOD + i]->value = number.bytes[i];
-		war->map[car->position + (arg[2] + arg[3]) % IDX_MOD + i]->cycles_bold = war->cycle;
+		war->map[car->position + (p->params[2].integer + p->params[3].integer) % IDX_MOD + i]->value = number.bytes[i];
+		war->map[car->position + (p->params[2].integer + p->params[3].integer) % IDX_MOD + i]->cycles_bold = war->cycle;
 	}
 	
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | sti r%d %d %d\n", car->number, arg[1], arg[2], arg[3]);
+		ft_printf("P%5d | sti r%d %d %d\n", car->number, p->params[1].integer, p->params[2].integer, p->params[3].integer);
 		ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
-			arg[2], arg[3], arg[2] + arg[3], car->position + (arg[2] + arg[3]) % IDX_MOD);
+			p->params[2].integer, p->params[3].integer, p->params[2].integer + p->params[3].integer, car->position + (p->params[2].integer + p->params[3].integer) % IDX_MOD);
 	}
 }
 
 
-void	op_fork(int index, t_carriage *car, t_war *war, int *arg)
+void	op_fork(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	t_carriage *new = create_carriage(0, 0, war);
-	new->position = (car->position + arg[1]) % IDX_MOD;
+	new->position = (car->position + p->params[1].integer) % IDX_MOD;
 	push_carriage(new, &war->carriages);
 	int i = -1;
 	while (++i <= REG_NUMBER)
@@ -101,7 +101,7 @@ void	op_fork(int index, t_carriage *car, t_war *war, int *arg)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | fork %d (%d)\n", car->number, arg[1], (car->position + arg[1]) % IDX_MOD);
+		ft_printf("P%5d | fork %d (%d)\n", car->number, p->params[1].integer, (car->position + p->params[1].integer) % IDX_MOD);
 	}
 	
 }
