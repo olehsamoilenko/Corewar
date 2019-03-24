@@ -50,8 +50,8 @@ int	read_magic_header(int fd)
 	int i;
 	// int res;
 
-	union magic_header header;
-	header.hex = COREWAR_EXEC_MAGIC;
+	union converter header;
+	header.integer = COREWAR_EXEC_MAGIC;
 
 	i = -1;
 	while (++i < 4)
@@ -96,7 +96,7 @@ int		read_null(int fd)
 
 int		read_exec_code_size(int fd)
 {
-	union magic_header size;
+	union converter size;
 	int i = -1;
 	// int res;
 	while (++i < 4)
@@ -104,7 +104,7 @@ int		read_exec_code_size(int fd)
 		// res = 
 		size.bytes[3 - i] = read_bytes(fd, 1);
 	}
-	return (size.hex);
+	return (size.integer);
 }
 
 void	read_comment(int fd, char *comment)

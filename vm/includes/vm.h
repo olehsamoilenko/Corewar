@@ -20,9 +20,9 @@
 # include <fcntl.h>
 
 // reversed bytes ??? [ 17 00 00 00 ] is 23
-union magic_header
+union converter // u_converter ?
 {
-	int					hex;
+	int					integer; // unsigned ?
 	unsigned char		bytes[4];
 };
 
@@ -81,6 +81,14 @@ typedef struct	s_op
 	t_bool				label; // bool
 	void				(*func)(int, t_carriage *, t_war *, int *);
 }				t_op;
+
+typedef struct	s_instr_params
+{
+	int					codage;
+	// int					amount;
+	int					sizes[4]; // 0 is unused
+	union converter		params[4]; // 0 is unused
+}				t_instr_params;
 
 extern t_op op_tab[];
 

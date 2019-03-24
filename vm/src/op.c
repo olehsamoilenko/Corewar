@@ -66,8 +66,8 @@ void	op_st(int index, t_carriage *car, t_war *war, int *arg)
 
 void	op_sti(int index, t_carriage *car, t_war *war, int *arg)
 {
-	union magic_header number;
-	number.hex = car->reg[arg[1]];
+	union converter number;
+	number.integer = car->reg[arg[1]];
 	int i = -1;
 	while (++i < 4)
 	{
