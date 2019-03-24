@@ -48,8 +48,26 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	car->reg[p->params[3].integer] = p->params[1].integer + p->params[2].integer; // only T_DIR
+	int index = car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD; // only T_DIR
+	union converter value;
+	value.bytes[0] = war->map[index]->value;
+	value.bytes[1] = war->map[index + 1]->value;
+	value.bytes[2] = war->map[index + 2]->value;
+	value.bytes[3] = war->map[index + 3]->value;
 
+
+	// ft_printf("%x %x %x %x = %d\n",
+	// 	war->map[index]->value,
+	// 	war->map[index + 1]->value,
+	// 	war->map[index + 2]->value,
+	// 	war->map[index + 3]->value,
+	// 	value.integer);
+	car->reg[p->params[3].integer] = value.integer;
+	// ft_printf("LDI Params %ld %#x + %ld %#x = %ld %#x\n",
+	// 	p->params[1].integer, p->params[1].integer,
+	// 	p->params[2].integer, p->params[2].integer,
+	// 	car->reg[p->params[3].integer], car->reg[p->params[3].integer]);
+	// ft_printf("LDI Cycle %d, Register %d, Value %ld\n", war->cycle, p->params[3].integer, car->reg[p->params[3].integer]);
 	if (war->flag_verbose)
 	{
 		ft_printf("P    %d | ldi %d %d r%d\n", car->number, p->params[1].integer, p->params[2].integer, p->params[3].integer);
@@ -57,7 +75,7 @@ void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 			p->params[1].integer,
 			p->params[2].integer,
 			p->params[1].integer + p->params[2].integer,
-			(car->position + p->params[1].integer + p->params[2].integer) % IDX_MOD);
+			car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD);
 	}
 }
 
@@ -93,9 +111,9 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 
 	// show_args(p);
 
-	int value_1 = p->params[1].integer;
-	int value_2 = 0;
-	int value_3 = 0;
+	unsigned int value_1 = p->params[1].integer;
+	unsigned int value_2 = 0;
+	unsigned int value_3 = 0;
 
 	if (p->types[2] == T_DIR)
 		value_2 = p->params[2].integer;
@@ -107,6 +125,8 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 	else if (p->types[3] == T_REG)
 		value_2 = car->reg[p->params[3].integer];
 
+	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, value_1);
+
 	union converter number;
 	number.integer = car->reg[value_1];
 	i = -1;
@@ -114,6 +134,7 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 	{
 		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->value = number.bytes[i];
 		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->cycles_bold = war->cycle;
+		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->color = car->creator->number;
 	}
 	
 	// verbose
@@ -128,7 +149,7 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_fork(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	t_carriage *new = create_carriage(0, 0, war);
+	t_carriage *new = create_carriage(0, 0, war, car->creator);
 	new->position = (car->position + p->params[1].integer) % IDX_MOD;
 	push_carriage(new, &war->carriages);
 	int i = -1;

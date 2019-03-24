@@ -94,10 +94,26 @@ void	print_memory(t_war *war)
 	wrefresh(war->win_info);
 }
 
-// void	print_info(t_war *war)
-// {
+void	dump(t_war *war)
+{
+	int i = -1;
 
-// }
+	// introducing
+
+	while (++i < MEM_SIZE)
+	{
+		if (i % 64 == 0)
+		{
+			if (i == 0)
+				ft_printf("0x0000 : ");
+			else
+				ft_printf("\n%#06x : ", i);
+		}
+			
+		ft_printf("%02x ", war->map[i]->value);
+	}
+	ft_printf("\n");
+}
 
 void	next_cycle(t_war *war)
 {
@@ -119,6 +135,7 @@ void	next_cycle(t_war *war)
 		// print_info(war);
 		print_memory(war);
 	}
+	
 	
 	
 	if (war->flag_verbose)
@@ -195,7 +212,7 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 	int i = -1;
 	while (champs[++i] != NULL)
 	{
-		push_carriage(create_carriage(mem_delta * i, i + 1, war), carriages);
+		push_carriage(create_carriage(mem_delta * i, i + 1, war, champs[i]), carriages);
 	}
 }
 
@@ -244,17 +261,18 @@ int		define_size(int arg_code, int label)
 		return (0);
 }
 
-int		get_bytes(int start, int amount, t_mem_cell *map[])
+unsigned int		get_bytes(int start, int amount, t_mem_cell *map[])
 {
-	int res = 0;
+	unsigned int res = 0;
 	int i = -1;
 	while (++i < amount)
 	{
 		if (i != 0)
 			res <<= 8;
 		res |= map[start + i]->value /*& 0xFF*/;
-		// printf("%x\n", res);
+		// ft_printf("%x\n", res);
 	}
+	// ft_printf("\n");
 	if (amount == 2)
 		return ((short)res);
 	return (res); // to unsigned ?
@@ -363,7 +381,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	
 
 
-	int arg_1 = 0, arg_2 = 0, arg_3 = 0;
+	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
 	arg_1 = get_bytes(car->position + delta, arg_1_size, map);
 	delta += arg_1_size;
 	if (arg_2_size != 0)
@@ -384,26 +402,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	return (params);
 }
 
-void	dump(t_war *war)
-{
-	int i = -1;
 
-	// introducing
-
-	while (++i < MEM_SIZE)
-	{
-		if (i % 64 == 0)
-		{
-			if (i == 0)
-				ft_printf("0x0000 : ");
-			else
-				ft_printf("\n%#06x : ", i);
-		}
-			
-		ft_printf("%02x ", war->map[i]->value);
-	}
-	ft_printf("\n");
-}
 
 // void	cooldown(t_war *war)
 // {
@@ -440,6 +439,18 @@ void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *p
 }
 
 
+void	introduce(t_champion **champs)
+{
+	ft_printf("Introducing contestants...\n");
+	int i = -1;
+	while (champs[++i])
+	{
+		ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
+			champs[i]->number, champs[i]->header->prog_size,
+			champs[i]->header->prog_name, champs[i]->header->comment);
+	}
+}
+
 
 int		main(int argc, char **argv)
 {
@@ -453,7 +464,9 @@ int		main(int argc, char **argv)
 	int champ_count = champions_count(war->champs);
 	int mem_delta = MEM_SIZE / champ_count;
 	parse_champions(war->champs, war->map, mem_delta);
-	print_champions(war->champs);
+	// print_champions(war->champs);
+	if (!war->flag_visual)
+		introduce(war->champs);
 
 	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
 
@@ -465,7 +478,10 @@ int		main(int argc, char **argv)
 	if (war->cycle >= war->flag_dump)
 		print_memory(war);
 
-	for (int i = 0; i < 1970; i++)
+	if (!war->flag_visual && war->cycle == war->flag_dump)
+		dump(war); // dump 0
+
+	for (int i = 0; i < 2500; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
@@ -500,7 +516,8 @@ int		main(int argc, char **argv)
 			}
 			tmp = tmp->next;
 		}
-		// show_carriages(war);
+		if (!war->flag_visual && war->cycle == war->flag_dump)
+			dump(war);
 		
 	}
 	

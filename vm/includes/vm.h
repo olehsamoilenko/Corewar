@@ -22,7 +22,7 @@
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union converter // u_converter ?
 {
-	int					integer; // unsigned ?
+	unsigned int		integer; // unsigned ?
 	unsigned char		bytes[4];
 };
 
@@ -45,9 +45,10 @@ typedef struct	s_map_cell
 
 typedef struct	s_carriage
 {
-	int					number; 
+	int					number;
+	t_champion			*creator;
 	int					position; // PC, program counter
-	int					reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
+	unsigned int		reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
 	// int					op_code; // mb op ?
 	struct s_op			*op;
 	int					cooldown;
@@ -115,7 +116,7 @@ void	init_curses(t_war *war);
 
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
-t_carriage	*create_carriage(int position, int number, t_war *war);
+t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *creator);
 // t_carriage	*copy_carriage(t_carriage *car);
 void		show_carriages(t_war *war);
 

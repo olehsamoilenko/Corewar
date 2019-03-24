@@ -65,7 +65,7 @@ t_war	*init()
 	while (++i < MEM_SIZE)
 	{
 		war->map[i] = ft_memalloc(sizeof(t_mem_cell));
-		war->map[i]->value = 0xFF; // fake 
+		// war->map[i]->value = 0xFF; // fake 
 	}
 	war->carriages = NULL;
 	war->flag_dump = -1;
