@@ -17,11 +17,11 @@
 # include "get_next_line.h"
 # include "printf.h"
 
-typedef	enum
+typedef enum		e_bool
 {
 	false,
 	true
-}		t_bool;
+}					t_bool;
 
 typedef struct		s_list
 {

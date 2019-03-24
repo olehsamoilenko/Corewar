@@ -1,5 +1,5 @@
-/* ************************************************************************** */
 /*                                                                            */
+/* ************************************************************************** */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
@@ -99,7 +99,7 @@ void	print_memory(t_war *war)
 
 // }
 
-void	next_cycle(t_war *war, t_carriage *car)
+void	next_cycle(t_war *war)
 {
 	
 	int key = 0;
@@ -112,7 +112,7 @@ void	next_cycle(t_war *war, t_carriage *car)
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
 		war->cycle++;
-		car->cooldown--;
+		// car->cooldown--;
 	}
 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
 	{
@@ -124,7 +124,7 @@ void	next_cycle(t_war *war, t_carriage *car)
 	if (war->flag_verbose)
 	{
 		ft_printf("It is now cycle %d\n", war->cycle);
-		curriage_info(car);
+		// curriage_info(car);
 	}
 }
 
@@ -225,17 +225,7 @@ void	reg_info(int *reg, t_war *war)
 	}
 }
 
-char	*define_arg(int arg_code)
-{
-	if (arg_code == REG_CODE)
-		return("T_REG");
-	else if (arg_code == DIR_CODE)
-		return("T_DIR");
-	else if (arg_code == IND_CODE)
-		return ("T_IND");
-	else
-		return ("---");
-}
+
 
 int		define_size(int arg_code, int label)
 {
@@ -271,17 +261,25 @@ int		get_bytes(int start, int amount, t_mem_cell *map[])
 }
 
 
-t_op		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns index
+t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
 {
-	car->op_code = map[car->position]->value;
-	int index = op_index(car->op_code);
+	// car->op_code = ;
+	int index = op_index(map[car_pos]->value); // return op ?
+	if (index == -1)
+	{
+		ft_printf("UNKNOWN COMMAND: %02x\n", map[car_pos]->value);
+		ft_printf("Bratik, realizuy pls\n");
+		exit(0);
+	}
+	t_op *op = &op_tab[index];
+	// car->op = &op_tab[index];
 	if (war->flag_verbose)
 	{
-		ft_printf("FOUND code %d, index %d, name %s, cooldown %i\n", car->op_code, index, op_tab[index].name, op_tab[index].cooldown);
+		// ft_printf("Process %d FOUND code %d, index %d, name %s, cooldown %i\n", process, op->code, index, op->name, op_tab[index].cooldown);
 	}
-	car->cooldown = op_tab[index].cooldown;
+	// car->cooldown = op_tab[index].cooldown;
 	status("reading operation", war);
-	return (op_tab[index]);
+	return (op);
 }
 
 
@@ -290,7 +288,7 @@ t_op		get_command(t_carriage *car, t_mem_cell *map[], t_war *war) // returns ind
 
 
 
-t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op op, t_war *war)
+t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
 	int v[7];
 
@@ -303,7 +301,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op op, t_war *war
 	int second;
 	int third;
 	int codage;
-	if (op.codage == true)
+	if (op->codage == true)
 	{
 		// if (war->flag_verbose)
 		// 	ft_printf("codage on\n");
@@ -321,15 +319,15 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op op, t_war *war
 		// if (war->flag_verbose)
 		// {
 		// 	ft_printf("args types %s %s %s\n", define_arg(first), define_arg(second), define_arg(third));
-		// 	if ((first | op.args_type[0]) == op.args_type[0])
+		// 	if ((first | op->args_type[0]) == op->args_type[0])
 		// 		ft_printf("first ok\n");
 		// 	else
 		// 		ft_printf("first KO!\n");
-		// 	if ((second | op.args_type[1]) == op.args_type[1])
+		// 	if ((second | op->args_type[1]) == op->args_type[1])
 		// 		ft_printf("second ok\n");
 		// 	else
 		// 		ft_printf("second KO!\n");
-		// 	if ((third | op.args_type[2]) == op.args_type[2])
+		// 	if ((third | op->args_type[2]) == op->args_type[2])
 		// 		ft_printf("third ok\n");
 		// 	else
 		// 		ft_printf("third KO!\n");
@@ -342,22 +340,26 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op op, t_war *war
 	{
 		// if (war->flag_verbose)
 		// 	ft_printf("codage off\n");
-		first = op.args_type[0];
-		second = op.args_type[1];
-		third = op.args_type[2];
+		first = op->args_type[0];
+		second = op->args_type[1];
+		third = op->args_type[2];
 	}
 
-	int arg_1_size = define_size(first, op.label);
-	int arg_2_size = define_size(second, op.label);
-	int arg_3_size = define_size(third, op.label);
+	params->types[1] = first;
+	params->types[2] = second;
+	params->types[3] = third;
+
+	int arg_1_size = define_size(first, op->label);
+	int arg_2_size = define_size(second, op->label);
+	int arg_3_size = define_size(third, op->label);
 
 	params->sizes[1] = arg_1_size;
 	params->sizes[2] = arg_2_size;
 	params->sizes[3] = arg_3_size;
 
 	
-	if (war->flag_verbose)
-		ft_printf("args_sizes: %d %d %d\n", arg_1_size, arg_2_size, arg_3_size);
+	// if (war->flag_verbose)
+	// 	ft_printf("args_sizes: %d %d %d\n", arg_1_size, arg_2_size, arg_3_size);
 	
 
 
@@ -403,17 +405,17 @@ void	dump(t_war *war)
 	ft_printf("\n");
 }
 
-void	cooldown(t_war *war)
-{
-	while (war->carriages->cooldown != 0)
-	{
-		if (!war->flag_visual && war->cycle == war->flag_dump)
-			dump(war);
-		next_cycle(war, war->carriages);
-	}
-}
+// void	cooldown(t_war *war)
+// {
+// 	while (war->carriages->cooldown != 0)
+// 	{
+// 		if (!war->flag_visual && war->cycle == war->flag_dump)
+// 			dump(war);
+// 		next_cycle(war, war->carriages);
+// 	}
+// }
 
-void	agv(t_war *war, t_op op, int instr_len, t_carriage *car, t_instr_params *params)
+void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params)
 {
 	if (war->flag_verbose)
 	{
@@ -421,9 +423,9 @@ void	agv(t_war *war, t_op op, int instr_len, t_carriage *car, t_instr_params *pa
 			instr_len,
 			car->position,
 			car->position + instr_len,
-			op.code,
+			op->code,
 			params->codage);
-		if (op.codage) // why index ?? t_op *op !
+		if (op->codage) // why index ?? t_op *op !
 			ft_printf("%02x ", params->codage);
 		int j = 0;
 		while (++j < 4)
@@ -437,9 +439,11 @@ void	agv(t_war *war, t_op op, int instr_len, t_carriage *car, t_instr_params *pa
 	}
 }
 
+
+
 int		main(int argc, char **argv)
 {
-	
+
 
 	t_war *war = init();
 
@@ -453,51 +457,55 @@ int		main(int argc, char **argv)
 
 	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
 
-	// MORTEL
+	
 
 	if (war->flag_visual)
 		init_curses(war);
 
-	// print_memory(war);
-	// next_cycle(war, car);
-	// print_info(war);
-
 	if (war->cycle >= war->flag_dump)
 		print_memory(war);
-	// cooldown(war);
 
-
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1970; i++)
 	{
 		t_carriage *tmp = war->carriages;
+		next_cycle(war);
+		
 		while (tmp)
 		{
+			// MORTEL
+
 			t_carriage *car = tmp;
-			t_op op = get_command(car, war->map, war); // ld
-			cooldown(war);
-			// int arg[4] = {0, 0, 0, 0}; // arg[0] is unused
-
-			t_instr_params *params = get_args(car, war->map, op, war);
-			op.func(car, war, params);
-
-			int instr_len = 1 + op.codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
-			agv(war, op, instr_len, car, params);
-			free(params);
-			car->position += instr_len;
-			print_memory(war);
+			if (car->cooldown == 0) // new process or forked
+			{
+				car->op = get_command(car->number, car->position, war->map, war);
+				car->cooldown = car->op->cooldown;
+			}
+			car->cooldown--;
+			if (car->cooldown == 0)
+			{
+				t_instr_params *params = get_args(car, war->map, car->op, war);
+				// show_args(params);
+				car->op->func(car, war, params);
+				int instr_len = 1 + car->op->codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
+				if (car->op->code != 0x09) // zjmp
+				{
+					adv(war, car->op, instr_len, car, params);
+					car->position += instr_len;
+				}
+				free(params);
+				
+				print_memory(war);
+				car->op = get_command(car->number, car->position, war->map, war);
+				car->cooldown = car->op->cooldown;
+			}
 			tmp = tmp->next;
 		}
+		// show_carriages(war);
+		
 	}
 	
-	show_carriages(war);
-
-
 	if (war->flag_visual)
 		over_curses(war);
-
-
-
 	system("leaks vm");
-
 	return (0);
 }

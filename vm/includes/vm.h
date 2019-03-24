@@ -41,18 +41,22 @@ typedef struct	s_map_cell
 	int					cycles_bold;
 }				t_mem_cell;
 
+// typedef struct s_op t_op;
+
 typedef struct	s_carriage
 {
-	int					number;
-	int					position;
+	int					number; 
+	int					position; // PC, program counter
 	int					reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
-	int					op_code;
+	// int					op_code; // mb op ?
+	struct s_op			*op;
 	int					cooldown;
-	// t_champion			*player;
-	// int					process_number;
+	t_bool				carry:1;
 	int					last_live;
 	struct s_carriage	*next;
 }				t_carriage;
+
+
 
 typedef struct	s_war
 {
@@ -63,17 +67,19 @@ typedef struct	s_war
 	t_champion			*champs[4];
 	t_carriage			*carriages;
 	int					cycle;
-	// t_bool				carry;
-	t_bool				flag_verbose;
-	t_bool				flag_visual;
+	t_bool				flag_verbose:1;
+	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
 	int					processes;
 }				t_war;
+
+
 
 typedef struct	s_instr_params
 {
 	int					codage;
 	// int					amount;
+	int					types[4]; // 0 is unused
 	int					sizes[4]; // 0 is unused
 	union converter		params[4]; // 0 is unused
 }				t_instr_params;
@@ -85,8 +91,8 @@ typedef struct	s_op
 	int					args_type[3];
 	int					code;
 	int					cooldown;
-	t_bool				codage;
-	t_bool				label; // bool
+	t_bool				codage:1;
+	t_bool				label:1;
 	void				(*func)(t_carriage *, t_war *, t_instr_params *);
 }				t_op;
 
