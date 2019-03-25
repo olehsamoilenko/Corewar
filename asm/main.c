@@ -78,20 +78,44 @@ void	write_int_to_byte(t_asm *asm_parsing, int nbr, int size)
 {
 	int i;
 	int count_bits;
+	char *temp;
+	int position;
+
 
 	count_bits = 0;
 	i = 0;
+	position = asm_parsing->position;
 
 	asm_parsing->byte_code = realloc(asm_parsing->byte_code, asm_parsing->position + size);
 	while (size)
 	{
-		asm_parsing->byte_code[asm_parsing->position + size - 1] = (nbr >> count_bits) & 0xFF;
+		asm_parsing->byte_code[position + size - 1] = (nbr >> count_bits) & 0xFF;
 		asm_parsing->position++;
 		count_bits += 8;
 		size--;
 	}
 }
 
+
+int		additional_code(int number)
+{
+	printf("NUMBER = %d\n", number);
+	int i;
+	int result;
+	char temp;
+
+	i = 0;
+	result = 0;
+	while (i < 32)
+	{
+		temp = !((number >> i) & 1);
+		result = result | (temp << i);
+		i++;
+	}
+	result += 1;
+	printf("RES = %d\n", result);
+	return (result);
+}
 
 void	ignore_comment(t_asm *asm_parsing, char *line)
 {
@@ -189,8 +213,7 @@ t_word		*determine_commands(t_asm *asm_parsing)
 			if (ft_strequ(current->name, ".name"))
 			{
 				current = current->next;
-				if ((asm_parsing->name_champ == NULL) && (current->word_type == DOUBLES) && 
-													ft_strlen(current->name) < PROG_NAME_LENGTH)
+				if ((asm_parsing->name_champ == NULL) && (current->word_type == DOUBLES))
 				{
 					asm_parsing->name_champ = current->name;
 					current = current->next;
@@ -202,10 +225,8 @@ t_word		*determine_commands(t_asm *asm_parsing)
 			}
 			else if (ft_strequ(current->name, ".comment"))
 			{
-
 				current = current->next;
-				if ((asm_parsing->comment == NULL) && (current->word_type == DOUBLES) &&
-													ft_strlen(current->name) < COMMENT_LENGTH)
+				if ((asm_parsing->comment == NULL) && (current->word_type == DOUBLES))
 				{
 					asm_parsing->comment = current->name;
 					current = current->next;
@@ -220,6 +241,10 @@ t_word		*determine_commands(t_asm *asm_parsing)
 			error_word2(current, "Name or comment is missed");
 		current = current->next;
 	}
+	if (ft_strlen(asm_parsing->name_champ) - 2 > PROG_NAME_LENGTH)
+		ft_arg_error("Length of the name is bigger than 128");
+	if (ft_strlen(asm_parsing->comment) - 2 > COMMENT_LENGTH)
+		ft_arg_error("Length of the comment is bigger than 2048");
 	return (current);
 }
 
@@ -267,7 +292,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 	if (instruction == -1)
 		error_word2(current, "Incorrect instruction");
 	current = current->next;
-	printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);
+	// printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);
 
 	instruction_args = init_instruction_args();
 
@@ -276,7 +301,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
 			char two = 2;
-			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 2 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
@@ -290,7 +315,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
 			char three = 3;
-			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 3 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
@@ -304,7 +329,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
 		{
 			char one = 1;
-			printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
+			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 1 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
@@ -317,7 +342,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 
 		}
 		current = current->next;
-		printf("type = %d\n", current->word_type);
+		// printf("type = %d\n", current->word_type);
 		if (count_args == g_op_tab[instruction].count_args)
 		{
 			// current = current->next;
@@ -329,11 +354,13 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		else
 			error_word2(current, "Separator is missed");
 	}
+
 	// write opcode of instruction
 	write_int_to_byte(asm_parsing, instruction + 1, 1);
 
 	// write codage of instruction
-	write_int_to_byte(asm_parsing, var_for_codage, 1);
+	if (g_op_tab[instruction].codage_octal == 1)
+		write_int_to_byte(asm_parsing, var_for_codage, 1);
 
 	// writing args of instruction
 	int i = 0;
@@ -354,6 +381,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 					write_int_to_byte(asm_parsing, number, 2);
 				else
 				{
+					// printf("NUMBER = %d\n", number);
 					write_int_to_byte(asm_parsing, number, 4);					
 				}
 			}
@@ -366,9 +394,10 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		i++;
 	}
 
-	printf("var_for_codage =  %d\n", var_for_codage);		
+	// printf("var_for_codage =  %d\n", var_for_codage);
 	if (count_args != g_op_tab[instruction].count_args)
 		error_word2(current, "Wrong number of arguments");
+	free(instruction_args);
 	return (current);
 }
 
@@ -383,7 +412,7 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 			current = current->next;
 			if (current->word_type == INSTRUCTION)
 			{
-				printf("label is OK\n");
+				// printf("label is OK\n");
 				current = process_instruction(asm_parsing, current);
 			}
 			else
@@ -427,23 +456,30 @@ void	write_to_file(t_asm *asm_parsing)
 	{
 		write_data_to_all(all_code, position_all, COREWAR_EXEC_MAGIC, 4);
 		position_all += 4;
+
 		char *name_without = ft_strsub(asm_parsing->name_champ, 1, ft_strlen(asm_parsing->name_champ) - 2);
 		ft_memcpy(&all_code[position_all], name_without, ft_strlen(name_without));
-		// ft_strdel(&name_without);
-		position_all += PROG_NAME_LENGTH + 4;
+		position_all += (PROG_NAME_LENGTH + 4);
+
 		// write size of champion
-		write_data_to_all(all_code, position_all, asm_parsing->position, 2);
-		position_all += 2;
+		write_data_to_all(all_code, position_all, asm_parsing->position, 4);
+		position_all += 4;
 
 		char *comment_without = ft_strsub(asm_parsing->comment, 1, ft_strlen(asm_parsing->comment) - 2);
 		ft_memcpy(&all_code[position_all], comment_without, ft_strlen(comment_without));
-		position_all += COMMENT_LENGTH + 4;
+		position_all += (COMMENT_LENGTH + 4);
 
 
 		// error with code of champion
-		ft_memcpy(&all_code[position_all], asm_parsing->byte_code, 5);
-		int new_fd = open("our_test.cor", O_CREAT | O_WRONLY, 0644);
-		write(new_fd, all_code, 4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
+		ft_memcpy(&all_code[position_all], asm_parsing->byte_code, asm_parsing->position);
+
+		int new_fd = open("our_test.cor", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+		// printf("LENGTH = %d\n", (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
+		write(new_fd, all_code, (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
+
+		ft_strdel(&name_without);
+		ft_strdel(&comment_without);
+		ft_strdel(&all_code);
 	}
 }
 
@@ -484,6 +520,7 @@ void	interpreter(const char *filename)
 	}
 
 	free_list(asm_parsing);
+	ft_strdel(&asm_parsing->byte_code);
 	free(asm_parsing);
 }
 
@@ -500,7 +537,7 @@ int main(int argc, char const *argv[])
 	if (ft_strlen(argv[1]) < 3)
 		ft_arg_error("Missed filename");
 	interpreter(argv[1]);
-
+	
 	system("leaks asm");
 	return (0);
 }
