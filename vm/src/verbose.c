@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init.c                                             :+:      :+:    :+:   */
+/*   verbose.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: osamoile <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,18 +12,47 @@
 
 #include "vm.h"
 
-t_war	*init()
+void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params)
 {
-	t_war *war = ft_memalloc(sizeof(t_war));
+	if (war->flag_verbose)
+	{
+		ft_printf("ADV %d (%#06x -> %#06x) %02x ",
+			instr_len,
+			car->position,
+			car->position + instr_len,
+			op->code,
+			params->codage);
+		if (op->codage) // why index ?? t_op *op !
+			ft_printf("%02x ", params->codage);
+		int j = 0;
+		while (++j < 4)
+		{
+			int k = params->sizes[j];
+			while(--k >= 0)
+				ft_printf("%02x ", params->params[j].bytes[k]);
+			
+		}
+		ft_printf("\n");
+	}
+}
+
+void	dump(t_war *war)
+{
 	int i = -1;
 
-	
+	// introducing
+
 	while (++i < MEM_SIZE)
 	{
-		war->map[i] = ft_memalloc(sizeof(t_mem_cell));
-		// war->map[i]->value = 0xFF; // fake 
+		if (i % 64 == 0)
+		{
+			if (i == 0)
+				ft_printf("0x0000 : ");
+			else
+				ft_printf("\n%#06x : ", i);
+		}
+			
+		ft_printf("%02x ", war->map[i]->value);
 	}
-	war->carriages = NULL;
-	war->flag_dump = -1;
-	return (war);
+	ft_printf("\n");
 }

@@ -21,7 +21,9 @@ LIST =			main \
 				params \
 				champion \
 				init \
-				carriage
+				carriage \
+				verbose \
+				curses
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

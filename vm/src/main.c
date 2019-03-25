@@ -14,9 +14,6 @@
 
 
 
-#define KEY_ESC 27
-#define KEY_S 115
-
 void	error(char *message) // .h
 {
 	ft_printf("Error: %s\n", message);
@@ -24,95 +21,12 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-void	status(char *line, t_war *war)
-{
-	if (war->flag_visual)
-	{
-		mvwaddstr(war->win_info, 4, 2, "                       ");
-		mvwaddstr(war->win_info, 4, 2, line);
-		wrefresh(war->win_info);
-	}
-}
+
 
 void	curriage_info(t_carriage *car)
 {
 	// ft_printf("INFO pos %d, op %s, cooldown %d\n",
 	// 	car->position, op_tab[op_index(car->op_code)].name, car->cooldown);
-}
-
-void	over_over(t_war *war)
-{
-	delwin(war->win_mem);
-	delwin(war->win_info);
-	endwin();
-	system("leaks vm");
-	exit(0);
-}
-
-void	print_memory(t_war *war)
-{
-	int i = -1;
-	char s[3];
-
-	while (++i < MEM_SIZE)
-	{
-		// color on
-		if (war->map[i]->color == 0)
-			wattroff(war->win_mem, A_COLOR);
-		else
-			wattron(war->win_mem, COLOR_PAIR(war->map[i]->color));
-
-		// bold
-		if (war->map[i]->cycles_bold && war->cycle - war->map[i]->cycles_bold < 50 - 1) 
-			wattron(war->win_mem, A_BOLD);
-
-		// live
-		if (war->map[i]->cycles_live && war->cycle - war->map[i]->cycles_live < 50 - 1) // 50 ?
-		{
-			wattron(war->win_mem, A_BOLD);
-			wattron(war->win_mem, COLOR_PAIR(8 + war->map[i]->color));
-		}
-
-
-		sprintf(s, "%02x", war->map[i]->value);
-		mvwaddstr(war->win_mem, i / 64 + 1, (i % 64) * 3 + 2, s);
-		wattroff(war->win_mem, A_BOLD);
-	}
-	t_carriage *tmp = war->carriages; // need?
-	while (tmp)
-	{
-		wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
-		sprintf(s, "%02x", war->map[tmp->position]->value);
-		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
-		tmp = tmp->next;
-	}
-	wrefresh(war->win_mem);
-
-	char *itoa = ft_itoa(war->cycle);
-	mvwaddstr(war->win_info, 2, 10, itoa);
-	ft_strdel(&itoa);
-	wrefresh(war->win_info);
-}
-
-void	dump(t_war *war)
-{
-	int i = -1;
-
-	// introducing
-
-	while (++i < MEM_SIZE)
-	{
-		if (i % 64 == 0)
-		{
-			if (i == 0)
-				ft_printf("0x0000 : ");
-			else
-				ft_printf("\n%#06x : ", i);
-		}
-			
-		ft_printf("%02x ", war->map[i]->value);
-	}
-	ft_printf("\n");
 }
 
 void	next_cycle(t_war *war)
@@ -179,21 +93,6 @@ void	print_champions(t_champion *champs[])
 }
 
 
-
-void	over_curses(t_war *war)
-{
-	int key;
-	status("overing", war);
-	while ((key = wgetch(war->win_getch)) != KEY_ESC)
-	{
-		// print_memory(war);
-		// box(war->win_mem, 0, 0);
-		// wrefresh(war->win_mem);
-	}
-	over_over(war);
-}
-
-
 int		champions_count(t_champion **champs)
 {
 	int count = 0;
@@ -202,9 +101,6 @@ int		champions_count(t_champion **champs)
 		count++;
 	return (count);
 }
-
-
-
 
 
 void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta, t_war *war)
@@ -227,9 +123,6 @@ int		op_index(int code)
 	return (-1);
 }
 
-
-
-
 void	reg_info(int *reg, t_war *war)
 {
 	if (war->flag_verbose)
@@ -241,8 +134,6 @@ void	reg_info(int *reg, t_war *war)
 
 	}
 }
-
-
 
 int		define_size(int arg_code, int label)
 {
@@ -261,9 +152,9 @@ int		define_size(int arg_code, int label)
 		return (0);
 }
 
-unsigned int		get_bytes(int start, int amount, t_mem_cell *map[])
+int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 {
-	unsigned int res = 0;
+	int res = 0;
 	int i = -1;
 	while (++i < amount)
 	{
@@ -274,14 +165,15 @@ unsigned int		get_bytes(int start, int amount, t_mem_cell *map[])
 	}
 	// ft_printf("\n");
 	if (amount == 2)
+	{
 		return ((short)res);
+	}
+
 	return (res); // to unsigned ?
 }
 
-
 t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
 {
-	// car->op_code = ;
 	int index = op_index(map[car_pos]->value); // return op ?
 	if (index == -1)
 	{
@@ -290,21 +182,12 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 		exit(0);
 	}
 	t_op *op = &op_tab[index];
-	// car->op = &op_tab[index];
 	if (war->flag_verbose)
 	{
 		// ft_printf("Process %d FOUND code %d, index %d, name %s, cooldown %i\n", process, op->code, index, op->name, op_tab[index].cooldown);
 	}
-	// car->cooldown = op_tab[index].cooldown;
-	status("reading operation", war);
 	return (op);
 }
-
-
-
-
-
-
 
 t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
@@ -321,43 +204,15 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	int codage;
 	if (op->codage == true)
 	{
-		// if (war->flag_verbose)
-		// 	ft_printf("codage on\n");
 		codage = map[car->position + delta]->value;
 		params->codage = codage;
-		// if (war->flag_verbose)
-		// 	ft_printf("args code: %d\n", codage);
-
 		first = codage >> 6;
 		second = codage >> 4 & 0b0011;
 		third = codage >> 2 & 0b000011;
-
-		
-		// check args types
-		// if (war->flag_verbose)
-		// {
-		// 	ft_printf("args types %s %s %s\n", define_arg(first), define_arg(second), define_arg(third));
-		// 	if ((first | op->args_type[0]) == op->args_type[0])
-		// 		ft_printf("first ok\n");
-		// 	else
-		// 		ft_printf("first KO!\n");
-		// 	if ((second | op->args_type[1]) == op->args_type[1])
-		// 		ft_printf("second ok\n");
-		// 	else
-		// 		ft_printf("second KO!\n");
-		// 	if ((third | op->args_type[2]) == op->args_type[2])
-		// 		ft_printf("third ok\n");
-		// 	else
-		// 		ft_printf("third KO!\n");
-		// }
-		// check args types
-
 		delta++;
 	}
 	else
 	{
-		// if (war->flag_verbose)
-		// 	ft_printf("codage off\n");
 		first = op->args_type[0];
 		second = op->args_type[1];
 		third = op->args_type[2];
@@ -382,16 +237,16 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 
 
 	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
-	arg_1 = get_bytes(car->position + delta, arg_1_size, map);
+	arg_1 = get_bytes(car->position + delta, arg_1_size, params->types[1], map);
 	delta += arg_1_size;
 	if (arg_2_size != 0)
 	{
-		arg_2 = get_bytes(car->position + delta, arg_2_size, map);
+		arg_2 = get_bytes(car->position + delta, arg_2_size, params->types[2], map);
 		delta += arg_2_size;
 	}
 	if (arg_3_size != 0)
 	{
-		arg_3 = get_bytes(car->position + delta, arg_3_size, map);
+		arg_3 = get_bytes(car->position + delta, arg_3_size, params->types[3], map);
 		delta += arg_3_size;
 	}
 
@@ -414,29 +269,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 // 	}
 // }
 
-void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params)
-{
-	if (war->flag_verbose)
-	{
-		ft_printf("ADV %d (%#06x -> %#06x) %02x ",
-			instr_len,
-			car->position,
-			car->position + instr_len,
-			op->code,
-			params->codage);
-		if (op->codage) // why index ?? t_op *op !
-			ft_printf("%02x ", params->codage);
-		int j = 0;
-		while (++j < 4)
-		{
-			int k = params->sizes[j];
-			while(--k >= 0)
-				ft_printf("%02x ", params->params[j].bytes[k]);
-			
-		}
-		ft_printf("\n");
-	}
-}
+
 
 
 void	introduce(t_champion **champs)
@@ -451,10 +284,33 @@ void	introduce(t_champion **champs)
 	}
 }
 
+char	*define_arg(int arg_code)
+{
+	if (arg_code == REG_CODE)
+		return("T_REG");
+	else if (arg_code == DIR_CODE)
+		return("T_DIR");
+	else if (arg_code == IND_CODE)
+		return ("T_IND");
+	else
+		return ("---");
+}
+
+
+void show_args(t_instr_params *params)
+{
+
+	ft_printf("ARGS: %ld (%s)\t%ld (%s)\t%ld (%s)\n",
+		params->params[1], define_arg(params->sizes[1]),
+		params->params[2], define_arg(params->sizes[2]),
+		params->params[3], define_arg(params->sizes[3]));
+}
+
 
 int		main(int argc, char **argv)
 {
-
+	printf("%#05x\n", 0);
+	ft_printf("%#05x\n", 0);
 
 	t_war *war = init();
 
@@ -481,7 +337,7 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 2500; i++)
+	for (int i = 0; i < 2000; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
@@ -501,6 +357,7 @@ int		main(int argc, char **argv)
 			{
 				t_instr_params *params = get_args(car, war->map, car->op, war);
 				// show_args(params);
+
 				car->op->func(car, war, params);
 				int instr_len = 1 + car->op->codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
 				if (car->op->code != 0x09) // zjmp

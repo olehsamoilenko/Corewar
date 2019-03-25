@@ -19,11 +19,14 @@
 # include <curses.h>
 # include <fcntl.h>
 
+#define KEY_ESC 27
+#define KEY_S 115
+
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union converter // u_converter ?
 {
-	unsigned int		integer; // unsigned ?
-	unsigned char		bytes[4];
+	int				integer; // unsigned ?
+	unsigned char	bytes[4];
 };
 
 typedef struct	s_champion
@@ -112,12 +115,20 @@ t_champion	*find_champ(int number, t_war *war);
 
 // init
 t_war	*init();
-void	init_curses(t_war *war);
 
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
 t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *creator);
-// t_carriage	*copy_carriage(t_carriage *car);
 void		show_carriages(t_war *war);
+
+// verbose
+void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params);
+void	dump(t_war *war);
+
+// curses
+void	print_memory(t_war *war);
+void	init_curses(t_war *war);
+void	over_over(t_war *war);
+void	over_curses(t_war *war);
 
 #endif

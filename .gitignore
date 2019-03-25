@@ -2,4 +2,5 @@
 *.vscode*
 *.a
 *.o
-vm
+vm/vm
+bin

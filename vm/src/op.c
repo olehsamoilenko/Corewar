@@ -84,26 +84,8 @@ void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
 	
 }
 
-char	*define_arg(int arg_code)
-{
-	if (arg_code == REG_CODE)
-		return("T_REG");
-	else if (arg_code == DIR_CODE)
-		return("T_DIR");
-	else if (arg_code == IND_CODE)
-		return ("T_IND");
-	else
-		return ("---");
-}
 
-void show_args(t_instr_params *params)
-{
 
-	ft_printf("ARGS: %d (%s)\t%d (%s)\t%d (%s)\n",
-		params->params[1], define_arg(params->sizes[1]),
-		params->params[2], define_arg(params->sizes[2]),
-		params->params[3], define_arg(params->sizes[3]));
-}
 
 void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 {
