@@ -38,7 +38,7 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 	car->position = position;
 	car->creator = creator;
 	car->number = ++war->processes;
-	car->reg[1] = -player;
+	car->reg[1].integer = -player;
 	car->carry = true; // mb false
 	return (car);
 }

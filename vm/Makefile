@@ -23,7 +23,8 @@ LIST =			main \
 				init \
 				carriage \
 				verbose \
-				curses
+				curses \
+				tmp
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

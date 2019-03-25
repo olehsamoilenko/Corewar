@@ -51,7 +51,7 @@ typedef struct	s_carriage
 	int					number;
 	t_champion			*creator;
 	int					position; // PC, program counter
-	unsigned int		reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
+	union converter		reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
 	// int					op_code; // mb op ?
 	struct s_op			*op;
 	int					cooldown;
@@ -82,7 +82,7 @@ typedef struct	s_war
 typedef struct	s_instr_params
 {
 	int					codage;
-	// int					amount;
+	int					amount;
 	int					types[4]; // 0 is unused
 	int					sizes[4]; // 0 is unused
 	union converter		params[4]; // 0 is unused
@@ -130,5 +130,8 @@ void	print_memory(t_war *war);
 void	init_curses(t_war *war);
 void	over_over(t_war *war);
 void	over_curses(t_war *war);
+
+// tmp
+void show_args(t_instr_params *params);
 
 #endif

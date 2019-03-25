@@ -12,21 +12,11 @@
 
 #include "vm.h"
 
-
-
 void	error(char *message) // .h
 {
 	ft_printf("Error: %s\n", message);
 	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
-}
-
-
-
-void	curriage_info(t_carriage *car)
-{
-	// ft_printf("INFO pos %d, op %s, cooldown %d\n",
-	// 	car->position, op_tab[op_index(car->op_code)].name, car->cooldown);
 }
 
 void	next_cycle(t_war *war)
@@ -59,40 +49,6 @@ void	next_cycle(t_war *war)
 	}
 }
 
-void	print_champion_hex(unsigned char *map)
-{
-	int i = 0;
-	while (i < MEM_SIZE)
-	{
-		ft_printf("%02x%02x ", map[i], map[i + 1]);
-		i += 2;
-		if (i % 16 == 0)
-			ft_printf("\n");
-	}
-}
-
-void	print_champions(t_champion *champs[])
-{
-	
-	int i = -1;
-	while (++i < 4)
-	{
-		// ft_printf("\t%i: \n", i + 1);
-		if (champs[i] == NULL)
-		{
-			ft_printf("Empty.\n");
-			// return ;
-		}
-		else
-		{
-			ft_printf("n = %d, NAME: %s\n", champs[i]->number, champs[i]->header->prog_name);
-			// ft_printf("COMMENT: %s\n", champs[i]->header->comment);
-			// ft_printf("SIZE: %d\n", champs[i]->header->prog_size);
-		}
-	}
-}
-
-
 int		champions_count(t_champion **champs)
 {
 	int count = 0;
@@ -101,7 +57,6 @@ int		champions_count(t_champion **champs)
 		count++;
 	return (count);
 }
-
 
 void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta, t_war *war)
 {
@@ -121,18 +76,6 @@ int		op_index(int code)
 			return (i);
 	}
 	return (-1);
-}
-
-void	reg_info(int *reg, t_war *war)
-{
-	if (war->flag_verbose)
-	{
-		int i = -1;
-		while (++i <= REG_NUMBER)
-			ft_printf("%d ", reg[i]);
-		ft_printf("\n");
-
-	}
 }
 
 int		define_size(int arg_code, int label)
@@ -175,17 +118,15 @@ int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
 {
 	int index = op_index(map[car_pos]->value); // return op ?
-	if (index == -1)
-	{
-		ft_printf("UNKNOWN COMMAND: %02x\n", map[car_pos]->value);
-		ft_printf("Bratik, realizuy pls\n");
-		exit(0);
-	}
+	// if (index == -1)
+	// {
+	// 	ft_printf("UNKNOWN COMMAND: %02x\n", map[car_pos]->value);
+	// 	ft_printf("Bratik, realizuy pls\n");
+	// 	exit(0);
+	// }
 	t_op *op = &op_tab[index];
 	if (war->flag_verbose)
-	{
-		// ft_printf("Process %d FOUND code %d, index %d, name %s, cooldown %i\n", process, op->code, index, op->name, op_tab[index].cooldown);
-	}
+		ft_printf("Process %d FOUND code %d, index %d, name %s, cooldown %i\n", process, op->code, index, op->name, op_tab[index].cooldown);
 	return (op);
 }
 
@@ -202,6 +143,7 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	int second;
 	int third;
 	int codage;
+	params->amount = op->args;
 	if (op->codage == true)
 	{
 		codage = map[car->position + delta]->value;
@@ -257,21 +199,6 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	return (params);
 }
 
-
-
-// void	cooldown(t_war *war)
-// {
-// 	while (war->carriages->cooldown != 0)
-// 	{
-// 		if (!war->flag_visual && war->cycle == war->flag_dump)
-// 			dump(war);
-// 		next_cycle(war, war->carriages);
-// 	}
-// }
-
-
-
-
 void	introduce(t_champion **champs)
 {
 	ft_printf("Introducing contestants...\n");
@@ -284,41 +211,14 @@ void	introduce(t_champion **champs)
 	}
 }
 
-char	*define_arg(int arg_code)
-{
-	if (arg_code == REG_CODE)
-		return("T_REG");
-	else if (arg_code == DIR_CODE)
-		return("T_DIR");
-	else if (arg_code == IND_CODE)
-		return ("T_IND");
-	else
-		return ("---");
-}
-
-
-void show_args(t_instr_params *params)
-{
-
-	ft_printf("ARGS: %ld (%s)\t%ld (%s)\t%ld (%s)\n",
-		params->params[1], define_arg(params->sizes[1]),
-		params->params[2], define_arg(params->sizes[2]),
-		params->params[3], define_arg(params->sizes[3]));
-}
-
-
 int		main(int argc, char **argv)
 {
-	printf("%#05x\n", 0);
-	ft_printf("%#05x\n", 0);
-
 	t_war *war = init();
 
 	int index;
 
 	parse_params(argc, argv, war);
-	int champ_count = champions_count(war->champs);
-	int mem_delta = MEM_SIZE / champ_count;
+	int mem_delta = MEM_SIZE / champions_count(war->champs);
 	parse_champions(war->champs, war->map, mem_delta);
 	// print_champions(war->champs);
 	if (!war->flag_visual)
@@ -326,18 +226,14 @@ int		main(int argc, char **argv)
 
 	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
 
-	
-
 	if (war->flag_visual)
 		init_curses(war);
-
 	if (war->cycle >= war->flag_dump)
 		print_memory(war);
-
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 2000; i++)
+	for (int i = 0; i < 1160; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);

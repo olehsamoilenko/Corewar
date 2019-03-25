@@ -34,7 +34,29 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	car->reg[p->params[2].integer] = p->params[1].integer; // check < 16
+	// show_args(p);
+	int reg_num = p->params[2].integer; // check < 16
+
+	// direct to register must be inversed
+	// here params don't need UNION
+
+	car->reg[reg_num].bytes[0] = p->params[1].bytes[3]; 
+	car->reg[reg_num].bytes[1] = p->params[1].bytes[2];
+	car->reg[reg_num].bytes[2] = p->params[1].bytes[1];
+	car->reg[reg_num].bytes[3] = p->params[1].bytes[0];
+
+
+	// ft_printf("%02x ", p->params[1].bytes[0]);
+	// ft_printf("%02x ", p->params[1].bytes[1]);
+	// ft_printf("%02x ", p->params[1].bytes[2]);
+	// ft_printf("%02x ", p->params[1].bytes[3]);
+	// ft_printf("\n");
+
+	// ft_printf("%02x ", car->reg[reg_num].bytes[0]);
+	// ft_printf("%02x ", car->reg[reg_num].bytes[1]);
+	// ft_printf("%02x ", car->reg[reg_num].bytes[2]);
+	// ft_printf("%02x ", car->reg[reg_num].bytes[3]);
+	// ft_printf("\n");
 
 	// CARRY
 	
@@ -48,26 +70,24 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 {
+	// show_args(p);
+
 	int index = car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD; // only T_DIR
 	union converter value;
 	value.bytes[0] = war->map[index]->value;
 	value.bytes[1] = war->map[index + 1]->value;
 	value.bytes[2] = war->map[index + 2]->value;
 	value.bytes[3] = war->map[index + 3]->value;
+	car->reg[p->params[3].integer].integer = value.integer;
+
+	// ft_printf("%02x ", war->map[index]->value);
+	// ft_printf("%02x ", war->map[index + 1]->value);
+	// ft_printf("%02x ", war->map[index + 2]->value);
+	// ft_printf("%02x ", war->map[index + 3]->value);
+	// ft_printf("\n");
 
 
-	// ft_printf("%x %x %x %x = %d\n",
-	// 	war->map[index]->value,
-	// 	war->map[index + 1]->value,
-	// 	war->map[index + 2]->value,
-	// 	war->map[index + 3]->value,
-	// 	value.integer);
-	car->reg[p->params[3].integer] = value.integer;
-	// ft_printf("LDI Params %ld %#x + %ld %#x = %ld %#x\n",
-	// 	p->params[1].integer, p->params[1].integer,
-	// 	p->params[2].integer, p->params[2].integer,
-	// 	car->reg[p->params[3].integer], car->reg[p->params[3].integer]);
-	// ft_printf("LDI Cycle %d, Register %d, Value %ld\n", war->cycle, p->params[3].integer, car->reg[p->params[3].integer]);
+
 	if (war->flag_verbose)
 	{
 		ft_printf("P    %d | ldi %d %d r%d\n", car->number, p->params[1].integer, p->params[2].integer, p->params[3].integer);
@@ -77,6 +97,8 @@ void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 			p->params[1].integer + p->params[2].integer,
 			car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD);
 	}
+
+
 }
 
 void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
@@ -85,32 +107,53 @@ void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
 }
 
 
+void	show_union(union converter a)
+{
+	ft_printf("%ld : ", a.integer);
+	int i = -1;
+	while (++i < 4)
+	{
+		ft_printf("%02x ", a.bytes[i]);
+	}
+	ft_printf("\n");
+}
 
 
 void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	int i;
 
-	// show_args(p);
+	show_args(p);
 
 	unsigned int value_1 = p->params[1].integer;
 	unsigned int value_2 = 0;
 	unsigned int value_3 = 0;
 
+	show_union(car->reg[3]); // PROBLEM
+
 	if (p->types[2] == T_DIR)
 		value_2 = p->params[2].integer;
 	else if (p->types[2] == T_REG)
-		value_2 = car->reg[p->params[2].integer];
+		value_2 = car->reg[p->params[2].integer].integer;
+
+	
 
 	if (p->types[3] == T_DIR)
 		value_3 = p->params[3].integer;
 	else if (p->types[3] == T_REG)
-		value_2 = car->reg[p->params[3].integer];
+		value_2 = car->reg[p->params[3].integer].integer;
 
 	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, value_1);
 
 	union converter number;
-	number.integer = car->reg[value_1];
+	number.integer = car->reg[value_1].integer;
+
+	// ft_printf("%02x ", number.bytes[0]);
+	// ft_printf("%02x ", number.bytes[1]);
+	// ft_printf("%02x ", number.bytes[2]);
+	// ft_printf("%02x ", number.bytes[3]);
+	// ft_printf("\n");
+
 	i = -1;
 	while (++i < 4)
 	{
@@ -181,7 +224,7 @@ void	op_new(t_carriage *car, t_war *war, t_instr_params *p)
 
 t_op		op_tab[] =  // [17]
 {
-//   name       args                                                                     index cycles codage label
+//   name       args                                                                      code cycles codage label
 	{"live",	1,	{					T_DIR,						0,				0	},	 1,	  10,	0,		0,	 &op_live	},
 	{  "ld",	2,	{			T_DIR | T_IND,					T_REG,				0	},	 2,	   5,	1,		0,	   &op_ld	},
 	{  "st",	2,	{					T_REG,			T_IND | T_REG,				0	},	 3,	   5,	1,		0,	   &op_st	},

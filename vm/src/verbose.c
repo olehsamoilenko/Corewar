@@ -16,12 +16,22 @@ void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *p
 {
 	if (war->flag_verbose)
 	{
-		ft_printf("ADV %d (%#06x -> %#06x) %02x ",
-			instr_len,
-			car->position,
-			car->position + instr_len,
-			op->code,
-			params->codage);
+		ft_printf("ADV %d (", instr_len);
+		
+		if (car->position == 0)
+			ft_printf("0x0000");
+		else
+			ft_printf("%#06x", car->position);
+
+		ft_printf(" -> ");
+		
+		if (car->position + instr_len == 0)
+			ft_printf("0x0000");
+		else
+			ft_printf("%#06x", car->position + instr_len);
+		
+		ft_printf(") %02x ", op->code);
+
 		if (op->codage) // why index ?? t_op *op !
 			ft_printf("%02x ", params->codage);
 		int j = 0;
