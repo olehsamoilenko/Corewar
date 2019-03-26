@@ -37,7 +37,8 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 	t_carriage *car = ft_memalloc(sizeof(t_carriage));
 	car->position = position;
 	car->creator = creator;
-	car->number = ++war->processes;
+	car->number = ++(war->processes_counter);
+	war->processes_amount++;
 	car->reg[1].integer = -player;
 	car->carry = true; // mb false
 	return (car);

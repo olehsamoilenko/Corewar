@@ -21,12 +21,20 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
+	t_champion *player = find_champ(p->params[1].integer, war);
+	if (player != NULL)
+	{
+		player->last_live = war->cycle;
+		(player->lives_cur_period)++;
+
+	}
+	
 	
 	// verbose
 	if (war->flag_verbose)
 	{
 		ft_printf("P    %d | live %d\n", car->number, p->params[1].integer);
-		t_champion *player = find_champ(p->params[1].integer, war);
+		
 		if (player != NULL)
 		{
 			ft_printf("Player %d (%s) is said to be alive\n",

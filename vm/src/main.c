@@ -32,6 +32,7 @@ void	next_cycle(t_war *war)
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
 		war->cycle++;
+		war->cycles_after_check++;
 		// car->cooldown--;
 	}
 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
@@ -233,11 +234,14 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 2065; i++)
+	for (int i = 0; i < 4575; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
-		
+		if (war->cycles_after_check == war->cycles_to_die)
+		{
+			war->champs[0]->lives_cur_period = 0;
+		}
 		while (tmp)
 		{
 			// MORTEL
@@ -270,6 +274,10 @@ int		main(int argc, char **argv)
 				car->op = NULL;
 			}
 			print_memory(war);
+
+			// if (war->cycle - car->last_live > war->cycles_to_die)
+			// 	ft_printf("Process %d hasn't live...\n", car->number);
+
 			tmp = tmp->next;
 		}
 		if (!war->flag_visual && war->cycle == war->flag_dump)

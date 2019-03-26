@@ -34,6 +34,8 @@ typedef struct	s_champion
 	char				*file;
 	int					number;
 	header_t			*header;
+	int					last_live;
+	int					lives_cur_period;
 }				t_champion;
 
 typedef struct	s_map_cell
@@ -67,14 +69,22 @@ typedef struct	s_war
 	WINDOW				*win_mem;
 	WINDOW				*win_info;
 	WINDOW				*win_getch;
+
 	t_mem_cell			*map[MEM_SIZE];
 	t_champion			*champs[4];
+
 	t_carriage			*carriages;
-	int					cycle;
+	int					processes_counter; // for number of carriage
+	int					processes_amount; // for visual
+
+	int					cycle; // current cycle
+	int					cycles_after_check;
+	int					cycles_to_die;
+
 	t_bool				flag_verbose:1;
 	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
-	int					processes;
+	
 }				t_war;
 
 
