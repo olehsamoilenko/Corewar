@@ -14,10 +14,19 @@
 
 // ADDITIONAL FILE
 
-void	curriage_info(t_carriage *car)
+void	curriage_info(t_carriage *car, t_war *war)
 {
-	// ft_printf("INFO pos %d, op %s, cooldown %d\n",
-	// 	car->position, op_tab[op_index(car->op_code)].name, car->cooldown);
+	if (war->flag_verbose)
+	{
+		ft_printf("INFO P %d pos: %d, op: ", car->number ,car->position);
+		
+		if (car->op)
+			ft_printf("%s", car->op->name);
+		else
+			ft_printf("empty");
+		ft_printf(", current cooldown: %d\n", car->cooldown);
+
+	}
 }
 
 void	print_champion_hex(unsigned char *map)
@@ -77,10 +86,10 @@ char	*define_type(int type)
 		return ("---");
 }
 
-void show_args(t_instr_params *params)
+void show_args(t_instr_params *params, t_war *war)
 {
 	int i = 0;
-	while (++i <= params->amount)
+	while (++i <= params->amount && war->flag_dump == -1)
 	{
 		ft_printf("ARG %d: ", i);
 		ft_printf("%10ld ", params->params[i].integer);

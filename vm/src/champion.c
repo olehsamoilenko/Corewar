@@ -22,7 +22,7 @@
 t_champion	*find_champ(int number, t_war *war)
 {
 	int i = -1;
-	while (++i < 4)
+	while (++i < 4 && war->champs[i])
 	{
 		if (war->champs[i]->number == -number)
 			return (war->champs[i]);

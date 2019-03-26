@@ -118,15 +118,14 @@ int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
 {
 	int index = op_index(map[car_pos]->value); // return op ?
-	// if (index == -1)
-	// {
-	// 	ft_printf("UNKNOWN COMMAND: %02x\n", map[car_pos]->value);
-	// 	ft_printf("Bratik, realizuy pls\n");
-	// 	exit(0);
-	// }
 	t_op *op = &op_tab[index];
-	if (war->flag_verbose)
-		ft_printf("Process %d FOUND code %d, index %d, name %s, cooldown %i\n", process, op->code, index, op->name, op_tab[index].cooldown);
+
+	// if (war->flag_verbose)
+	// 	ft_printf("Process %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
+	// 		process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
+
+	if (index == -1)
+		return (NULL);
 	return (op);
 }
 
@@ -213,6 +212,7 @@ void	introduce(t_champion **champs)
 
 int		main(int argc, char **argv)
 {
+
 	t_war *war = init();
 
 	int index;
@@ -233,7 +233,7 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 1160; i++)
+	for (int i = 0; i < 2065; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
@@ -243,13 +243,18 @@ int		main(int argc, char **argv)
 			// MORTEL
 
 			t_carriage *car = tmp;
-			if (car->cooldown == 0) // new process or forked
+			if (car->op == NULL)
 			{
 				car->op = get_command(car->number, car->position, war->map, war);
-				car->cooldown = car->op->cooldown;
+				// curriage_info(car, war);
+				if (car->op)
+					car->cooldown = car->op->cooldown;
+				else
+					car->position += 1;
+
 			}
 			car->cooldown--;
-			if (car->cooldown == 0)
+			if (car->op && car->cooldown == 0)
 			{
 				t_instr_params *params = get_args(car, war->map, car->op, war);
 				// show_args(params);
@@ -262,16 +267,13 @@ int		main(int argc, char **argv)
 					car->position += instr_len;
 				}
 				free(params);
-				
-				print_memory(war);
-				car->op = get_command(car->number, car->position, war->map, war);
-				car->cooldown = car->op->cooldown;
+				car->op = NULL;
 			}
+			print_memory(war);
 			tmp = tmp->next;
 		}
 		if (!war->flag_visual && war->cycle == war->flag_dump)
 			dump(war);
-		
 	}
 	
 	if (war->flag_visual)

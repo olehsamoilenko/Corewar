@@ -14,8 +14,11 @@
 
 // SWAP WITH OP.C FROM SUBJ
 
+
 void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 {
+	// show_args(p, war);
+
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
 	
@@ -24,8 +27,12 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 	{
 		ft_printf("P    %d | live %d\n", car->number, p->params[1].integer);
 		t_champion *player = find_champ(p->params[1].integer, war);
-		ft_printf("Player %d (%s) is said to be alive\n",
-			player->number, player->header->prog_name);
+		if (player != NULL)
+		{
+			ft_printf("Player %d (%s) is said to be alive\n",
+				player->number, player->header->prog_name);
+
+		}
 		
 
 		// ft_printf("ADV %d (%x -> %x)\n", delta, car->position, car->position + delta);
@@ -34,16 +41,18 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	// show_args(p);
+	// show_args(p, war);
 	int reg_num = p->params[2].integer; // check < 16
 
 	// direct to register must be inversed
 	// here params don't need UNION
 
-	car->reg[reg_num].bytes[0] = p->params[1].bytes[3]; 
-	car->reg[reg_num].bytes[1] = p->params[1].bytes[2];
-	car->reg[reg_num].bytes[2] = p->params[1].bytes[1];
-	car->reg[reg_num].bytes[3] = p->params[1].bytes[0];
+	car->reg[reg_num].integer = p->params[1].integer;
+	// car->reg[reg_num].bytes[1] = p->params[1].bytes[2];
+	// car->reg[reg_num].bytes[2] = p->params[1].bytes[1];
+	// car->reg[reg_num].bytes[3] = p->params[1].bytes[0];
+
+	// ft_printf("%d\n", car->reg[reg_num].integer);
 
 
 	// ft_printf("%02x ", p->params[1].bytes[0]);
@@ -70,20 +79,24 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	// show_args(p);
+	// show_args(p, war);
 
 	int index = car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD; // only T_DIR
-	union converter value;
-	value.bytes[0] = war->map[index]->value;
-	value.bytes[1] = war->map[index + 1]->value;
-	value.bytes[2] = war->map[index + 2]->value;
-	value.bytes[3] = war->map[index + 3]->value;
-	car->reg[p->params[3].integer].integer = value.integer;
+	
 
-	// ft_printf("%02x ", war->map[index]->value);
-	// ft_printf("%02x ", war->map[index + 1]->value);
-	// ft_printf("%02x ", war->map[index + 2]->value);
-	// ft_printf("%02x ", war->map[index + 3]->value);
+	int reg_number = p->params[3].integer;
+	// ft_printf("%d\n", reg_number);
+
+	car->reg[reg_number].bytes[3] = war->map[index + 0]->value;
+	car->reg[reg_number].bytes[2] = war->map[index + 1]->value;
+	car->reg[reg_number].bytes[1] = war->map[index + 2]->value;
+	car->reg[reg_number].bytes[0] = war->map[index + 3]->value;
+
+
+	// ft_printf("%02x ", car->reg[reg_number].bytes[0]);
+	// ft_printf("%02x ", car->reg[reg_number].bytes[1]);
+	// ft_printf("%02x ", car->reg[reg_number].bytes[2]);
+	// ft_printf("%02x ", car->reg[reg_number].bytes[3]);
 	// ft_printf("\n");
 
 
@@ -123,13 +136,13 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	int i;
 
-	show_args(p);
+	// show_args(p, war);
 
 	unsigned int value_1 = p->params[1].integer;
 	unsigned int value_2 = 0;
 	unsigned int value_3 = 0;
 
-	show_union(car->reg[3]); // PROBLEM
+	// show_union(p->params[3]); // PROBLEM
 
 	if (p->types[2] == T_DIR)
 		value_2 = p->params[2].integer;
@@ -141,7 +154,7 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 	if (p->types[3] == T_DIR)
 		value_3 = p->params[3].integer;
 	else if (p->types[3] == T_REG)
-		value_2 = car->reg[p->params[3].integer].integer;
+		value_3 = car->reg[p->params[3].integer].integer;
 
 	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, value_1);
 
@@ -154,10 +167,15 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 	// ft_printf("%02x ", number.bytes[3]);
 	// ft_printf("\n");
 
+	war->map[car->position + (value_2 + value_3) % IDX_MOD + 3]->value = number.bytes[0];
+	war->map[car->position + (value_2 + value_3) % IDX_MOD + 2]->value = number.bytes[1];
+	war->map[car->position + (value_2 + value_3) % IDX_MOD + 1]->value = number.bytes[2];
+	war->map[car->position + (value_2 + value_3) % IDX_MOD + 0]->value = number.bytes[3];
+
 	i = -1;
 	while (++i < 4)
 	{
-		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->value = number.bytes[i];
+		
 		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->cycles_bold = war->cycle;
 		war->map[car->position + (value_2 + value_3) % IDX_MOD + i]->color = car->creator->number;
 	}

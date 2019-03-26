@@ -132,6 +132,7 @@ void	over_over(t_war *war);
 void	over_curses(t_war *war);
 
 // tmp
-void show_args(t_instr_params *params);
+void show_args(t_instr_params *params, t_war *war);
+void	curriage_info(t_carriage *car, t_war *war);
 
 #endif
