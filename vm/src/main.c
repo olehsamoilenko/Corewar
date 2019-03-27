@@ -121,9 +121,9 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 	int index = op_index(map[car_pos]->value); // return op ?
 	t_op *op = &op_tab[index];
 
-	// if (war->flag_verbose)
-	// 	ft_printf("Process %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
-	// 		process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
+	if (war->flag_verbose)
+		ft_printf("Process %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
+			process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
 
 	if (index == -1)
 		return (NULL);
@@ -234,7 +234,7 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 4575; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
@@ -245,6 +245,7 @@ int		main(int argc, char **argv)
 		while (tmp)
 		{
 			// MORTEL
+			// BEE_GEES
 
 			t_carriage *car = tmp;
 			if (car->op == NULL)
@@ -265,7 +266,11 @@ int		main(int argc, char **argv)
 
 				car->op->func(car, war, params);
 				int instr_len = 1 + car->op->codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
-				if (car->op->code != 0x09) // zjmp
+				if (car->op->code == 0x09 && car->carry == true) // zjmp
+				{
+
+				}
+				else
 				{
 					adv(war, car->op, instr_len, car, params);
 					car->position += instr_len;

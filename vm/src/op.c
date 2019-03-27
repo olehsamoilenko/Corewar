@@ -50,12 +50,12 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 {
 	// show_args(p, war);
-	int reg_num = p->params[2].integer; // check < 16
+	// int reg_num = ; // check < 16
 
 	// direct to register must be inversed
 	// here params don't need UNION
 
-	car->reg[reg_num].integer = p->params[1].integer;
+	car->reg[p->params[2].integer].integer = p->params[1].integer;
 	// car->reg[reg_num].bytes[1] = p->params[1].bytes[2];
 	// car->reg[reg_num].bytes[2] = p->params[1].bytes[1];
 	// car->reg[reg_num].bytes[3] = p->params[1].bytes[0];
@@ -75,7 +75,10 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 	// ft_printf("%02x ", car->reg[reg_num].bytes[3]);
 	// ft_printf("\n");
 
-	// CARRY
+	if (car->reg[p->params[2].integer].integer == 0)
+		car->carry = true;
+	else
+		car->carry = false;
 	
 	// verbose
 	if (war->flag_verbose)
@@ -223,15 +226,62 @@ void	op_fork(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_zjmp(t_carriage *car, t_war *war, t_instr_params *p)
 {
+	char *jump_status;
+
 	if (car->carry == true)
 	{
 		car->position += (p->params[1].integer % IDX_MOD);
+		jump_status = "OK";
+	}
+	else
+	{
+		jump_status = "FAILED";
 	}
 
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | zjmp %d OK\n", car->number, p->params[1].integer % IDX_MOD);
+		ft_printf("P%5d | zjmp %d %s\n", car->number, p->params[1].integer % IDX_MOD, jump_status);
+	}
+	
+}
+
+void	op_add(t_carriage *car, t_war *war, t_instr_params *p)
+{
+	car->reg[p->params[3].integer].integer = car->reg[p->params[1].integer].integer + car->reg[p->params[2].integer].integer;
+	if (car->reg[p->params[3].integer].integer == 0)
+		car->carry = true;
+	else
+		car->carry = false;
+	// verbose
+	if (war->flag_verbose)
+	{
+		ft_printf("P%5d | add r%d r%d r%d\n", car->number,
+			p->params[1].integer, p->params[2].integer, p->params[3].integer);
+	}
+	
+}
+
+void	op_xor(t_carriage *car, t_war *war, t_instr_params *p)
+{
+	// show_args(p, war);
+
+	int value_1;
+	int value_2;
+
+	if (p->types[1] == T_REG)
+		value_1 = car->reg[p->params[1].integer].integer;
+
+	if (p->types[2] == T_DIR)
+		value_2 = p->params[2].integer;
+
+	car->reg[p->params[3].integer].integer = value_1 ^ value_2;
+
+	// verbose
+	if (war->flag_verbose)
+	{
+		ft_printf("P%5d | xor %d %d r%d\n", car->number,
+			value_1, value_2, p->params[3].integer);
 	}
 	
 }
@@ -254,6 +304,8 @@ t_op		op_tab[] =  // [17]
 	{"live",	1,	{					T_DIR,						0,				0	},	 1,	  10,	0,		0,	 &op_live	},
 	{  "ld",	2,	{			T_DIR | T_IND,					T_REG,				0	},	 2,	   5,	1,		0,	   &op_ld	},
 	{  "st",	2,	{					T_REG,			T_IND | T_REG,				0	},	 3,	   5,	1,		0,	   &op_st	},
+	{ "add",	3,	{					T_REG,					T_REG,			T_REG	},	 4,	  10,	1,		0,	  &op_add	},
+	{ "xor",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 8,	   6,	1,		0,	  &op_xor	},
 	{"zjmp",	1,	{					T_DIR,						0,				0	},	 9,	  20,	0,		1,	 &op_zjmp	},
 	{ "ldi",	3,	{	T_REG | T_DIR | T_IND,			T_DIR | T_REG,			T_REG	},	10,	  25,	1,		1,	  &op_ldi	},
 	{ "sti",	3,	{					T_REG,	T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	  25,	1,		1,	  &op_sti	},
