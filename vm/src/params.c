@@ -59,10 +59,6 @@ void	parse_params(int argc, char **argv, t_war *war)
 		usage();
 
 	int cur_champs = 0;
-
-	// int buf_champs_counter = 0;
-	// t_champion	**buf_champs = ft_memalloc(4 * sizeof(t_champion));
-
 	int i = 0;
 	int n;
 	while (++i < argc)

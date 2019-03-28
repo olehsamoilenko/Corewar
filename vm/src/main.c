@@ -128,11 +128,11 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 	return (op);
 }
 
-t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
+void	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
 	int v[7];
 
-	t_instr_params *params = ft_memalloc(sizeof(t_instr_params));
+	// car->p = ft_memalloc(sizeof(t_instr_params));
 
 	int delta = 0;
 	// car->position++;
@@ -141,11 +141,11 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 	int second;
 	int third;
 	int codage;
-	params->amount = op->args;
+	// car->p->amount = op->args;
 	if (op->codage == true)
 	{
 		codage = map[car->position + delta]->value;
-		params->codage = codage;
+		car->codage = codage;
 		first = codage >> 6;
 		second = codage >> 4 & 0b0011;
 		third = codage >> 2 & 0b000011;
@@ -158,17 +158,17 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 		third = op->args_type[2];
 	}
 
-	params->types[1] = first;
-	params->types[2] = second;
-	params->types[3] = third;
+	car->types[1] = first;
+	car->types[2] = second;
+	car->types[3] = third;
 
 	int arg_1_size = define_size(first, op->label);
 	int arg_2_size = define_size(second, op->label);
 	int arg_3_size = define_size(third, op->label);
 
-	params->sizes[1] = arg_1_size;
-	params->sizes[2] = arg_2_size;
-	params->sizes[3] = arg_3_size;
+	car->sizes[1] = arg_1_size;
+	car->sizes[2] = arg_2_size;
+	car->sizes[3] = arg_3_size;
 
 	
 	// if (war->flag_verbose)
@@ -177,24 +177,24 @@ t_instr_params	*get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *wa
 
 
 	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
-	arg_1 = get_bytes(car->position + delta, arg_1_size, params->types[1], map);
+	arg_1 = get_bytes(car->position + delta, arg_1_size, car->types[1], map);
 	delta += arg_1_size;
 	if (arg_2_size != 0)
 	{
-		arg_2 = get_bytes(car->position + delta, arg_2_size, params->types[2], map);
+		arg_2 = get_bytes(car->position + delta, arg_2_size, car->types[2], map);
 		delta += arg_2_size;
 	}
 	if (arg_3_size != 0)
 	{
-		arg_3 = get_bytes(car->position + delta, arg_3_size, params->types[3], map);
+		arg_3 = get_bytes(car->position + delta, arg_3_size, car->types[3], map);
 		delta += arg_3_size;
 	}
 
-	params->params[1].integer = arg_1;
-	params->params[2].integer = arg_2;
-	params->params[3].integer = arg_3;
+	car->params[1].integer = arg_1;
+	car->params[2].integer = arg_2;
+	car->params[3].integer = arg_3;
 
-	return (params);
+	// return (params);
 }
 
 void	introduce(t_champion **champs)
@@ -294,7 +294,8 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 50000; i++)
+	// int i = -1;
+	while (true)
 	{
 		t_carriage *tmp = war->carriages;
 
@@ -325,22 +326,24 @@ int		main(int argc, char **argv)
 			car->cooldown--;
 			if (car->op && car->cooldown == 0)
 			{
-				t_instr_params *params = get_args(car, war->map, car->op, war);
-				car->op->func(car, war, params);
-				int instr_len = 1 + car->op->codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
+				get_args(car, war->map, car->op, war);
+				// car->p = params;
+				car->op->func(car, war);
+				int instr_len = 1 + car->op->codage + car->sizes[1] + car->sizes[2] + car->sizes[3];
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
 				}
 				else
 				{
-					adv(war, car->op, instr_len, car, params);
+					adv(war, car->op, instr_len, car);
 					car->position += instr_len;
 				}
-				free(params);
+				// free(car->p);
 				car->op = NULL;
 			}
-			print_memory(war);
+			if (war->flag_visual)
+				print_memory(war);
 			tmp = tmp->next;
 		}
 		checking(war);

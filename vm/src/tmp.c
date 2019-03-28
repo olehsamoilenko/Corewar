@@ -86,18 +86,18 @@ char	*define_type(int type)
 		return ("---");
 }
 
-void show_args(t_instr_params *params, t_war *war)
+void show_args(t_war *war, t_carriage *car)
 {
 	int i = 0;
-	while (++i <= params->amount && war->flag_dump == -1)
+	while (++i <= car->op->args && war->flag_dump == -1)
 	{
 		ft_printf("ARG %d: ", i);
-		ft_printf("%10ld %10d ", params->params[i].integer, params->params[i].integer);
-		ft_printf("%#010x ", params->params[i].integer);
+		ft_printf("%10ld %10d ", car->params[i].integer, car->params[i].integer);
+		ft_printf("%#010x ", car->params[i].integer);
 		int j = -1;
 		while (++j < 4)
-			ft_printf("%02x ", params->params[i].bytes[j]);
-		ft_printf("%s\n", define_type(params->types[i]));
+			ft_printf("%02x ", car->params[i].bytes[j]);
+		ft_printf("%s\n", define_type(car->types[i]));
 
 	}
 	// ft_printf("ARGS:\n\t%ld %#06x (%s)\n\t%ld %#06x (%s)\n\t%ld %#06x (%s)\n",

@@ -48,18 +48,33 @@ typedef struct	s_map_cell
 
 // typedef struct s_op t_op;
 
+// typedef struct	s_instr_params
+// {
+	
+// 	// int					amount;
+	
+	
+	
+// }				t_instr_params;
+
 typedef struct	s_carriage
 {
 	int					number;
 	t_champion			*creator;
 	int					position; // PC, program counter
 	union converter		reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
-	// int					op_code; // mb op ?
+
 	struct s_op			*op;
 	int					cooldown;
 	t_bool				carry:1;
 	int					last_live;
 	struct s_carriage	*next;
+
+	int					codage;
+	int					types[4]; // 0 is unused
+	int					sizes[4]; // 0 is unused
+	union converter		params[4]; // 0 is unused
+
 }				t_carriage;
 
 
@@ -83,6 +98,7 @@ typedef struct	s_war
 	int					checks;
 
 	t_champion			*last_live; // if anybody ?
+	// int					all_lives;
 
 	t_bool				flag_verbose:1;
 	t_bool				flag_visual:1;
@@ -93,14 +109,7 @@ typedef struct	s_war
 
 
 
-typedef struct	s_instr_params
-{
-	int					codage;
-	int					amount;
-	int					types[4]; // 0 is unused
-	int					sizes[4]; // 0 is unused
-	union converter		params[4]; // 0 is unused
-}				t_instr_params;
+
 
 typedef struct	s_op
 {
@@ -111,7 +120,7 @@ typedef struct	s_op
 	int					cooldown;
 	t_bool				codage:1;
 	t_bool				label:1;
-	void				(*func)(t_carriage *, t_war *, t_instr_params *);
+	void				(*func)(t_carriage *, t_war *);
 }				t_op;
 
 
@@ -136,7 +145,7 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 void		show_carriages(t_war *war);
 
 // verbose
-void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params);
+void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
 void	dump(t_war *war);
 
 // curses
@@ -146,7 +155,7 @@ void	over_over(t_war *war);
 void	over_curses(t_war *war);
 
 // tmp
-void show_args(t_instr_params *params, t_war *war);
+void	show_args(t_war *war, t_carriage *car);
 void	curriage_info(t_carriage *car, t_war *war);
 
 #endif

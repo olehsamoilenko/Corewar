@@ -12,7 +12,7 @@
 
 #include "vm.h"
 
-void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *params)
+void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car)
 {
 	if (war->flag_verbose)
 	{
@@ -33,13 +33,13 @@ void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car, t_instr_params *p
 		ft_printf(") %02x ", op->code);
 
 		if (op->codage) // why index ?? t_op *op !
-			ft_printf("%02x ", params->codage);
+			ft_printf("%02x ", car->codage);
 		int j = 0;
 		while (++j < 4)
 		{
-			int k = params->sizes[j];
+			int k = car->sizes[j];
 			while(--k >= 0)
-				ft_printf("%02x ", params->params[j].bytes[k]);
+				ft_printf("%02x ", car->params[j].bytes[k]);
 			
 		}
 		ft_printf("\n");

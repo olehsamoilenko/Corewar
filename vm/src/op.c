@@ -15,13 +15,13 @@
 // SWAP WITH OP.C FROM SUBJ
 
 
-void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_live(t_carriage *car, t_war *war)
 {
 	// show_args(p, war);
 
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
-	t_champion *player = find_champ(p->params[1].integer, war);
+	t_champion *player = find_champ(car->params[1].integer, war);
 	if (player != NULL)
 	{
 		player->last_live = war->cycle;
@@ -29,11 +29,10 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 		war->last_live = player;
 	}
 	
-	
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | live %d\n", car->number, p->params[1].integer);
+		ft_printf("P    %d | live %d\n", car->number, car->params[1].integer);
 		
 		if (player != NULL)
 		{
@@ -47,7 +46,7 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 	}
 }
 
-void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_ld(t_carriage *car, t_war *war)
 {
 	// show_args(p, war);
 	// int reg_num = ; // check < 16
@@ -55,18 +54,18 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 	// direct to register must be inversed
 	// here params don't need UNION
 
-	car->reg[p->params[2].integer].integer = p->params[1].integer;
-	// car->reg[reg_num].bytes[1] = p->params[1].bytes[2];
-	// car->reg[reg_num].bytes[2] = p->params[1].bytes[1];
-	// car->reg[reg_num].bytes[3] = p->params[1].bytes[0];
+	car->reg[car->params[2].integer].integer = car->params[1].integer;
+	// car->reg[reg_num].bytes[1] = car->p->params[1].bytes[2];
+	// car->reg[reg_num].bytes[2] = car->p->params[1].bytes[1];
+	// car->reg[reg_num].bytes[3] = car->p->params[1].bytes[0];
 
 	// ft_printf("%d\n", car->reg[reg_num].integer);
 
 
-	// ft_printf("%02x ", p->params[1].bytes[0]);
-	// ft_printf("%02x ", p->params[1].bytes[1]);
-	// ft_printf("%02x ", p->params[1].bytes[2]);
-	// ft_printf("%02x ", p->params[1].bytes[3]);
+	// ft_printf("%02x ", car->p->params[1].bytes[0]);
+	// ft_printf("%02x ", car->p->params[1].bytes[1]);
+	// ft_printf("%02x ", car->p->params[1].bytes[2]);
+	// ft_printf("%02x ", car->p->params[1].bytes[3]);
 	// ft_printf("\n");
 
 	// ft_printf("%02x ", car->reg[reg_num].bytes[0]);
@@ -75,7 +74,7 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 	// ft_printf("%02x ", car->reg[reg_num].bytes[3]);
 	// ft_printf("\n");
 
-	if (car->reg[p->params[2].integer].integer == 0)
+	if (car->reg[car->params[2].integer].integer == 0)
 		car->carry = true;
 	else
 		car->carry = false;
@@ -83,21 +82,21 @@ void	op_ld(t_carriage *car, t_war *war, t_instr_params *p)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ld %d r%d\n", car->number, p->params[1].integer, p->params[2].integer);
+		ft_printf("P    %d | ld %d r%d\n", car->number, car->params[1].integer, car->params[2].integer);
 	}
 }
 
 
-void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_ldi(t_carriage *car, t_war *war)
 {
 	// show_args(p, war);
 
-	int index = car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD; // only T_DIR
+	int index = car->position + (car->params[1].integer + car->params[2].integer) % IDX_MOD; // only T_DIR
 	
-	car->reg[p->params[3].integer].bytes[3] = war->map[index + 0]->value;
-	car->reg[p->params[3].integer].bytes[2] = war->map[index + 1]->value;
-	car->reg[p->params[3].integer].bytes[1] = war->map[index + 2]->value;
-	car->reg[p->params[3].integer].bytes[0] = war->map[index + 3]->value;
+	car->reg[car->params[3].integer].bytes[3] = war->map[index + 0]->value;
+	car->reg[car->params[3].integer].bytes[2] = war->map[index + 1]->value;
+	car->reg[car->params[3].integer].bytes[1] = war->map[index + 2]->value;
+	car->reg[car->params[3].integer].bytes[0] = war->map[index + 3]->value;
 
 
 	// ft_printf("%02x ", car->reg[reg_number].bytes[0]);
@@ -110,34 +109,34 @@ void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 
 	if (war->flag_verbose)
 	{
-		ft_printf("P    %d | ldi %d %d r%d\n", car->number, p->params[1].integer, p->params[2].integer, p->params[3].integer);
+		ft_printf("P    %d | ldi %d %d r%d\n", car->number, car->params[1].integer, car->params[2].integer, car->params[3].integer);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
-			p->params[1].integer,
-			p->params[2].integer,
-			p->params[1].integer + p->params[2].integer,
-			car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD);
+			car->params[1].integer,
+			car->params[2].integer,
+			car->params[1].integer + car->params[2].integer,
+			car->position + (car->params[1].integer + car->params[2].integer) % IDX_MOD);
 	}
 
 
 }
 
-void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_st(t_carriage *car, t_war *war)
 {
 	// show_args(p, war);
 
-	int index = car->position + p->params[2].integer % IDX_MOD; // T_IND
+	int index = car->position + car->params[2].integer % IDX_MOD; // T_IND
 	if (index < 0)
 		index += MEM_SIZE;
 	// ft_printf("%d\n", index);
 
-	war->map[index + 0]->value = car->reg[p->params[1].integer].bytes[3];
-	war->map[index + 1]->value = car->reg[p->params[1].integer].bytes[2];
-	war->map[index + 2]->value = car->reg[p->params[1].integer].bytes[1];
-	war->map[index + 3]->value = car->reg[p->params[1].integer].bytes[0];
+	war->map[index + 0]->value = car->reg[car->params[1].integer].bytes[3];
+	war->map[index + 1]->value = car->reg[car->params[1].integer].bytes[2];
+	war->map[index + 2]->value = car->reg[car->params[1].integer].bytes[1];
+	war->map[index + 3]->value = car->reg[car->params[1].integer].bytes[0];
 
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | st r%d %d\n", car->number, p->params[1].integer, p->params[2].integer);
+		ft_printf("P%5d | st r%d %d\n", car->number, car->params[1].integer, car->params[2].integer);
 	}
 }
 
@@ -154,29 +153,29 @@ void	show_union(union converter a)
 }
 
 
-void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_sti(t_carriage *car, t_war *war)
 {
 	int i;
 
 	// show_args(p, war);
 
-	unsigned int value_1 = p->params[1].integer;
+	unsigned int value_1 = car->params[1].integer;
 	unsigned int value_2 = 0;
 	unsigned int value_3 = 0;
 
-	// show_union(p->params[3]); // PROBLEM
+	// show_union(car->p->params[3]); // PROBLEM
 
-	if (p->types[2] == T_DIR)
-		value_2 = p->params[2].integer;
-	else if (p->types[2] == T_REG)
-		value_2 = car->reg[p->params[2].integer].integer;
+	if (car->types[2] == T_DIR)
+		value_2 = car->params[2].integer;
+	else if (car->types[2] == T_REG)
+		value_2 = car->reg[car->params[2].integer].integer;
 
 	
 
-	if (p->types[3] == T_DIR)
-		value_3 = p->params[3].integer;
-	else if (p->types[3] == T_REG)
-		value_3 = car->reg[p->params[3].integer].integer;
+	if (car->types[3] == T_DIR)
+		value_3 = car->params[3].integer;
+	else if (car->types[3] == T_REG)
+		value_3 = car->reg[car->params[3].integer].integer;
 
 	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, value_1);
 
@@ -212,10 +211,10 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 }
 
 
-void	op_fork(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_fork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
-	new->position = (car->position + p->params[1].integer) % IDX_MOD;
+	new->position = (car->position + car->params[1].integer) % IDX_MOD;
 	push_carriage(new, &war->carriages);
 	int i = -1;
 	while (++i <= REG_NUMBER)
@@ -230,18 +229,18 @@ void	op_fork(t_carriage *car, t_war *war, t_instr_params *p)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | fork %d (%d)\n", car->number, p->params[1].integer, (car->position + p->params[1].integer) % IDX_MOD);
+		ft_printf("P%5d | fork %d (%d)\n", car->number, car->params[1].integer, (car->position + car->params[1].integer) % IDX_MOD);
 	}
 	
 }
 
-void	op_zjmp(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_zjmp(t_carriage *car, t_war *war)
 {
 	char *jump_status;
 
 	if (car->carry == true)
 	{
-		car->position += (p->params[1].integer % IDX_MOD);
+		car->position += (car->params[1].integer % IDX_MOD);
 		jump_status = "OK";
 	}
 	else
@@ -252,15 +251,15 @@ void	op_zjmp(t_carriage *car, t_war *war, t_instr_params *p)
 	// verbose
 	if (war->flag_verbose)
 	{
-		ft_printf("P%5d | zjmp %d %s\n", car->number, p->params[1].integer % IDX_MOD, jump_status);
+		ft_printf("P%5d | zjmp %d %s\n", car->number, car->params[1].integer % IDX_MOD, jump_status);
 	}
 	
 }
 
-void	op_add(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_add(t_carriage *car, t_war *war)
 {
-	car->reg[p->params[3].integer].integer = car->reg[p->params[1].integer].integer + car->reg[p->params[2].integer].integer;
-	if (car->reg[p->params[3].integer].integer == 0)
+	car->reg[car->params[3].integer].integer = car->reg[car->params[1].integer].integer + car->reg[car->params[2].integer].integer;
+	if (car->reg[car->params[3].integer].integer == 0)
 		car->carry = true;
 	else
 		car->carry = false;
@@ -268,36 +267,36 @@ void	op_add(t_carriage *car, t_war *war, t_instr_params *p)
 	if (war->flag_verbose)
 	{
 		ft_printf("P%5d | add r%d r%d r%d\n", car->number,
-			p->params[1].integer, p->params[2].integer, p->params[3].integer);
+			car->params[1].integer, car->params[2].integer, car->params[3].integer);
 	}
 	
 }
 
-void	op_xor(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_xor(t_carriage *car, t_war *war)
 {
 	// show_args(p, war);
 
 	int value_1;
 	int value_2;
 
-	if (p->types[1] == T_REG)
-		value_1 = car->reg[p->params[1].integer].integer;
+	if (car->types[1] == T_REG)
+		value_1 = car->reg[car->params[1].integer].integer;
 
-	if (p->types[2] == T_DIR)
-		value_2 = p->params[2].integer;
+	if (car->types[2] == T_DIR)
+		value_2 = car->params[2].integer;
 
-	car->reg[p->params[3].integer].integer = value_1 ^ value_2;
+	car->reg[car->params[3].integer].integer = value_1 ^ value_2;
 
 	// verbose
 	if (war->flag_verbose)
 	{
 		ft_printf("P%5d | xor %d %d r%d\n", car->number,
-			value_1, value_2, p->params[3].integer);
+			value_1, value_2, car->params[3].integer);
 	}
 	
 }
 
-void	op_new(t_carriage *car, t_war *war, t_instr_params *p)
+void	op_new(t_carriage *car, t_war *war)
 {
 
 
