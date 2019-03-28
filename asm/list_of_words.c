@@ -21,7 +21,6 @@ t_word	*create_word(t_asm *asm_parsing, char *name, int type)
 	new_word->name = name;
 	new_word->word_type = type;
 	new_word->row = asm_parsing->row;
-	// new_word->symbol = asm_parsing->symbol;
 	new_word->next = NULL;
 	return (new_word);
 }
@@ -41,20 +40,28 @@ void	add_word_to_list(t_asm *asm_parsing, t_word *new_word)
 			temp = temp->next;
 		temp->next = new_word;
 	}
-	// bool a = false;
 }
 
 void	free_list(t_asm *asm_parsing)
 {
 	t_word *current;
 	t_word *temp;
+	t_label *current_label;
+	t_label *temp_label;
 
 	current = asm_parsing->words;
+	current_label = asm_parsing->labels;
 	while (current != NULL)
 	{
 		temp = current->next;
 		ft_strdel(&current->name);
 		free(current);
 		current = temp;
+	}
+	while (current_label != NULL)
+	{
+		temp_label = current_label->next;
+		free(current_label);
+		current_label = temp_label;
 	}
 }

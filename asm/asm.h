@@ -68,6 +68,18 @@ typedef struct	s_op
 
 extern t_op g_op_tab[];
 
+/*
+** Structure for labels
+** refer - byte on which will refer some label
+*/
+typedef	struct	s_label
+{
+	int		refer;
+	char	*name;
+
+	struct	s_label *next;
+}				t_label;
+
 
 /*
 **	Structure for insruction
@@ -77,7 +89,6 @@ typedef	struct	s_word
 	char					*name;
 	unsigned				word_type;
 	unsigned				row;
-	// unsigned				symbol;
 	struct	s_word			*next;
 }				t_word;
 
@@ -97,11 +108,14 @@ typedef	struct	s_asm
 	unsigned	row;
 	unsigned	symbol;
 	t_word		*words;
-
+	t_label		*labels;
 
 	// added
 	char *byte_code;
 	int	position;
+
+	// position for labels
+	int		pos_labels;
 }				t_asm;
 
 /*
@@ -126,6 +140,13 @@ void	ft_error(t_asm *asm_parsing, char *message);
 t_word	*create_word(t_asm *asm_parsing, char *name, int type);
 void	add_word_to_list(t_asm *asm_parsing, t_word *new_word);
 void	free_list(t_asm *asm_parsing);
+
+
+/*
+**	list_of_labels.c
+*/
+t_label *create_label(char *name, int refer);
+void    add_label_to_list(t_asm *asm_parsing, t_label *new_label);
 
 /*
 **	parsing_lines.c

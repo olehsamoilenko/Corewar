@@ -66,10 +66,13 @@ t_asm	*init_asm(int fd)
 	asm_parsing->row = 0;
 	asm_parsing->symbol = 0;
 	asm_parsing->words = NULL;
+	asm_parsing->labels = NULL;
 
 	// added
 	asm_parsing->byte_code = NULL;
 	asm_parsing->position = 0;
+
+	asm_parsing->pos_labels = 0;
 	return (asm_parsing);
 }
 
@@ -274,6 +277,28 @@ t_instruction *init_instruction_args(void)
 	return (instruction_args);
 }
 
+t_label *find_label(t_asm *asm_parsing, t_word *current_label)
+{
+	t_label *label;
+	char *name;
+	char *name_label;
+
+	label = asm_parsing->labels;
+	name = ft_strchr(current_label->name, ':') + 1;
+	while (label != NULL)
+	{
+		name_label = ft_strsub(label->name, 0, ft_strlen(label->name) - 1);
+		if (ft_strcmp(name, name_label) == 0)
+		{
+			ft_strdel(&name_label);
+			return (label);
+		}
+		ft_strdel(&name_label);
+		label = label->next;
+	}
+	return (NULL);
+}
+
 t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 {
 	int		instruction;
@@ -307,7 +332,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 				error_word2(current, "Incorrect argument");
 			var_for_codage = var_for_codage | (two << shift_left);
 			shift_left -= 2;
-			// printf("var_for_codage =  %d\n", var_for_codage);		
+			// printf("var_for_codage =  %d\n", var_for_codage);
 			instruction_args->args[count_args] = current;	
 
 			count_args++;
@@ -354,7 +379,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		else
 			error_word2(current, "Separator is missed");
 	}
-
+	int position_of_instruct = asm_parsing->position;
 	// write opcode of instruction
 	write_int_to_byte(asm_parsing, instruction + 1, 1);
 
@@ -371,18 +396,43 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		{
 			if (instruction_args->args[i]->word_type == INDIRECT_ARG)
 			{
-				number = ft_atoi(instruction_args->args[i]->name);
-				write_int_to_byte(asm_parsing, number, 2);
+				if (ft_strchr(instruction_args->args[i]->name, ':'))
+				{
+					t_label *label = find_label(asm_parsing, instruction_args->args[i]);
+					if (label != NULL)
+					{
+						printf("position = %d\n", label->refer - position_of_instruct);
+						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
+					}
+				}
+				else
+				{
+					number = ft_atoi(instruction_args->args[i]->name);
+					write_int_to_byte(asm_parsing, number, 2);
+				}
 			}
 			else if (instruction_args->args[i]->word_type == DIRECT_ARG)
 			{
-				number = ft_atoi(&instruction_args->args[i]->name[1]);
-				if (g_op_tab[instruction].label_size == 1)
-					write_int_to_byte(asm_parsing, number, 2);
+				if (ft_strchr(instruction_args->args[i]->name, ':'))
+				{
+					t_label *label = find_label(asm_parsing, instruction_args->args[i]);
+					if (label != NULL)
+					{
+						printf("position = %d\n", label->refer - position_of_instruct);
+						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
+					}
+
+				}
 				else
 				{
-					// printf("NUMBER = %d\n", number);
-					write_int_to_byte(asm_parsing, number, 4);					
+					number = ft_atoi(&instruction_args->args[i]->name[1]);
+					if (g_op_tab[instruction].label_size == 1)
+						write_int_to_byte(asm_parsing, number, 2);
+					else
+					{
+						// printf("NUMBER = %d\n", number);
+						write_int_to_byte(asm_parsing, number, 4);					
+					}
 				}
 			}
 			else if (instruction_args->args[i]->word_type == REGISTER)
@@ -410,6 +460,8 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == LABEL)
 		{
 			current = current->next;
+			while (current->word_type == NEXT_LINE)
+				current = current->next;
 			if (current->word_type == INSTRUCTION)
 			{
 				// printf("label is OK\n");
@@ -426,7 +478,6 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 		{
 			error_word2(current, "INCORRECT");
 		}
-
 	}
 }
 
@@ -483,6 +534,135 @@ void	write_to_file(t_asm *asm_parsing)
 	}
 }
 
+t_word	*process_label(t_asm *asm_parsing, t_word *current)
+{
+	int		instruction;
+	int		count_args;
+	int		sum;
+
+	t_instruction *instruction_args;
+
+
+	// for codage
+	unsigned char var_for_codage = 0;
+	char shift_left = 6;
+
+	count_args = 0;
+	instruction = find_instruction(current);
+	if (instruction == -1)
+		error_word2(current, "Incorrect instruction");
+	current = current->next;
+
+	instruction_args = init_instruction_args();
+
+	while (current->word_type != NEXT_LINE && current->word_type != END_LINE)
+	{
+		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
+		{		
+			instruction_args->args[count_args] = current;	
+			count_args++;
+		}
+		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
+		{	
+			instruction_args->args[count_args] = current;
+			count_args++;			
+		}
+		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
+		{	
+			instruction_args->args[count_args] = current;				
+			count_args++;
+		}
+		current = current->next;
+		// printf("type = %d\n", current->word_type);
+		if (count_args == g_op_tab[instruction].count_args)
+		{
+			// current = current->next;
+			if (current->word_type != NEXT_LINE && current->word_type != END_LINE)
+				error_word2(current, "Wrong instruction");		
+		}
+		else if (current->word_type == SEPARATOR)
+			current = current->next;
+		else
+			error_word2(current, "Separator is missed");
+	}
+
+	// write opcode of instruction
+	asm_parsing->pos_labels += 1;
+
+	// write codage of instruction
+	if (g_op_tab[instruction].codage_octal == 1)
+		asm_parsing->pos_labels += 1;
+
+	// writing args of instruction
+	int i = 0;
+	while (i < 3)
+	{
+		if (instruction_args->args[i] != NULL)
+		{
+			if (instruction_args->args[i]->word_type == INDIRECT_ARG)
+				asm_parsing->pos_labels += 2;
+			else if (instruction_args->args[i]->word_type == DIRECT_ARG)
+			{
+				if (g_op_tab[instruction].label_size == 1)
+					asm_parsing->pos_labels += 2;
+				else
+					asm_parsing->pos_labels += 4;					
+			}
+			else if (instruction_args->args[i]->word_type == REGISTER)
+				asm_parsing->pos_labels += 1;
+		}
+		i++;
+	}
+
+	// printf("var_for_codage =  %d\n", var_for_codage);
+	if (count_args != g_op_tab[instruction].count_args)
+		error_word2(current, "Wrong number of arguments");
+	free(instruction_args);
+	return (current);
+}
+
+void	print_labels(t_asm *asm_parsing)
+{
+	t_label *current_label;
+
+	current_label = asm_parsing->labels;
+	while (current_label != NULL)
+	{
+		printf("label->name = %s | label->refer = %d\n", current_label->name, current_label->refer);
+		current_label = current_label->next;
+	}
+}
+
+void	determine_labels(t_asm *asm_parsing, t_word *current)
+{
+	t_word *current_label;
+
+	while (current->word_type != END_LINE)
+	{
+		if (current->word_type == NEXT_LINE)
+			current = current->next;
+		else if (current->word_type == LABEL)
+		{
+			current_label = current;
+			current = current->next;
+			while (current->word_type == NEXT_LINE)
+				current = current->next;
+			if (current->word_type == INSTRUCTION)
+			{
+				// printf("label is OK\n");
+				add_label_to_list(asm_parsing, create_label(current_label->name, asm_parsing->pos_labels));
+				current = process_label(asm_parsing, current);
+			}
+			else
+				error_word2(current, "Error with labels");
+		}
+		else if (current->word_type == INSTRUCTION)
+			current = process_label(asm_parsing, current);
+		else
+			error_word2(current, "INCORRECT");
+	}
+}
+
 void	interpreter(const char *filename)
 {
 	int		fd;
@@ -512,12 +692,12 @@ void	interpreter(const char *filename)
 	print_asm_structure(asm_parsing);
 
 	current = determine_commands(asm_parsing);
+	
+	determine_labels(asm_parsing, current);
+	print_labels(asm_parsing);
 	determine_instructions(asm_parsing, current);
 
-	// added
-	{
-		write_to_file(asm_parsing);
-	}
+	write_to_file(asm_parsing);
 
 	free_list(asm_parsing);
 	ft_strdel(&asm_parsing->byte_code);

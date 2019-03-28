@@ -16,6 +16,7 @@ LIBFT_INC = ./libft/includes
 LIBFT = libft/libft.a
 SRC =	main.c \
 		list_of_words.c \
+		list_of_labels.c \
 		parsing_lines.c \
 		op.c \
 		ft_itoa_base.c
