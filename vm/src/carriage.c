@@ -14,15 +14,15 @@
 
 void		show_carriages(t_war *war)
 {
-	if (war->flag_verbose)
-	{
+	// if (war->flag_dev)
+	// {
 		t_carriage *tmp = war->carriages;
 		while (tmp)
 		{
 			ft_printf("Position: %d Process: %d Cooldown: %d\n", tmp->position, tmp->number, tmp->cooldown);
 			tmp = tmp->next;
 		}
-	}
+	// }
 	
 }
 
@@ -44,10 +44,3 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 	return (car);
 }
 
-// t_carriage	*copy_carriage(t_carriage *car)
-// {
-// 	t_carriage *new = ft_memalloc(sizeof(t_carriage));
-// 	// new->position = car->position;
-
-// 	return (new);
-// }

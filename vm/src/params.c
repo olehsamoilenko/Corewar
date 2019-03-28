@@ -24,9 +24,11 @@
 #define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
 #define ERR_VER_DUMP "Combination of -verbose and -dump is forbidden"
 
+#define ERR_DEV "Only with -verbose!" // dev
+
 void	usage()
 {
-	printf("Usage: ./vm <[-n 1] champion1.cor> <...> [-verbose] [-visual]\n");
+	printf("Usage: ./vm <[-n 1] champion1.cor> <...> [-verbose] [-visual] [-dev]\n");
 	system("leaks vm | grep 'leaked bytes'");
 	exit(0);
 }
@@ -91,6 +93,8 @@ void	parse_params(int argc, char **argv, t_war *war)
 			war->flag_verbose = true;
 		else if (ft_strequ(argv[i], "-visual"))
 			war->flag_visual = true;
+		else if (ft_strequ(argv[i], "-dev"))
+			war->flag_dev = true;
 		else if (ft_strequ(argv[i], "-dump"))
 		{
 			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (n = ft_atoi(argv[i + 1])) < 0)
@@ -148,5 +152,8 @@ void	parse_params(int argc, char **argv, t_war *war)
 		error(ERR_VER_VIS);
 	if (war->flag_verbose && war->flag_dump != -1)
 		error(ERR_VER_DUMP);
+
+	if (war->flag_dev && (!war->flag_verbose || war->flag_visual))
+		error(ERR_DEV); // dev
 
 }

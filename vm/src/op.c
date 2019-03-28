@@ -26,7 +26,7 @@ void	op_live(t_carriage *car, t_war *war, t_instr_params *p)
 	{
 		player->last_live = war->cycle;
 		(player->lives_cur_period)++;
-
+		war->last_live = player;
 	}
 	
 	
@@ -94,14 +94,10 @@ void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 
 	int index = car->position + (p->params[1].integer + p->params[2].integer) % IDX_MOD; // only T_DIR
 	
-
-	int reg_number = p->params[3].integer;
-	// ft_printf("%d\n", reg_number);
-
-	car->reg[reg_number].bytes[3] = war->map[index + 0]->value;
-	car->reg[reg_number].bytes[2] = war->map[index + 1]->value;
-	car->reg[reg_number].bytes[1] = war->map[index + 2]->value;
-	car->reg[reg_number].bytes[0] = war->map[index + 3]->value;
+	car->reg[p->params[3].integer].bytes[3] = war->map[index + 0]->value;
+	car->reg[p->params[3].integer].bytes[2] = war->map[index + 1]->value;
+	car->reg[p->params[3].integer].bytes[1] = war->map[index + 2]->value;
+	car->reg[p->params[3].integer].bytes[0] = war->map[index + 3]->value;
 
 
 	// ft_printf("%02x ", car->reg[reg_number].bytes[0]);
@@ -127,7 +123,22 @@ void	op_ldi(t_carriage *car, t_war *war, t_instr_params *p)
 
 void	op_st(t_carriage *car, t_war *war, t_instr_params *p)
 {
-	
+	// show_args(p, war);
+
+	int index = car->position + p->params[2].integer % IDX_MOD; // T_IND
+	if (index < 0)
+		index += MEM_SIZE;
+	// ft_printf("%d\n", index);
+
+	war->map[index + 0]->value = car->reg[p->params[1].integer].bytes[3];
+	war->map[index + 1]->value = car->reg[p->params[1].integer].bytes[2];
+	war->map[index + 2]->value = car->reg[p->params[1].integer].bytes[1];
+	war->map[index + 3]->value = car->reg[p->params[1].integer].bytes[0];
+
+	if (war->flag_verbose)
+	{
+		ft_printf("P%5d | st r%d %d\n", car->number, p->params[1].integer, p->params[2].integer);
+	}
 }
 
 
@@ -169,7 +180,7 @@ void	op_sti(t_carriage *car, t_war *war, t_instr_params *p)
 
 	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, value_1);
 
-	union converter number;
+	union converter number; // WITHOUT NUMBER (CHECK ON MORTEL)
 	number.integer = car->reg[value_1].integer;
 
 	// ft_printf("%02x ", number.bytes[0]);

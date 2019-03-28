@@ -92,7 +92,7 @@ void show_args(t_instr_params *params, t_war *war)
 	while (++i <= params->amount && war->flag_dump == -1)
 	{
 		ft_printf("ARG %d: ", i);
-		ft_printf("%10ld ", params->params[i].integer);
+		ft_printf("%10ld %10d ", params->params[i].integer, params->params[i].integer);
 		ft_printf("%#010x ", params->params[i].integer);
 		int j = -1;
 		while (++j < 4)

@@ -23,6 +23,7 @@ void	next_cycle(t_war *war)
 {
 	
 	int key = 0;
+	
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		key = wgetch(war->win_getch);
@@ -31,8 +32,10 @@ void	next_cycle(t_war *war)
 	}
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
-		war->cycle++;
-		war->cycles_after_check++;
+		war->cycle += 1;
+		if (war->flag_verbose)
+			ft_printf("It is now cycle %d\n", war->cycle);
+		
 		// car->cooldown--;
 	}
 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
@@ -43,11 +46,6 @@ void	next_cycle(t_war *war)
 	
 	
 	
-	if (war->flag_verbose)
-	{
-		ft_printf("It is now cycle %d\n", war->cycle);
-		// curriage_info(car);
-	}
 }
 
 int		champions_count(t_champion **champs)
@@ -121,8 +119,8 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 	int index = op_index(map[car_pos]->value); // return op ?
 	t_op *op = &op_tab[index];
 
-	if (war->flag_verbose)
-		ft_printf("Process %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
+	if (war->flag_dev)
+		ft_printf("\tProcess %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
 			process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
 
 	if (index == -1)
@@ -211,13 +209,75 @@ void	introduce(t_champion **champs)
 	}
 }
 
+void	verbose_death(t_carriage *car, t_war *war)
+{
+	ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
+		car->number, war->cycle - car->last_live, war->cycles_to_die);
+}
+
+void	remove_carriages(t_carriage **list, t_war *war)
+{
+	// show_carriages(war);
+
+	t_carriage *del;
+
+	while (*list && (war->cycle - (*list)->last_live > war->cycles_to_die || war->cycles_to_die <= 0))
+	{
+		if (war->flag_verbose)
+			verbose_death(*list, war);
+		del = *list;
+		*list = (*list)->next;
+		free(del);
+	}
+
+	t_carriage *tmp = *list;
+	while (tmp && tmp->next)
+	{
+		// ft_printf("Checked %d\n", tmp->next->number);
+		if (war->cycle - tmp->next->last_live > war->cycles_to_die || war->cycles_to_die <= 0)
+		{
+			if (war->flag_verbose)
+				verbose_death(tmp->next, war);
+			del = tmp->next;
+			tmp->next = tmp->next->next;
+			free(del);
+		}
+		else
+			tmp = tmp->next;
+	}
+
+	// show_carriages(war);
+}
+
+void	checking(t_war *war)
+{
+	war->cycles_after_check += 1;
+	// ft_printf("LIVES: %d\n", war->champs[0]->lives_cur_period);
+	if (war->cycles_after_check >= war->cycles_to_die)
+	{
+		war->checks += 1;
+		remove_carriages(&war->carriages, war);
+		
+		if (war->champs[0]->lives_cur_period >= NBR_LIVE || war->checks == MAX_CHECKS)
+		{
+			war->cycles_to_die -= CYCLE_DELTA;
+			
+			war->checks = 0;
+			if (war->flag_verbose)
+				ft_printf("Cycle to die is now %d\n", war->cycles_to_die);
+		}
+
+		war->cycles_after_check = 0;
+		war->champs[0]->lives_cur_period = 0;
+	}
+}
+
+
+
 int		main(int argc, char **argv)
 {
 
 	t_war *war = init();
-
-	int index;
-
 	parse_params(argc, argv, war);
 	int mem_delta = MEM_SIZE / champions_count(war->champs);
 	parse_champions(war->champs, war->map, mem_delta);
@@ -234,24 +294,28 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 50000; i++)
 	{
 		t_carriage *tmp = war->carriages;
-		next_cycle(war);
-		if (war->cycles_after_check == war->cycles_to_die)
+
+		if (!tmp)
 		{
-			war->champs[0]->lives_cur_period = 0;
+			ft_printf("Contestant %d, \"%s\", has won !\n",
+				war->last_live->number, war->last_live->header->prog_name);
+			break ;
 		}
+
+		next_cycle(war);
 		while (tmp)
 		{
-			// MORTEL
-			// BEE_GEES
+			// MORTEL - cycle_to_die-- ?
+			// BEE_GEES - doesn't stop
+			// TURTLE7
 
 			t_carriage *car = tmp;
 			if (car->op == NULL)
 			{
 				car->op = get_command(car->number, car->position, war->map, war);
-				// curriage_info(car, war);
 				if (car->op)
 					car->cooldown = car->op->cooldown;
 				else
@@ -262,8 +326,6 @@ int		main(int argc, char **argv)
 			if (car->op && car->cooldown == 0)
 			{
 				t_instr_params *params = get_args(car, war->map, car->op, war);
-				// show_args(params);
-
 				car->op->func(car, war, params);
 				int instr_len = 1 + car->op->codage + params->sizes[1] + params->sizes[2] + params->sizes[3];
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
@@ -279,18 +341,17 @@ int		main(int argc, char **argv)
 				car->op = NULL;
 			}
 			print_memory(war);
-
-			// if (war->cycle - car->last_live > war->cycles_to_die)
-			// 	ft_printf("Process %d hasn't live...\n", car->number);
-
 			tmp = tmp->next;
 		}
+		checking(war);
 		if (!war->flag_visual && war->cycle == war->flag_dump)
 			dump(war);
 	}
 	
 	if (war->flag_visual)
 		over_curses(war);
-	system("leaks vm");
+	// show_carriages(war);
+	if (!war->flag_dump)
+		system("leaks vm");
 	return (0);
 }

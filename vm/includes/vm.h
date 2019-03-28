@@ -80,10 +80,14 @@ typedef struct	s_war
 	int					cycle; // current cycle
 	int					cycles_after_check;
 	int					cycles_to_die;
+	int					checks;
+
+	t_champion			*last_live; // if anybody ?
 
 	t_bool				flag_verbose:1;
 	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
+	t_bool				flag_dev:1; // FOR TESTING !
 	
 }				t_war;
 
