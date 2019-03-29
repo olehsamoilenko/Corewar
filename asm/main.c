@@ -317,7 +317,6 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 	if (instruction == -1)
 		error_word2(current, "Incorrect instruction");
 	current = current->next;
-	// printf("Instruction = %d | count_args = %d\n", instruction, g_op_tab[instruction].count_args);
 
 	instruction_args = init_instruction_args();
 
@@ -326,27 +325,33 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
 			char two = 2;
-			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 2 | g_op_tab[instruction].type_args[count_args];
+			printf("SUMA_OUT = %d\n", sum);
 			if (sum != g_op_tab[instruction].type_args[count_args])
+			{
+				printf("INN = %d\n", g_op_tab[instruction].type_args[count_args]);
+				printf("HERE2\n");
 				error_word2(current, "Incorrect argument");
+			}
+				
 			var_for_codage = var_for_codage | (two << shift_left);
 			shift_left -= 2;
-			// printf("var_for_codage =  %d\n", var_for_codage);
 			instruction_args->args[count_args] = current;	
 
 			count_args++;
 		}
 		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
-			char three = 3;
-			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
-			sum = 3 | g_op_tab[instruction].type_args[count_args];
+			char three = 4;
+			sum = 4 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
+			{
+				printf("HERE\n");
 				error_word2(current, "Incorrect argument");
+
+			}
 			var_for_codage = var_for_codage | (three << shift_left);
 			shift_left -= 2;
-			// printf("var_for_codage =  %d\n", var_for_codage);	
 			instruction_args->args[count_args] = current;			
 
 			count_args++;			
@@ -354,25 +359,21 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
 		{
 			char one = 1;
-			// printf("args = %d\n", g_op_tab[instruction].type_args[count_args]);
 			sum = 1 | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
 			var_for_codage = var_for_codage | (one << shift_left);
 			shift_left -= 2;
-			// printf("var_for_codage =  %d\n", var_for_codage);	
 			instruction_args->args[count_args] = current;			
 						
 			count_args++;
 
 		}
 		current = current->next;
-		// printf("type = %d\n", current->word_type);
 		if (count_args == g_op_tab[instruction].count_args)
 		{
-			// current = current->next;
-			if (current->word_type != NEXT_LINE && current->word_type != END_LINE)
-				error_word2(current, "Wrong instruction");		
+			if (current->word_type != NEXT_LINE)			
+				error_word2(current, "Wrong instruction");
 		}
 		else if (current->word_type == SEPARATOR)
 			current = current->next;
@@ -380,6 +381,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 			error_word2(current, "Separator is missed");
 	}
 	int position_of_instruct = asm_parsing->position;
+
 	// write opcode of instruction
 	write_int_to_byte(asm_parsing, instruction + 1, 1);
 
@@ -404,6 +406,8 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 						printf("position = %d\n", label->refer - position_of_instruct);
 						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
 					}
+					else
+						error_word2(instruction_args->args[i], "Unknown label");
 				}
 				else
 				{
@@ -421,7 +425,8 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 						printf("position = %d\n", label->refer - position_of_instruct);
 						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
 					}
-
+					else
+						error_word2(instruction_args->args[i], "Unknown label");
 				}
 				else
 				{
@@ -430,7 +435,6 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 						write_int_to_byte(asm_parsing, number, 2);
 					else
 					{
-						// printf("NUMBER = %d\n", number);
 						write_int_to_byte(asm_parsing, number, 4);					
 					}
 				}
@@ -444,7 +448,6 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		i++;
 	}
 
-	// printf("var_for_codage =  %d\n", var_for_codage);
 	if (count_args != g_op_tab[instruction].count_args)
 		error_word2(current, "Wrong number of arguments");
 	free(instruction_args);
@@ -464,7 +467,6 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 				current = current->next;
 			if (current->word_type == INSTRUCTION)
 			{
-				// printf("label is OK\n");
 				current = process_instruction(asm_parsing, current);
 			}
 			else
@@ -573,7 +575,6 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 			count_args++;
 		}
 		current = current->next;
-		// printf("type = %d\n", current->word_type);
 		if (count_args == g_op_tab[instruction].count_args)
 		{
 			// current = current->next;
@@ -649,7 +650,6 @@ void	determine_labels(t_asm *asm_parsing, t_word *current)
 				current = current->next;
 			if (current->word_type == INSTRUCTION)
 			{
-				// printf("label is OK\n");
 				add_label_to_list(asm_parsing, create_label(current_label->name, asm_parsing->pos_labels));
 				current = process_label(asm_parsing, current);
 			}
