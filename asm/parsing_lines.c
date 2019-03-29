@@ -33,7 +33,7 @@ void	cut_doubles(t_asm *asm_parsing, char *line, int	start)
 
 
 	substring = take_word(asm_parsing->symbol, line, start);
-	printf("SUBSTRING = %s\n", substring);
+	// printf("SUBSTRING = %s\n", substring);
 	temp_join = substring;
 	while (get_next_line(asm_parsing->fd, &line))
 	{
@@ -46,7 +46,7 @@ void	cut_doubles(t_asm *asm_parsing, char *line, int	start)
 		ft_strdel(&substring);
 		substring = temp_join;
 		// ft_strdel(&temp_join);
-		printf("temp_join = %s\n", temp_join);
+		// printf("temp_join = %s\n", temp_join);
 		ft_strdel(&line);
 	}
 	str = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
@@ -55,7 +55,7 @@ void	cut_doubles(t_asm *asm_parsing, char *line, int	start)
 	ft_strdel(&temp);
 	ft_strdel(&str);
 	int pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
-	printf("line[pos] = %d\n", pos);
+	// printf("line[pos] = %d\n", pos);
 	while (ft_strlen(line) > 0 && line[pos])
 	{
 		if (ft_isspace(line[pos]))

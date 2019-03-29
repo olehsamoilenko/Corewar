@@ -15,7 +15,7 @@
 void	ft_arg_error(char *message)
 {
 	ft_putendl_fd(message, 2);
-	system("leaks asm");
+	// system("leaks asm");
 	exit(1);
 }
 
@@ -26,21 +26,21 @@ void	ft_error(t_asm *asm_parsing, char *message)
 	printf("asm_parsing->row = %d\n", asm_parsing->row);
 	printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
 	ft_putendl_fd(message, 2);
-	system("leaks asm");
+	// system("leaks asm");
 	exit(1);
 }
 
 void	error_word(t_asm *asm_parsing, char *message)
 {
 	printf("Not valid word on row %d \"%s\"\n", asm_parsing->row, message);
-	system("leaks asm");
+	// system("leaks asm");
 	exit(1);
 }
 
 void	error_word2(t_word *word, char *message)
 {
 	printf("ERROR: \"%s\" on row %d\n", message, word->row);
-	system("leaks asm");
+	// system("leaks asm");
 	exit(1);	
 }
 
@@ -396,7 +396,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 					t_label *label = find_label(asm_parsing, instruction_args->args[i]);
 					if (label != NULL)
 					{
-						printf("position = %d\n", label->refer - position_of_instruct);
+						// printf("position = %d\n", label->refer - position_of_instruct);
 						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
 					}
 					else
@@ -416,7 +416,13 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 					if (label != NULL)
 					{
 						printf("position = %d\n", label->refer - position_of_instruct);
-						write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);						
+						// write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);
+						if (g_op_tab[instruction].label_size == 1)
+							write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 2);
+						else
+						{
+							write_int_to_byte(asm_parsing, label->refer - position_of_instruct, 4);					
+						}					
 					}
 					else
 						error_word2(instruction_args->args[i], "Unknown label");
@@ -526,11 +532,12 @@ void	write_to_file(t_asm *asm_parsing)
 		// printf("LENGTH = %d\n", (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
 		write(new_fd, all_code, (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
 
-		ft_strdel(&file_to_write);
 		ft_strdel(&name_without);
 		ft_strdel(&comment_without);
 		ft_strdel(&all_code);
 	}
+	printf("Writing output program to %s\n", file_to_write);
+		ft_strdel(&file_to_write);	
 }
 
 t_word	*process_label(t_asm *asm_parsing, t_word *current)
@@ -725,7 +732,7 @@ int main(int argc, char const *argv[])
 		ft_arg_error("Missed filename");
 	interpreter(argv[1]);
 	
-	system("leaks asm");
+	// system("leaks asm");
 	return (0);
 }
  
