@@ -102,6 +102,7 @@ typedef struct s_instruction
 */
 typedef	struct	s_asm
 {
+	char		*filename;
 	int			fd;
 	char		*name_champ;
 	char		*comment;

@@ -97,6 +97,11 @@ void	cut_direct(t_asm *asm_parsing, char *line)
 	while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
 		asm_parsing->symbol++;
 	substring = take_word(asm_parsing->symbol, line, start);
+	if (!ft_strchr(substring, ':'))
+		if (ft_strchr(substring, '_'))
+			error_word(asm_parsing, "Argument contains incorrect symbol");
+	if (ft_strlen(substring) < 2)
+		error_word(asm_parsing, "Length of argument equals 0");
 	add_word_to_list(asm_parsing, create_word(asm_parsing, substring, DIRECT_ARG));
 }
 
@@ -115,6 +120,15 @@ void	cut_other(t_asm *asm_parsing, char *line)
 	if (line[asm_parsing->symbol] == LABEL_CHAR)
 	{
 		substring = take_word(++asm_parsing->symbol, line, start);
+		// check if minus is in label
+		int i = 0;
+		while (i < ft_strlen(substring) - 1)
+		{
+			if (ft_strchr(LABEL_CHARS, substring[i]) != NULL)
+				i++;
+			else
+				error_word(asm_parsing, substring);
+		}
 		// if label contains not only ':'
 		if (ft_strlen(substring) > 1)
 			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, LABEL));

@@ -54,12 +54,13 @@ void	print_asm_structure(t_asm *asm_parsing)
 	printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
 }
 
-t_asm	*init_asm(int fd)
+t_asm	*init_asm(int fd, const char *filename)
 {
 	t_asm	*asm_parsing;
 
 	if (!(asm_parsing = (t_asm *)malloc(sizeof(t_asm))))
 		ft_arg_error("Can't allocate memory");
+	asm_parsing->filename = ft_strsub(filename, 0, ft_strlen(filename) - 2);
 	asm_parsing->fd = fd;
 	asm_parsing->name_champ = NULL;
 	asm_parsing->comment = NULL;
@@ -324,17 +325,13 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 	{
 		if (current->word_type == DIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
-			char two = 2;
-			sum = 2 | g_op_tab[instruction].type_args[count_args];
-			printf("SUMA_OUT = %d\n", sum);
+			sum = T_DIR | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 			{
-				printf("INN = %d\n", g_op_tab[instruction].type_args[count_args]);
-				printf("HERE2\n");
 				error_word2(current, "Incorrect argument");
 			}
 				
-			var_for_codage = var_for_codage | (two << shift_left);
+			var_for_codage = var_for_codage | (DIR_CODE << shift_left);
 			shift_left -= 2;
 			instruction_args->args[count_args] = current;	
 
@@ -342,15 +339,12 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		}
 		else if (current->word_type == INDIRECT_ARG && count_args < g_op_tab[instruction].count_args)
 		{
-			char three = 4;
-			sum = 4 | g_op_tab[instruction].type_args[count_args];
+			sum = T_IND | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 			{
-				printf("HERE\n");
 				error_word2(current, "Incorrect argument");
-
 			}
-			var_for_codage = var_for_codage | (three << shift_left);
+			var_for_codage = var_for_codage | (IND_CODE << shift_left);
 			shift_left -= 2;
 			instruction_args->args[count_args] = current;			
 
@@ -358,11 +352,10 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		}
 		else if (current->word_type == REGISTER && count_args < g_op_tab[instruction].count_args)
 		{
-			char one = 1;
-			sum = 1 | g_op_tab[instruction].type_args[count_args];
+			sum = T_REG | g_op_tab[instruction].type_args[count_args];
 			if (sum != g_op_tab[instruction].type_args[count_args])
 				error_word2(current, "Incorrect argument");
-			var_for_codage = var_for_codage | (one << shift_left);
+			var_for_codage = var_for_codage | (REG_CODE << shift_left);
 			shift_left -= 2;
 			instruction_args->args[count_args] = current;			
 						
@@ -373,7 +366,7 @@ t_word	*process_instruction(t_asm *asm_parsing, t_word *current)
 		if (count_args == g_op_tab[instruction].count_args)
 		{
 			if (current->word_type != NEXT_LINE)			
-				error_word2(current, "Wrong instruction");
+				error_word2(current, "Invalid syntax after instruction");
 		}
 		else if (current->word_type == SEPARATOR)
 			current = current->next;
@@ -465,10 +458,12 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 			current = current->next;
 			while (current->word_type == NEXT_LINE)
 				current = current->next;
+			if (current->word_type == END_LINE)
+				break;
+			else if (current->word_type == LABEL)
+				continue;				
 			if (current->word_type == INSTRUCTION)
-			{
 				current = process_instruction(asm_parsing, current);
-			}
 			else
 				error_word2(current, "Error with labels");
 		}
@@ -501,7 +496,8 @@ void	write_data_to_all(char *all, int start, int data, int size)
 void	write_to_file(t_asm *asm_parsing)
 {
 	int position_all = 0;
-
+	char	*file_to_write = ft_strjoin(asm_parsing->filename, ".cor");
+	
 	int len = asm_parsing->position;
 	char *all_code = ft_strnew(4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
 	ft_bzero(all_code, 4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len);
@@ -526,10 +522,11 @@ void	write_to_file(t_asm *asm_parsing)
 		// error with code of champion
 		ft_memcpy(&all_code[position_all], asm_parsing->byte_code, asm_parsing->position);
 
-		int new_fd = open("our_test.cor", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+		int new_fd = open(file_to_write, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 		// printf("LENGTH = %d\n", (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
 		write(new_fd, all_code, (4 + PROG_NAME_LENGTH + 4 + 4 + COMMENT_LENGTH + 4 + len));
 
+		ft_strdel(&file_to_write);
 		ft_strdel(&name_without);
 		ft_strdel(&comment_without);
 		ft_strdel(&all_code);
@@ -579,7 +576,7 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 		{
 			// current = current->next;
 			if (current->word_type != NEXT_LINE && current->word_type != END_LINE)
-				error_word2(current, "Wrong instruction");		
+				error_word2(current, "Invalid syntax after instruction");		
 		}
 		else if (current->word_type == SEPARATOR)
 			current = current->next;
@@ -648,7 +645,17 @@ void	determine_labels(t_asm *asm_parsing, t_word *current)
 			current = current->next;
 			while (current->word_type == NEXT_LINE)
 				current = current->next;
-			if (current->word_type == INSTRUCTION)
+			if (current_label->next->word_type == NEXT_LINE && current->word_type == END_LINE)
+			{
+				add_label_to_list(asm_parsing, create_label(current_label->name, asm_parsing->pos_labels));				
+				break;								
+			}
+			else if (current->word_type == LABEL && current_label->next->word_type == NEXT_LINE)
+			{
+				add_label_to_list(asm_parsing, create_label(current_label->name, asm_parsing->pos_labels));
+				continue;
+			}
+			else if (current->word_type == INSTRUCTION)
 			{
 				add_label_to_list(asm_parsing, create_label(current_label->name, asm_parsing->pos_labels));
 				current = process_label(asm_parsing, current);
@@ -673,8 +680,8 @@ void	interpreter(const char *filename)
 
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		ft_arg_error("Can't open this file");
-	asm_parsing = init_asm(fd);
-	// print_asm_structure(asm_parsing);
+	asm_parsing = init_asm(fd, filename);
+
 	while ((ret = get_next_line(fd, &line)) > 0 && line != NULL)
 	{
 		asm_parsing->row++;
@@ -689,7 +696,6 @@ void	interpreter(const char *filename)
 	if (ret == -1)
 		ft_arg_error("You can't open directory");
 	print_list(asm_parsing);
-	print_asm_structure(asm_parsing);
 
 	current = determine_commands(asm_parsing);
 	
@@ -700,6 +706,7 @@ void	interpreter(const char *filename)
 	write_to_file(asm_parsing);
 
 	free_list(asm_parsing);
+	ft_strdel(&asm_parsing->filename);
 	ft_strdel(&asm_parsing->byte_code);
 	free(asm_parsing);
 }

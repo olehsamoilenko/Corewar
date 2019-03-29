@@ -1,12 +1,9 @@
-.name "Batman"
+.name       "Batman"
+.comment    "This city needs me"
 
-.comment "This city needs me"
-
-loop:
-loop:
+_loop:
         sti r1, %:live, %1
 live:
-        live %0
+        live %4
         ld %0, r2
-        zjmp %:loop
-        st r5, -10
+		zjmp %:live
