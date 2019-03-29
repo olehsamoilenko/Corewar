@@ -98,7 +98,7 @@ typedef struct	s_war
 	int					checks;
 
 	t_champion			*last_live; // if anybody ?
-	// int					all_lives;
+	int					all_lives;
 
 	t_bool				flag_verbose:1;
 	t_bool				flag_visual:1;

@@ -33,7 +33,7 @@ void	next_cycle(t_war *war)
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
 		war->cycle += 1;
-		if (war->flag_verbose)
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("It is now cycle %d\n", war->cycle);
 		
 		// car->cooldown--;
@@ -124,8 +124,24 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 			process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
 
 	if (index == -1)
+	{
+		if (map[car_pos]->value > 0 && map[car_pos]->value < 17)
+			ft_printf("UNKNOWN COMMAND %02x\n", map[car_pos]->value);
 		return (NULL);
+	}
 	return (op);
+}
+
+int		define_type_1(int type)
+{
+	if (type == REG_CODE)
+		return(T_REG);
+	else if (type == DIR_CODE)
+		return(T_DIR);
+	else if (type == IND_CODE)
+		return (T_IND);
+	else
+		return (0);
 }
 
 void	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
@@ -158,22 +174,38 @@ void	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 		third = op->args_type[2];
 	}
 
-	car->types[1] = first;
-	car->types[2] = second;
-	car->types[3] = third;
+	car->types[1] = define_type_1(first);
+	car->types[2] = define_type_1(second);
+	car->types[3] = define_type_1(third);
+
+	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
+
+	if ((op->args_type[0] | car->types[1]) != op->args_type[0])
+	{
+		car->types[1] = 0;
+		// ft_printf("first ko\n");
+	}
+	if ((op->args_type[1] | car->types[2]) != op->args_type[1])
+	{
+		car->types[2] = 0; 
+		// ft_printf("second ko\n");
+	}
+	if ((op->args_type[2] | car->types[3]) != op->args_type[2])
+	{
+		car->types[3] = 0;
+		// ft_printf("third ko\n");
+	}
+
 
 	int arg_1_size = define_size(first, op->label);
 	int arg_2_size = define_size(second, op->label);
 	int arg_3_size = define_size(third, op->label);
 
+	
+
 	car->sizes[1] = arg_1_size;
 	car->sizes[2] = arg_2_size;
 	car->sizes[3] = arg_3_size;
-
-	
-	// if (war->flag_verbose)
-	// 	ft_printf("args_sizes: %d %d %d\n", arg_1_size, arg_2_size, arg_3_size);
-	
 
 
 	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
@@ -221,7 +253,7 @@ void	remove_carriages(t_carriage **list, t_war *war)
 
 	t_carriage *del;
 
-	while (*list && (war->cycle - (*list)->last_live > war->cycles_to_die || war->cycles_to_die <= 0))
+	while (*list && (war->cycle - (*list)->last_live >= war->cycles_to_die || war->cycles_to_die <= 0))
 	{
 		if (war->flag_verbose)
 			verbose_death(*list, war);
@@ -234,9 +266,9 @@ void	remove_carriages(t_carriage **list, t_war *war)
 	while (tmp && tmp->next)
 	{
 		// ft_printf("Checked %d\n", tmp->next->number);
-		if (war->cycle - tmp->next->last_live > war->cycles_to_die || war->cycles_to_die <= 0)
+		if (war->cycle - tmp->next->last_live >= war->cycles_to_die || war->cycles_to_die <= 0)
 		{
-			if (war->flag_verbose)
+			if (war->flag_verbose && war->cycle >= war->flag_dump)
 				verbose_death(tmp->next, war);
 			del = tmp->next;
 			tmp->next = tmp->next->next;
@@ -257,22 +289,26 @@ void	checking(t_war *war)
 	{
 		war->checks += 1;
 		remove_carriages(&war->carriages, war);
-		
-		if (war->champs[0]->lives_cur_period >= NBR_LIVE || war->checks == MAX_CHECKS)
+		// ft_printf("LIVES %d\n", war->all_lives);
+		if (war->all_lives >= NBR_LIVE || war->checks == MAX_CHECKS)
 		{
 			war->cycles_to_die -= CYCLE_DELTA;
 			
 			war->checks = 0;
-			if (war->flag_verbose)
+			if (war->flag_verbose && war->cycle >= war->flag_dump)
 				ft_printf("Cycle to die is now %d\n", war->cycles_to_die);
 		}
 
 		war->cycles_after_check = 0;
 		war->champs[0]->lives_cur_period = 0;
+		war->all_lives = 0;
 	}
 }
-
-
+//				VERBOSE		DUMP
+// MORTEL		OK			OK
+// TURTLE 		OK			OK
+// FLUTTERSHY	OK			OK
+// GAGNANT		SF
 
 int		main(int argc, char **argv)
 {
@@ -294,24 +330,19 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-	// int i = -1;
+	int i = -1;
 	while (true)
 	{
+
 		t_carriage *tmp = war->carriages;
-
-		if (!tmp)
-		{
-			ft_printf("Contestant %d, \"%s\", has won !\n",
-				war->last_live->number, war->last_live->header->prog_name);
-			break ;
-		}
-
 		next_cycle(war);
+		
+
 		while (tmp)
 		{
-			// MORTEL - cycle_to_die-- ?
-			// BEE_GEES - doesn't stop
-			// TURTLE7
+			
+			// ft_printf("HELLO\n");
+			
 
 			t_carriage *car = tmp;
 			if (car->op == NULL)
@@ -327,7 +358,6 @@ int		main(int argc, char **argv)
 			if (car->op && car->cooldown == 0)
 			{
 				get_args(car, war->map, car->op, war);
-				// car->p = params;
 				car->op->func(car, war);
 				int instr_len = 1 + car->op->codage + car->sizes[1] + car->sizes[2] + car->sizes[3];
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
@@ -336,10 +366,10 @@ int		main(int argc, char **argv)
 				}
 				else
 				{
+
 					adv(war, car->op, instr_len, car);
-					car->position += instr_len;
+					car->position = (car->position + instr_len) % MEM_SIZE;
 				}
-				// free(car->p);
 				car->op = NULL;
 			}
 			if (war->flag_visual)
@@ -347,14 +377,27 @@ int		main(int argc, char **argv)
 			tmp = tmp->next;
 		}
 		checking(war);
-		if (!war->flag_visual && war->cycle == war->flag_dump)
+		if (!war->carriages)
+		{
+			if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
+				ft_printf("Contestant %d, \"%s\", has won !\n",
+					war->last_live->number, war->last_live->header->prog_name);
+			break ;
+		}
+		if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)
+		{
 			dump(war);
+			// ft_printf("sd");
+			// break ;
+		}
 	}
+
+	// show_carriages(war);
 	
 	if (war->flag_visual)
 		over_curses(war);
 	// show_carriages(war);
-	if (!war->flag_dump)
-		system("leaks vm");
+	// if (war->flag_dump == -1)
+	// 	system("leaks vm");
 	return (0);
 }

@@ -86,10 +86,10 @@ char	*define_type(int type)
 		return ("---");
 }
 
-void show_args(t_war *war, t_carriage *car)
+void	show_args(t_war *war, t_carriage *car)
 {
 	int i = 0;
-	while (++i <= car->op->args && war->flag_dump == -1)
+	while (++i <= car->op->args)
 	{
 		ft_printf("ARG %d: ", i);
 		ft_printf("%10ld %10d ", car->params[i].integer, car->params[i].integer);

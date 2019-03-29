@@ -22,7 +22,7 @@
 #define ERR_BIG_N "Champion's number exceeds their amount"
 #define ERR_DUMP "Flag -dump needs a number"
 #define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
-#define ERR_VER_DUMP "Combination of -verbose and -dump is forbidden"
+// #define ERR_VER_DUMP "Combination of -verbose and -dump is forbidden"
 
 #define ERR_DEV "Only with -verbose!" // dev
 
@@ -146,8 +146,8 @@ void	parse_params(int argc, char **argv, t_war *war)
 	
 	if (war->flag_verbose && war->flag_visual)
 		error(ERR_VER_VIS);
-	if (war->flag_verbose && war->flag_dump != -1)
-		error(ERR_VER_DUMP);
+	// if (war->flag_verbose && war->flag_dump != -1)
+	// 	error(ERR_VER_DUMP);
 
 	if (war->flag_dev && (!war->flag_verbose || war->flag_visual))
 		error(ERR_DEV); // dev

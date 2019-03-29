@@ -4,5 +4,10 @@ then
 else
 	./vm $1 -verbose > bin/my
 	./resources/corewar $1 -v 31 > bin/origin
-	diff -y bin/my bin/origin | less
+	if [ "$(diff -u bin/my bin/origin)" == "" ]
+	then
+		echo "OK"
+	else
+		echo "KO"
+	fi
 fi
