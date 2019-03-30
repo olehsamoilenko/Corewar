@@ -38,6 +38,9 @@
 # define REGISTER 10
 # define END_LINE 11
 
+# define BREAK 33
+# define CONTINUE 44
+
 static	char *test[] = 
 {
 	"COMMAND",
@@ -68,6 +71,17 @@ typedef struct	s_op
 
 extern t_op g_op_tab[];
 
+
+typedef	struct	s_codage
+{
+	int				instruction;
+	int				count_args;	
+	int				sum;
+	unsigned char	var_for_codage;
+    char 			shift_left;
+	
+}				t_codage;
+
 /*
 ** Structure for labels
 ** refer - byte on which will refer some label
@@ -95,6 +109,7 @@ typedef	struct	s_word
 typedef struct s_instruction
 {
 	t_word *args[3];
+	int		opcode;
 }				t_instruction;
 
 /*
@@ -124,23 +139,14 @@ typedef	struct	s_asm
 */
 char	*take_word(int end , char *line, int start);
 void	ignore_comment(t_asm *asm_parsing, char *line);
-int		check_for_register(t_asm *asm_parsing, char *name);
-int		check_for_number(t_asm *asm_parsing, char *name);
-int		check_for_instruction(char *name);
-
-/*
-**	Functions for errors
-*/
-void	ft_arg_error(char *message);
-void	error_word(t_asm *asm_parsing, char *message);
-void	ft_error(t_asm *asm_parsing, char *message);
-
+int	find_instruction(t_word *current);
+t_instruction 	*init_instruction_args(void);
+t_label *find_label(t_asm *asm_parsing, t_word *current_label);
 /*
 **	list_of_worrds.c
 */
 t_word	*create_word(t_asm *asm_parsing, char *name, int type);
 void	add_word_to_list(t_asm *asm_parsing, t_word *new_word);
-void	free_list(t_asm *asm_parsing);
 
 
 /*
@@ -154,7 +160,42 @@ void    add_label_to_list(t_asm *asm_parsing, t_label *new_label);
 */
 void	parse_line(t_asm *asm_parsing, char *line);
 
+/*
+**	check_all.c
+*/
+void	check_label(t_asm *asm_parsing, char *substring, char *line, int start);
+void	check_for_doubles(t_asm *asm_parsing, char *line, char *substring);
+void	check_all_lines(t_asm *asm_parsing, int ret, int fd, char *line);
+int		check_for_register(t_asm *asm_parsing, char *name);
+int		check_for_instruction(char *name);
+int		check_for_number(t_asm *asm_parsing, char *name);
+/*
+**	error_managment.c
+*/
+void	ft_arg_error(char *message);
+void	ft_error(t_asm *asm_parsing, char *message);
+void	error_word(t_asm *asm_parsing, char *message);
+void	error_word2(t_word *word, char *message);
+/*
+**	convert_and_write.c
+*/
+void	write_int_to_byte(t_asm *asm_parsing, int nbr, int size);
+void	write_data_to_all(char *all, int start, int data, int size);
+void	write_to_file(t_asm *asm_parsing);
+/*
+**	free_all.c
+*/
+void	free_all(t_asm *asm_parsing);
 
-// added
-char		*ft_itoa_base(uintmax_t n, int base, int flag);
+/*
+**	process_instruction.c
+*/
+t_word	*process_instruction(t_asm *asm_parsing, t_word *current);
+t_codage	*init_codage(void);
+
+/*
+**	process_labels.c
+*/
+t_word	*process_label(t_asm *asm_parsing, t_word *current);
+
 #endif

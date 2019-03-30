@@ -19,7 +19,12 @@ SRC =	main.c \
 		list_of_labels.c \
 		parsing_lines.c \
 		op.c \
-		ft_itoa_base.c
+		check_all.c \
+		error_managment.c \
+		convert_and_write.c \
+		free_all.c \
+		process_instruction.c \
+		process_labels.c
 
 OBJ = $(SRC:.c=.o)
 

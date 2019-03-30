@@ -12,7 +12,7 @@
 
 #include "asm.h"
 
-t_label *create_label(char *name, int refer)
+t_label	*create_label(char *name, int refer)
 {
     t_label *new_label;
 
@@ -28,9 +28,7 @@ void    add_label_to_list(t_asm *asm_parsing, t_label *new_label)
     t_label *temp;
 
 	if (asm_parsing->labels == NULL)
-	{
 		asm_parsing->labels = new_label;
-	}
 	else
 	{
 		temp = asm_parsing->labels;

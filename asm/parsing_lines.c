@@ -21,7 +21,6 @@ void	cut_command(t_asm *asm_parsing, char *line)
 	while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
 		asm_parsing->symbol++;
 	substring = take_word(asm_parsing->symbol, line, start);
-	// printf("CUT = %s\n", substring);
 	add_word_to_list(asm_parsing, create_word(asm_parsing, substring, COMMAND));
 }
 
@@ -33,20 +32,15 @@ void	cut_doubles(t_asm *asm_parsing, char *line, int	start)
 
 
 	substring = take_word(asm_parsing->symbol, line, start);
-	// printf("SUBSTRING = %s\n", substring);
 	temp_join = substring;
 	while (get_next_line(asm_parsing->fd, &line))
 	{
 		asm_parsing->row++;
-		// printf("ROW = %d\n", asm_parsing->row);
-		// printf("LINE = %s\n", line);
 		if (ft_strchr(line, '"'))
 			break ;
 		temp_join = ft_strjoin(substring, line);
 		ft_strdel(&substring);
 		substring = temp_join;
-		// ft_strdel(&temp_join);
-		// printf("temp_join = %s\n", temp_join);
 		ft_strdel(&line);
 	}
 	str = take_word(ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1, line, 0);
@@ -54,21 +48,7 @@ void	cut_doubles(t_asm *asm_parsing, char *line, int	start)
 	substring = ft_strjoin(temp_join, str);
 	ft_strdel(&temp);
 	ft_strdel(&str);
-	int pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
-	// printf("line[pos] = %d\n", pos);
-	while (ft_strlen(line) > 0 && line[pos])
-	{
-		if (ft_isspace(line[pos]))
-			pos++;
-		else if (line[pos] == '#')
-			break ;
-		else
-			error_word(asm_parsing, &line[pos]);
-	}
-	if (ft_strchr(line, '"') == NULL)
-		error_word(asm_parsing, "ERROR");
-	ft_strdel(&line);
-	add_word_to_list(asm_parsing, create_word(asm_parsing, substring, DOUBLES));
+	check_for_doubles(asm_parsing, line, substring);
 }
 
 void	cut_label(t_asm *asm_parsing, char *line)
@@ -118,23 +98,7 @@ void	cut_other(t_asm *asm_parsing, char *line)
 	while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
 		asm_parsing->symbol++;
 	if (line[asm_parsing->symbol] == LABEL_CHAR)
-	{
-		substring = take_word(++asm_parsing->symbol, line, start);
-		// check if minus is in label
-		int i = 0;
-		while (i < ft_strlen(substring) - 1)
-		{
-			if (ft_strchr(LABEL_CHARS, substring[i]) != NULL)
-				i++;
-			else
-				error_word(asm_parsing, substring);
-		}
-		// if label contains not only ':'
-		if (ft_strlen(substring) > 1)
-			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, LABEL));
-		else
-			ft_error(asm_parsing, "Lexical error");
-	}
+		check_label(asm_parsing, substring, line, start);
 	else
 	{
 		substring = take_word(asm_parsing->symbol, line, start);
@@ -149,38 +113,33 @@ void	cut_other(t_asm *asm_parsing, char *line)
 	}
 }
 
+void	cut_doubles_s(t_asm *asm_parsing, char *line, int start, char *substring)
+{
+	start = asm_parsing->symbol++;
+	while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
+		asm_parsing->symbol++;
+	if (line[asm_parsing->symbol] != '"')
+		cut_doubles(asm_parsing, line, start);
+	else
+	{
+		substring = take_word(++asm_parsing->symbol, line, start);
+		add_word_to_list(asm_parsing, create_word(asm_parsing, substring, DOUBLES));
+	}
+}
+
 void	parse_word(t_asm *asm_parsing, char *line)
 {
 	int	start;
 	char	*substring;
 
 	if (line[asm_parsing->symbol] == '.')
-	{
 		cut_command(asm_parsing, line);
-	}
 	else if (line[asm_parsing->symbol] == '"')
-	{
-		start = asm_parsing->symbol++;
-		while (line[asm_parsing->symbol] && line[asm_parsing->symbol] != '"')
-			asm_parsing->symbol++;
-		if (line[asm_parsing->symbol] != '"')
-		{
-			cut_doubles(asm_parsing, line, start);
-		}
-		else
-		{
-			substring = take_word(++asm_parsing->symbol, line, start);
-			add_word_to_list(asm_parsing, create_word(asm_parsing, substring, DOUBLES));
-		}
-	}
+		cut_doubles_s(asm_parsing, line, start, substring);
 	else if (line[asm_parsing->symbol] == LABEL_CHAR)
-	{
 		cut_label(asm_parsing, line);
-	}
 	else if (line[asm_parsing->symbol] == DIRECT_CHAR)
-	{
 		cut_direct(asm_parsing, line);
-	}
 	else if (line[asm_parsing->symbol] == ',')
 	{
 		start = asm_parsing->symbol++;
@@ -188,9 +147,7 @@ void	parse_word(t_asm *asm_parsing, char *line)
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring, SEPARATOR));
 	}
 	else if (line[asm_parsing->symbol])
-	{
 		cut_other(asm_parsing, line);
-	}
 }
 
 void	parse_line(t_asm *asm_parsing, char *line)

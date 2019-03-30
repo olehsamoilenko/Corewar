@@ -30,9 +30,7 @@ void	add_word_to_list(t_asm *asm_parsing, t_word *new_word)
 	t_word	*temp;
 
 	if (asm_parsing->words == NULL)
-	{
 		asm_parsing->words = new_word;
-	}
 	else
 	{
 		temp = asm_parsing->words;
@@ -42,26 +40,3 @@ void	add_word_to_list(t_asm *asm_parsing, t_word *new_word)
 	}
 }
 
-void	free_list(t_asm *asm_parsing)
-{
-	t_word *current;
-	t_word *temp;
-	t_label *current_label;
-	t_label *temp_label;
-
-	current = asm_parsing->words;
-	current_label = asm_parsing->labels;
-	while (current != NULL)
-	{
-		temp = current->next;
-		ft_strdel(&current->name);
-		free(current);
-		current = temp;
-	}
-	while (current_label != NULL)
-	{
-		temp_label = current_label->next;
-		free(current_label);
-		current_label = temp_label;
-	}
-}

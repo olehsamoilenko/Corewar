@@ -1,9 +1,7 @@
-.name       "Batman"
-.comment    "This city needs me"
+.name "zork"
+.comment "just a basic living prog"
 
-_loop:
-        sti r1, %:live, %1
-live:
-        live %4
-        ld %0, r2
-		zjmp %:live
+st r5, r5	
+
+# Executable compilation:
+#
