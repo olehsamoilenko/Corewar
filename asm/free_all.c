@@ -12,7 +12,7 @@
 
 #include "asm.h"
 
-static void	free_list(t_asm *asm_parsing)
+static	void	free_list(t_asm *asm_parsing)
 {
 	t_word	*current;
 	t_word	*temp;
@@ -36,7 +36,7 @@ static void	free_list(t_asm *asm_parsing)
 	}
 }
 
-void	free_all(t_asm *asm_parsing)
+void			free_all(t_asm *asm_parsing)
 {
 	free_list(asm_parsing);
 	ft_strdel(&asm_parsing->filename);

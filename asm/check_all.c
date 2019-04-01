@@ -15,7 +15,7 @@
 void	check_label(t_asm *asm_parsing, char *substring, char *line, int start)
 {
 	int i;
-	
+
 	i = 0;
 	substring = take_word(++asm_parsing->symbol, line, start);
 	while (i < ft_strlen(substring) - 1)
@@ -26,14 +26,17 @@ void	check_label(t_asm *asm_parsing, char *substring, char *line, int start)
 			error_word(asm_parsing, substring);
 	}
 	if (ft_strlen(substring) > 1)
-		add_word_to_list(asm_parsing, create_word(asm_parsing, substring, LABEL));
+		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
+																	LABEL));
 	else
 		ft_error(asm_parsing, "Lexical error");
 }
 
 void	check_for_doubles(t_asm *asm_parsing, char *line, char *substring)
 {
-	int pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
+	int pos;
+
+	pos = ft_strlen(line) - ft_strlen(ft_strchr(line, '"')) + 1;
 	while (ft_strlen(line) > 0 && line[pos])
 	{
 		if (ft_isspace(line[pos]))
@@ -84,24 +87,6 @@ int		check_for_register(t_asm *asm_parsing, char *name)
 	return (0);
 }
 
-int		check_for_number(t_asm *asm_parsing, char *name)
-{
-	int i;
-
-	i = 0;
-	if (name[0] == '-')
-		i++;
-	while (name[i])
-	{
-		if (ft_isdigit(name[i]))
-			i++;
-		else
-			return (0);
-	}
-	return (1);
-}
-
-
 void	check_all_lines(t_asm *asm_parsing, int ret, int fd, char *line)
 {
 	while ((ret = get_next_line(fd, &line)) > 0 && line != NULL)
@@ -110,9 +95,11 @@ void	check_all_lines(t_asm *asm_parsing, int ret, int fd, char *line)
 		parse_line(asm_parsing, line);
 		asm_parsing->symbol = 0;
 		if (line[ft_strlen(line) - 1] == '\n')
-			add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("next line"), NEXT_LINE));	
-		else					
-			add_word_to_list(asm_parsing, create_word(asm_parsing, ft_strdup("end line"), END_LINE));	
+			add_word_to_list(asm_parsing, create_word(asm_parsing,
+									ft_strdup("next line"), NEXT_LINE));
+		else
+			add_word_to_list(asm_parsing, create_word(asm_parsing,
+									ft_strdup("end line"), END_LINE));
 		ft_strdel(&line);
 	}
 	if (ret == -1)

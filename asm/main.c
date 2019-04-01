@@ -13,14 +13,14 @@
 #include "asm.h"
 
 // DELETE THIS
-// void	print_asm_structure(t_asm *asm_parsing)
-// {
-// 	printf("===========  ASM_PARSING  ==========\n");
-// 	printf("asm_parsing->name_champ = %s\n", asm_parsing->name_champ);
-// 	printf("asm_parsing->comment = %s\n", asm_parsing->comment);
-// 	printf("asm_parsing->row = %d\n", asm_parsing->row);
-// 	printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
-// }
+void	print_asm_structure(t_asm *asm_parsing)
+{
+	printf("===========  ASM_PARSING  ==========\n");
+	printf("asm_parsing->name_champ = %s\n", asm_parsing->name_champ);
+	printf("asm_parsing->comment = %s\n", asm_parsing->comment);
+	printf("asm_parsing->row = %d\n", asm_parsing->row);
+	printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
+}
 
 // void	print_list(t_asm *asm_parsing)
 // {
@@ -50,7 +50,7 @@
 // 	}
 // }
 
-t_asm	*init_asm(int fd, const char *filename)
+t_asm		*init_asm(int fd, const char *filename)
 {
 	t_asm	*asm_parsing;
 
@@ -67,25 +67,11 @@ t_asm	*init_asm(int fd, const char *filename)
 	asm_parsing->byte_code = NULL;
 	asm_parsing->position = 0;
 	asm_parsing->pos_labels = 0;
+	asm_parsing->disassembler = 0;
 	return (asm_parsing);
 }
 
-void	ignore_comment(t_asm *asm_parsing, char *line)
-{
-	if (line[asm_parsing->symbol] == COMMENT_CHAR)
-		while (line[asm_parsing->symbol])
-			asm_parsing->symbol++;
-}
-
-char	*take_word(int end, char *line, int start)
-{
-	char	*temp;
-
-	temp = ft_strsub(line, start, end - start);
-	return (temp);
-}
-
-t_word	*determine_name(t_asm *asm_parsing, t_word *current)
+t_word		*determine_name(t_asm *asm_parsing, t_word *current)
 {
 	current = current->next;
 	if ((asm_parsing->name_champ == NULL) && (current->word_type == DOUBLES))
@@ -100,7 +86,7 @@ t_word	*determine_name(t_asm *asm_parsing, t_word *current)
 	return (current);
 }
 
-t_word	*determine_comment(t_asm *asm_parsing, t_word *current)
+t_word		*determine_comment(t_asm *asm_parsing, t_word *current)
 {
 	current = current->next;
 	if ((asm_parsing->comment == NULL) && (current->word_type == DOUBLES))
@@ -115,164 +101,7 @@ t_word	*determine_comment(t_asm *asm_parsing, t_word *current)
 	return (current);
 }
 
-t_word		*determine_commands(t_asm *asm_parsing)
-{
-	t_word *current;
-
-	current = asm_parsing->words;
-	while (asm_parsing->name_champ == NULL || asm_parsing->comment == NULL)
-	{
-		if (current->word_type == COMMAND)
-		{
-			if (ft_strequ(current->name, ".name"))
-				current = determine_name(asm_parsing, current);
-			else if (ft_strequ(current->name, ".comment"))
-				current = determine_comment(asm_parsing, current);
-		}
-		if (current->word_type != NEXT_LINE)
-			error_word2(current, "Name or comment is missed");
-		current = current->next;
-	}
-	if (ft_strlen(asm_parsing->name_champ) - 2 > PROG_NAME_LENGTH)
-		ft_arg_error("Length of the name is bigger than 128");
-	if (ft_strlen(asm_parsing->comment) - 2 > COMMENT_LENGTH)
-		ft_arg_error("Length of the comment is bigger than 2048");
-	return (current);
-}
-
-int	find_instruction(t_word *current)
-{
-	int i;
-
-	i = 0;
-	while (i < 17)
-	{
-		if (ft_strequ(current->name, g_op_tab[i].name))
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-t_instruction	*init_instruction_args(void)
-{
-	t_instruction	*instruction_args;
-	int				i;
-
-	instruction_args = (t_instruction *)malloc(sizeof(t_instruction));
-	i = -1;
-	while (++i < 3)
-		instruction_args->args[i] = NULL;
-	return (instruction_args);
-}
-
-t_label	*find_label(t_asm *asm_parsing, t_word *current_label)
-{
-	t_label	*label;
-	char	*name;
-	char	*name_label;
-
-	label = asm_parsing->labels;
-	name = ft_strchr(current_label->name, ':') + 1;
-	while (label != NULL)
-	{
-		name_label = ft_strsub(label->name, 0, ft_strlen(label->name) - 1);
-		if (ft_strcmp(name, name_label) == 0)
-		{
-			ft_strdel(&name_label);
-			return (label);
-		}
-		ft_strdel(&name_label);
-		label = label->next;
-	}
-	return (NULL);
-}
-
-void	determine_instructions(t_asm *asm_parsing, t_word *current)
-{
-	while (current->word_type != END_LINE)
-	{
-		if (current->word_type == NEXT_LINE)
-			current = current->next;
-		else if (current->word_type == LABEL)
-		{
-			current = current->next;
-			while (current->word_type == NEXT_LINE)
-				current = current->next;
-			if (current->word_type == END_LINE)
-				break ;
-			else if (current->word_type == LABEL)
-				continue ;
-			if (current->word_type == INSTRUCTION)
-				current = process_instruction(asm_parsing, current);
-			else
-				error_word2(current, "Error with labels");
-		}
-		else if (current->word_type == INSTRUCTION)
-			current = process_instruction(asm_parsing, current);
-		else
-			error_word2(current, "INCORRECT");
-	}
-}
-
-t_word	*add_labels(t_asm *asm_parsing, t_word *current, int *ret,
-													t_word *current_label)
-{
-	if (current_label->next->word_type == NEXT_LINE &&
-											current->word_type == END_LINE)
-	{
-		add_label_to_list(asm_parsing, create_label(current_label->name,
-												asm_parsing->pos_labels));
-		*ret = BREAK;
-	}
-	else if (current->word_type == LABEL &&
-								current_label->next->word_type == NEXT_LINE)
-	{
-		add_label_to_list(asm_parsing, create_label(current_label->name,
-													asm_parsing->pos_labels));
-		*ret = CONTINUE;
-	}
-	else if (current->word_type == INSTRUCTION)
-	{
-		add_label_to_list(asm_parsing, create_label(current_label->name,
-													asm_parsing->pos_labels));
-		current = process_label(asm_parsing, current);
-	}
-	else
-		error_word2(current, "Error with labels");
-	return (current);
-}
-
-void	determine_labels(t_asm *asm_parsing, t_word *current)
-{
-	t_word	*current_label;
-	int		ret;
-
-	ret = 0;
-	while (current->word_type != END_LINE)
-	{
-		if (current->word_type == NEXT_LINE)
-			current = current->next;
-		else if (current->word_type == LABEL)
-		{
-			current_label = current;
-			current = current->next;
-			while (current->word_type == NEXT_LINE)
-				current = current->next;
-			current = add_labels(asm_parsing, current, &ret, current_label);
-			if (ret == BREAK)
-				break ;
-			else if (ret == CONTINUE)
-				continue ;
-		}
-		else if (current->word_type == INSTRUCTION)
-			current = process_label(asm_parsing, current);
-		else
-			error_word2(current, "INCORRECT");
-	}
-}
-
-void	interpreter(const char *filename)
+static void	assembler(const char *filename)
 {
 	int		fd;
 	char	*line;
@@ -293,18 +122,59 @@ void	interpreter(const char *filename)
 	free_all(asm_parsing);
 }
 
+int			check_for_disasm(char const *argv[])
+{
+	if (ft_strequ(argv[1], "-d"))
+		return (1);
+	return (0);
+}
+
+void	help_dis(t_asm *asm_parsing)
+{
+	char buf[4];
+	int size;
+
+	size = read(asm_parsing->fd, buf, 4);
+	printf("%2x\n", buf[2]);
+}
+
+static void	disassembler(const char *filename)
+{
+	int fd;
+	t_asm	*asm_parsing;
+
+	if ((fd = open(filename, O_RDONLY)) == -1)
+		ft_arg_error("Can't open this file");
+	asm_parsing = init_asm(fd, filename);
+	help_dis(asm_parsing);
+	print_asm_structure(asm_parsing);
+}
+
 int		main(int argc, char const *argv[])
 {
 	char *extention;
 
-	if (argc != 2)
-		ft_arg_error("Usage: ./asm champion.s");
+	if (argc != 2 && argc != 3)
+		ft_arg_error("Usage: ./asm [-d] champion.s\n\t-d\tdisassembler");
+	if ((check_for_disasm(argv)))
+	{
+		if (argc != 3)
+			ft_arg_error("Missed filename");
+		extention = ft_strdup(ft_strrchr(argv[2], '.'));
+		if (!ft_strequ(extention, ".cor"))
+			ft_arg_error("Extention of the file must be .cor");
+		if (ft_strlen(argv[2]) < 5)
+			ft_arg_error("Missed filename");
+		disassembler(argv[2]);
+		printf("OK\n");
+		return (0);
+	}
 	extention = ft_strdup(ft_strrchr(argv[1], '.'));
 	if (!ft_strequ(extention, ".s"))
 		ft_arg_error("Extention of the file must be .s");
 	if (ft_strlen(argv[1]) < 3)
 		ft_arg_error("Missed filename");
-	interpreter(argv[1]);
+	assembler(argv[1]);
 	
 	// system("leaks asm");
 	return (0);

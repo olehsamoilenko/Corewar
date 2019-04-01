@@ -41,5 +41,5 @@ void	error_word2(t_word *word, char *message)
 {
 	printf("ERROR: \"%s\" on row %d\n", message, word->row);
 	// system("leaks asm");
-	exit(1);	
+	exit(1);
 }

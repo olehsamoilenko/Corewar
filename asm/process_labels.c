@@ -12,37 +12,37 @@
 
 #include "asm.h"
 
-t_word    *work_with_args(t_word *current, t_instruction *instruction_args, 
-                                                            t_codage *codage)
+t_word	*work_with_args(t_word *current, t_instruction *instruction_args,
+															t_codage *codage)
 {
-    if (current->word_type == DIRECT_ARG && codage->count_args <
-                                    g_op_tab[codage->instruction].count_args)
-	{		
-        instruction_args->args[codage->count_args] = current;	
-        codage->count_args++;
+	if (current->word_type == DIRECT_ARG && codage->count_args <
+									g_op_tab[codage->instruction].count_args)
+	{
+		instruction_args->args[codage->count_args] = current;
+		codage->count_args++;
 	}
 	else if (current->word_type == INDIRECT_ARG && codage->count_args <
-                                    g_op_tab[codage->instruction].count_args)
-	{	
-        instruction_args->args[codage->count_args] = current;
-        codage->count_args++;			
-    }
+									g_op_tab[codage->instruction].count_args)
+	{
+		instruction_args->args[codage->count_args] = current;
+		codage->count_args++;
+	}
 	else if (current->word_type == REGISTER && codage->count_args <
-                                    g_op_tab[codage->instruction].count_args)
-	{	
-        instruction_args->args[codage->count_args] = current;				
-        codage->count_args++;
+									g_op_tab[codage->instruction].count_args)
+	{
+		instruction_args->args[codage->count_args] = current;
+		codage->count_args++;
 	}
 	current = current->next;
-    return (current);
+	return (current);
 }
 
-void   count_bytes(t_asm *asm_parsing, t_codage *codage,
-                            t_instruction *instruction_args, t_word *current)
+void	count_bytes(t_asm *asm_parsing, t_codage *codage,
+							t_instruction *instruction_args, t_word *current)
 {
-    int i;
+	int i;
 
-    asm_parsing->pos_labels += 1;
+	asm_parsing->pos_labels += 1;
 	if (g_op_tab[codage->instruction].codage_octal == 1)
 		asm_parsing->pos_labels += 1;
 	i = -1;
@@ -56,7 +56,7 @@ void   count_bytes(t_asm *asm_parsing, t_codage *codage,
 				if (g_op_tab[codage->instruction].label_size == 1)
 					asm_parsing->pos_labels += 2;
 				else
-					asm_parsing->pos_labels += 4;					
+					asm_parsing->pos_labels += 4;
 			}
 			else if (instruction_args->args[i]->word_type == REGISTER)
 				asm_parsing->pos_labels += 1;
@@ -68,10 +68,10 @@ void   count_bytes(t_asm *asm_parsing, t_codage *codage,
 
 t_word	*process_label(t_asm *asm_parsing, t_word *current)
 {
-    t_codage        *codage;
-	t_instruction   *instruction_args;
+	t_codage		*codage;
+	t_instruction	*instruction_args;
 
-    codage = init_codage();
+	codage = init_codage();
 	codage->instruction = find_instruction(current);
 	if (codage->instruction == -1)
 		error_word2(current, "Incorrect instruction");
@@ -83,8 +83,8 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 		if (codage->count_args == g_op_tab[codage->instruction].count_args)
 		{
 			if (current->word_type != NEXT_LINE &&
-                                        current->word_type != END_LINE)
-				error_word2(current, "Invalid syntax after instruction");		
+										current->word_type != END_LINE)
+				error_word2(current, "Invalid syntax after instruction");
 		}
 		else if (current->word_type == SEPARATOR)
 			current = current->next;
@@ -92,5 +92,6 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 			error_word2(current, "Separator is missed");
 	}
 	count_bytes(asm_parsing, codage, instruction_args, current);
+	free(codage);
 	return (current);
 }

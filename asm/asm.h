@@ -41,7 +41,7 @@
 # define BREAK 33
 # define CONTINUE 44
 
-static	char *test[] = 
+static	char *test[] =
 {
 	"COMMAND",
 	"DOUBLES",
@@ -56,31 +56,28 @@ static	char *test[] =
 	"END_LINE"
 };
 
-typedef struct	s_op
+typedef struct		s_op
 {
-	char	*name;
-	int		count_args;
-	int		type_args[3];
-	int		opcode;
-	int		cycles;
-	char	*description;
-	int		codage_octal;
-	int		label_size;
+	char			*name;
+	int				count_args;
+	int				type_args[3];
+	int				opcode;
+	int				codage_octal;
+	int				label_size;
 
-}				t_op;
+}					t_op;
 
 extern t_op g_op_tab[];
 
-
-typedef	struct	s_codage
+typedef	struct		s_codage
 {
 	int				instruction;
-	int				count_args;	
+	int				count_args;
 	int				sum;
 	unsigned char	var_for_codage;
-    char 			shift_left;
-	
-}				t_codage;
+	char			shift_left;
+
+}					t_codage;
 
 /*
 ** Structure for labels
@@ -88,28 +85,28 @@ typedef	struct	s_codage
 */
 typedef	struct	s_label
 {
-	int		refer;
-	char	*name;
+	int				refer;
+	char			*name;
 
-	struct	s_label *next;
+	struct s_label	*next;
 }				t_label;
-
 
 /*
 **	Structure for insruction
 */
 typedef	struct	s_word
 {
-	char					*name;
-	unsigned				word_type;
-	unsigned				row;
-	struct	s_word			*next;
+	char			*name;
+	unsigned		word_type;
+	unsigned		row;
+	struct s_word	*next;
 }				t_word;
 
-typedef struct s_instruction
+typedef struct	s_instruction
 {
-	t_word *args[3];
+	t_word	*args[3];
 	int		opcode;
+
 }				t_instruction;
 
 /*
@@ -125,35 +122,30 @@ typedef	struct	s_asm
 	unsigned	symbol;
 	t_word		*words;
 	t_label		*labels;
+	char		*byte_code;
+	int			position;
+	int			pos_labels;
+	int			disassembler;
 
-	// added
-	char *byte_code;
-	int	position;
-
-	// position for labels
-	int		pos_labels;
 }				t_asm;
 
 /*
 ** main.c
 */
-char	*take_word(int end , char *line, int start);
-void	ignore_comment(t_asm *asm_parsing, char *line);
-int	find_instruction(t_word *current);
-t_instruction 	*init_instruction_args(void);
-t_label *find_label(t_asm *asm_parsing, t_word *current_label);
+t_word	*determine_name(t_asm *asm_parsing, t_word *current);
+t_word	*determine_comment(t_asm *asm_parsing, t_word *current);
+
 /*
 **	list_of_worrds.c
 */
 t_word	*create_word(t_asm *asm_parsing, char *name, int type);
 void	add_word_to_list(t_asm *asm_parsing, t_word *new_word);
 
-
 /*
 **	list_of_labels.c
 */
-t_label *create_label(char *name, int refer);
-void    add_label_to_list(t_asm *asm_parsing, t_label *new_label);
+t_label	*create_label(char *name, int refer);
+void	add_label_to_list(t_asm *asm_parsing, t_label *new_label);
 
 /*
 **	parsing_lines.c
@@ -168,7 +160,7 @@ void	check_for_doubles(t_asm *asm_parsing, char *line, char *substring);
 void	check_all_lines(t_asm *asm_parsing, int ret, int fd, char *line);
 int		check_for_register(t_asm *asm_parsing, char *name);
 int		check_for_instruction(char *name);
-int		check_for_number(t_asm *asm_parsing, char *name);
+
 /*
 **	error_managment.c
 */
@@ -197,5 +189,55 @@ t_codage	*init_codage(void);
 **	process_labels.c
 */
 t_word	*process_label(t_asm *asm_parsing, t_word *current);
+
+/*
+**	cut_functions.c
+*/
+void	cut_command(t_asm *asm_parsing, char *line);
+void	cut_doubles(t_asm *asm_parsing, char *line, int start);
+void	cut_label(t_asm *asm_parsing, char *line);
+void	cut_direct(t_asm *asm_parsing, char *line);
+
+/*
+**	process_args.c
+*/
+void	process_direct_arg(t_codage *codage, t_instruction *instruction_args,
+															t_word *current);
+void	process_indirect_arg(t_codage *codage, t_instruction *instruction_args,
+															t_word *current);
+void	process_register_arg(t_codage *codage, t_instruction *instruction_args,
+															t_word *current);
+t_codage	*init_codage(void);
+
+/*
+**	write_args.c
+*/
+void	write_ind_arg(t_asm *asm_parsing, int i,
+					t_instruction *instruction_args, int position_of_instruct);
+void	if_exist_label(t_asm *asm_parsing, int i,
+					t_instruction *instruction_args, int position_of_instruct);
+void	write_dir_arg(t_asm *asm_parsing, int i,
+					t_instruction *instruction_args, int position_of_instruct);
+void	define_arg_type(t_asm *asm_parsing, t_instruction *instruction_args,
+											int i, int position_of_instruct);
+void	write_args(t_asm *asm_parsing, t_codage *codage,
+									t_instruction *instruction_args);
+
+/*
+**	help_functions.c
+*/
+void	ignore_comment(t_asm *asm_parsing, char *line);
+char	*take_word(int end, char *line, int start);
+int	find_instruction(t_word *current);
+t_instruction	*init_instruction_args(void);
+int		check_for_number(t_asm *asm_parsing, char *name);
+
+/*
+**	determine.c
+*/
+t_word		*determine_commands(t_asm *asm_parsing);
+void		determine_labels(t_asm *asm_parsing, t_word *current);
+void		determine_instructions(t_asm *asm_parsing, t_word *current);
+t_label		*find_label(t_asm *asm_parsing, t_word *current_label);
 
 #endif

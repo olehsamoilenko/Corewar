@@ -24,7 +24,12 @@ SRC =	main.c \
 		convert_and_write.c \
 		free_all.c \
 		process_instruction.c \
-		process_labels.c
+		process_labels.c \
+		cut_functions.c \
+		process_args.c \
+		write_args.c \
+		help_functions.c \
+		determine.c
 
 OBJ = $(SRC:.c=.o)
 

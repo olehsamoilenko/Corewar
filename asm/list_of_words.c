@@ -39,4 +39,3 @@ void	add_word_to_list(t_asm *asm_parsing, t_word *new_word)
 		temp->next = new_word;
 	}
 }
-
