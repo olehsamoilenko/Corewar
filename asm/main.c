@@ -68,6 +68,7 @@ t_asm		*init_asm(int fd, const char *filename)
 	asm_parsing->position = 0;
 	asm_parsing->pos_labels = 0;
 	asm_parsing->disassembler = 0;
+	asm_parsing->asm_code = NULL;
 	return (asm_parsing);
 }
 
@@ -129,27 +130,6 @@ int			check_for_disasm(char const *argv[])
 	return (0);
 }
 
-void	help_dis(t_asm *asm_parsing)
-{
-	char buf[4];
-	int size;
-
-	size = read(asm_parsing->fd, buf, 4);
-	printf("%2x\n", buf[2]);
-}
-
-static void	disassembler(const char *filename)
-{
-	int fd;
-	t_asm	*asm_parsing;
-
-	if ((fd = open(filename, O_RDONLY)) == -1)
-		ft_arg_error("Can't open this file");
-	asm_parsing = init_asm(fd, filename);
-	help_dis(asm_parsing);
-	print_asm_structure(asm_parsing);
-}
-
 int		main(int argc, char const *argv[])
 {
 	char *extention;
@@ -167,6 +147,8 @@ int		main(int argc, char const *argv[])
 			ft_arg_error("Missed filename");
 		disassembler(argv[2]);
 		printf("OK\n");
+		// system("leaks asm");
+
 		return (0);
 	}
 	extention = ft_strdup(ft_strrchr(argv[1], '.'));

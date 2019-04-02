@@ -29,7 +29,8 @@ SRC =	main.c \
 		process_args.c \
 		write_args.c \
 		help_functions.c \
-		determine.c
+		determine.c \
+		disassembler.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -53,7 +54,7 @@ all: $(NAME)
 
 $(NAME): lib $(OBJ)
 	@gcc $(OBJ) $(LIBFT) -o $(NAME)
-	@echo "$(PURPLEBOLD)ASM$(OFF)$(PURPLE) is ready"
+	@echo "$(PURPLEBOLD)ASM$(OFF)$(PURPLE) is ready$(OFF)"
 
 lib:
 	@make -C libft/

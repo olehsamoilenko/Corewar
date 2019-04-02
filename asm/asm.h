@@ -126,6 +126,7 @@ typedef	struct	s_asm
 	int			position;
 	int			pos_labels;
 	int			disassembler;
+	char		*asm_code;
 
 }				t_asm;
 
@@ -134,6 +135,9 @@ typedef	struct	s_asm
 */
 t_word	*determine_name(t_asm *asm_parsing, t_word *current);
 t_word	*determine_comment(t_asm *asm_parsing, t_word *current);
+void	print_asm_structure(t_asm *asm_parsing);
+t_asm		*init_asm(int fd, const char *filename);
+
 
 /*
 **	list_of_worrds.c
@@ -239,5 +243,11 @@ t_word		*determine_commands(t_asm *asm_parsing);
 void		determine_labels(t_asm *asm_parsing, t_word *current);
 void		determine_instructions(t_asm *asm_parsing, t_word *current);
 t_label		*find_label(t_asm *asm_parsing, t_word *current_label);
+
+
+/*
+**	disassembler.c
+*/
+void	disassembler(const char *filename);
 
 #endif
