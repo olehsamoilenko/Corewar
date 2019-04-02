@@ -158,5 +158,6 @@ void	over_curses(t_war *war);
 void	show_args(t_war *war, t_carriage *car);
 void	curriage_info(t_carriage *car, t_war *war);
 char	*define_type(int type);
+void	show_union(union converter a);
 
 #endif

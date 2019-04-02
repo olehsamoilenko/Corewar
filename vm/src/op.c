@@ -171,16 +171,22 @@ void	op_st(t_carriage *car, t_war *war)
 	// ft_printf("%d\n", index);
 
 	int reg_num = car->params[1].integer;
+
+	// show_union(car->reg[reg_num]);
+
 	if (reg_num < 1 || reg_num > 16)
 	{
 		// ft_printf("Incorrect reg\n");
 		return ;
 	}
 
-	war->map[index + 0]->value = car->reg[reg_num].bytes[3];
-	war->map[index + 1]->value = car->reg[reg_num].bytes[2];
-	war->map[index + 2]->value = car->reg[reg_num].bytes[1];
-	war->map[index + 3]->value = car->reg[reg_num].bytes[0];
+	if (car->types[2] == T_IND)
+	{
+		war->map[(index + 0) % MEM_SIZE]->value = car->reg[reg_num].bytes[3];
+		war->map[(index + 1) % MEM_SIZE]->value = car->reg[reg_num].bytes[2];
+		war->map[(index + 2) % MEM_SIZE]->value = car->reg[reg_num].bytes[1];
+		war->map[(index + 3) % MEM_SIZE]->value = car->reg[reg_num].bytes[0];
+	}
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
@@ -189,16 +195,7 @@ void	op_st(t_carriage *car, t_war *war)
 }
 
 
-void	show_union(union converter a)
-{
-	ft_printf("%ld : ", a.integer);
-	int i = -1;
-	while (++i < 4)
-	{
-		ft_printf("%02x ", a.bytes[i]);
-	}
-	ft_printf("\n");
-}
+
 
 
 void	op_sti(t_carriage *car, t_war *war)
@@ -206,38 +203,13 @@ void	op_sti(t_carriage *car, t_war *war)
 	int i;
 
 
-
-	// show_args(war, car);
-
 	int reg_num = car->params[1].integer;
 	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
 	int value_3 = get_value(car->params[3].integer, car->types[3], car->reg);
 
-	// show_union(car->p->params[3]); // PROBLEM
-
-	// if (car->types[2] == T_DIR)
-	// 	value_2 = car->params[2].integer;
-	// else if (car->types[2] == T_REG)
-	// 	value_2 = car->reg[car->params[2].integer].integer;
-
 	if (reg_num < 1 || reg_num > 16)
 		return ;
 
-	// if (car->types[3] == T_DIR)
-	// 	value_3 = car->params[3].integer;
-	// else if (car->types[3] == T_REG)
-	// 	value_3 = car->reg[car->params[3].integer].integer;
-
-	// ft_printf("STI Cycle: %d, VALUE: %ld\n", war->cycle, reg_num);
-
-	// union converter number; // WITHOUT NUMBER (CHECK ON MORTEL)
-	// number.integer = car->reg[reg_num].integer;
-
-	// ft_printf("%02x ", number.bytes[0]);
-	// ft_printf("%02x ", number.bytes[1]);
-	// ft_printf("%02x ", number.bytes[2]);
-	// ft_printf("%02x ", number.bytes[3]);
-	// ft_printf("\n");
 	int index = car->position + (value_2 + value_3) % IDX_MOD;
 	if (index < 0)
 		index += MEM_SIZE;
@@ -281,7 +253,7 @@ void	op_fork(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | fork %d (%d)\n", car->number, car->params[1].integer, (car->position + car->params[1].integer) % IDX_MOD);
+		ft_printf("P%5d | fork %d (%d)\n", car->number, car->params[1].integer, car->position + car->params[1].integer % IDX_MOD);
 	}
 }
 

@@ -303,13 +303,27 @@ void	checking(t_war *war)
 		war->champs[0]->lives_cur_period = 0;
 		war->all_lives = 0;
 	}
+		
 }
-//				MORTE	TURTL	FLUTT	GAGNA	TOTO 
-// MORTE		OK		OK		OK		OK		OK
-// TURTL 				OK		OK		OK		OK
-// FLUTT						OK		OK		OK
-// GAGNA								OK		OK
-// TOTO 										OK
+
+// 42				TOO BIG
+// CAR				LONG
+// GAGNANT			OK
+// OCTOBRE			LONG
+// BARRIERE			TOO BIG
+// BEE_GEES			LONG
+// BIGZORK			OK
+// EX				OK
+// FLUTTERSHY		OK
+// HELLTRAIN		
+// JUMPER			
+// MAXIDEF			
+// MORTEL			OK
+// SLIDER			
+// TOTO				OK
+// TURTLE			OK
+// ZORK				
+
 
 int		main(int argc, char **argv)
 {
@@ -318,6 +332,7 @@ int		main(int argc, char **argv)
 	parse_params(argc, argv, war);
 	int mem_delta = MEM_SIZE / champions_count(war->champs);
 	parse_champions(war->champs, war->map, mem_delta);
+	war->last_live = war->champs[0];
 	// print_champions(war->champs);
 	if (!war->flag_visual)
 		introduce(war->champs);
@@ -381,11 +396,15 @@ int		main(int argc, char **argv)
 			
 		}
 		checking(war);
+
 		if (!war->carriages)
 		{
 			if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
+			{
 				ft_printf("Contestant %d, \"%s\", has won !\n",
 					war->last_live->number, war->last_live->header->prog_name);
+
+			}
 			break ;
 		}
 		if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)

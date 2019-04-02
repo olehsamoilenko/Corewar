@@ -62,6 +62,17 @@ void	print_champions(t_champion *champs[])
 	}
 }
 
+void	show_union(union converter a)
+{
+	ft_printf("%ld : ", a.integer);
+	int i = -1;
+	while (++i < 4)
+	{
+		ft_printf("%02x ", a.bytes[i]);
+	}
+	ft_printf("\n");
+}
+
 void	reg_info(int *reg, t_war *war)
 {
 	if (war->flag_verbose)
@@ -76,11 +87,11 @@ void	reg_info(int *reg, t_war *war)
 
 char	*define_type(int type)
 {
-	if (type == REG_CODE)
+	if (type == T_REG)
 		return("T_REG");
-	else if (type == DIR_CODE)
+	else if (type == T_DIR	)
 		return("T_DIR");
-	else if (type == IND_CODE)
+	else if (type == T_IND)
 		return ("T_IND");
 	else
 		return ("---");

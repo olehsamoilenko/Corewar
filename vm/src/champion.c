@@ -155,4 +155,5 @@ void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
 		read_exec_code(fd, map, champ, i, i * mem_delta);
 		close(fd);
 	}
+	
 }
