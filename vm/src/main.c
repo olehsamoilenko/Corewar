@@ -102,7 +102,7 @@ int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 	{
 		if (i != 0)
 			res <<= 8;
-		res |= map[start + i]->value /*& 0xFF*/;
+		res |= map[(start + i) % MEM_SIZE]->value /*& 0xFF*/;
 		// ft_printf("%x\n", res);
 	}
 	// ft_printf("\n");
@@ -144,7 +144,7 @@ int		define_type_1(int type)
 		return (0);
 }
 
-void	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
+int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
 	int v[7];
 
@@ -178,55 +178,55 @@ void	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	car->types[2] = define_type_1(second);
 	car->types[3] = define_type_1(third);
 
-	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
-
-	if ((op->args_type[0] | car->types[1]) != op->args_type[0])
-	{
-		car->types[1] = 0;
-		// ft_printf("first ko\n");
-	}
-	if ((op->args_type[1] | car->types[2]) != op->args_type[1])
-	{
-		car->types[2] = 0; 
-		// ft_printf("second ko\n");
-	}
-	if ((op->args_type[2] | car->types[3]) != op->args_type[2])
-	{
-		car->types[3] = 0;
-		// ft_printf("third ko\n");
-	}
-
-
-	int arg_1_size = define_size(first, op->label);
-	int arg_2_size = define_size(second, op->label);
-	int arg_3_size = define_size(third, op->label);
-
 	
+	car->sizes[1] = define_size(first, op->label);
+	
+	if (car->op->args > 1)
+		car->sizes[2] = define_size(second, op->label);
+	else
+		car->sizes[2] = 0;
 
-	car->sizes[1] = arg_1_size;
-	car->sizes[2] = arg_2_size;
-	car->sizes[3] = arg_3_size;
+	if (car->op->args > 2)
+		car->sizes[3] = define_size(third, op->label);
+	else
+		car->sizes[3] = 0;
 
+	// ft_printf("%d\n", car->codage);
+	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
+	// ft_printf("sizes %d %d %d\n", car->sizes[1], car->sizes[2], car->sizes[3]);
 
 	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
-	arg_1 = get_bytes(car->position + delta, arg_1_size, car->types[1], map);
-	delta += arg_1_size;
-	if (arg_2_size != 0)
-	{
-		arg_2 = get_bytes(car->position + delta, arg_2_size, car->types[2], map);
-		delta += arg_2_size;
-	}
-	if (arg_3_size != 0)
-	{
-		arg_3 = get_bytes(car->position + delta, arg_3_size, car->types[3], map);
-		delta += arg_3_size;
-	}
+	arg_1 = get_bytes(car->position + delta, car->sizes[1], car->types[1], map);
+	delta += car->sizes[1];
+	arg_2 = get_bytes(car->position + delta, car->sizes[2], car->types[2], map);
+	delta += car->sizes[2];
+	arg_3 = get_bytes(car->position + delta, car->sizes[3], car->types[3], map);
+	delta += car->sizes[3];
 
 	car->params[1].integer = arg_1;
 	car->params[2].integer = arg_2;
 	car->params[3].integer = arg_3;
 
-	// return (params);
+	// if ((op->args_type[0] | car->types[1]) != op->args_type[0])
+	// {
+	// 	car->types[1] = 0;
+	// 	car->sizes[1] = 0;
+	// }
+	// if ((op->args_type[1] | car->types[2]) != op->args_type[1])
+	// {
+	// 	car->types[2] = 0;
+	// 	car->sizes[2] = 0;
+	// }
+	// if ((op->args_type[2] | car->types[3]) != op->args_type[2])
+	// {
+	// 	car->types[3] = 0;
+	// 	car->sizes[3] = 0;
+	// }
+
+	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
+	// ft_printf("sizes %d %d %d\n", car->sizes[1], car->sizes[2], car->sizes[3]);
+
+	return (delta);
 }
 
 void	introduce(t_champion **champs)
@@ -304,11 +304,12 @@ void	checking(t_war *war)
 		war->all_lives = 0;
 	}
 }
-//				VERBOSE		DUMP
-// MORTEL		OK			OK
-// TURTLE 		OK			OK
-// FLUTTERSHY	OK			OK
-// GAGNANT		SF
+//				MORTE	TURTL	FLUTT	GAGNA	TOTO 
+// MORTE		OK		OK		OK		OK		OK
+// TURTL 				OK		OK		OK		OK
+// FLUTT						OK		OK		OK
+// GAGNA								OK		OK
+// TOTO 										OK
 
 int		main(int argc, char **argv)
 {
@@ -341,7 +342,7 @@ int		main(int argc, char **argv)
 		while (tmp)
 		{
 			
-			// ft_printf("HELLO\n");
+			// ft_printf("%d\n", tmp->number);
 			
 
 			t_carriage *car = tmp;
@@ -354,12 +355,14 @@ int		main(int argc, char **argv)
 					car->position += 1;
 
 			}
+			
 			car->cooldown--;
 			if (car->op && car->cooldown == 0)
 			{
-				get_args(car, war->map, car->op, war);
+				// ft_printf("finish\n");
+				int delta = get_args(car, war->map, car->op, war);
 				car->op->func(car, war);
-				int instr_len = 1 + car->op->codage + car->sizes[1] + car->sizes[2] + car->sizes[3];
+				// int instr_len = 1 + car->op->codage + car->sizes[1] + car->sizes[2] + car->sizes[3];
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
@@ -367,14 +370,15 @@ int		main(int argc, char **argv)
 				else
 				{
 
-					adv(war, car->op, instr_len, car);
-					car->position = (car->position + instr_len) % MEM_SIZE;
+					adv(war, car->op, delta, car);
+					car->position = (car->position + delta) % MEM_SIZE;
 				}
 				car->op = NULL;
 			}
 			if (war->flag_visual)
 				print_memory(war);
 			tmp = tmp->next;
+			
 		}
 		checking(war);
 		if (!war->carriages)

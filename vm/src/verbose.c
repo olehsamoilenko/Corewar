@@ -53,7 +53,7 @@ void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car)
 		// ft_printf("LEN %d\n", instr_len);
 		j = -1;
 		while (++j < instr_len)
-			ft_printf("%02x ", war->map[car->position + j]->value);
+			ft_printf("%02x ", war->map[(car->position + j) % MEM_SIZE]->value);
 		ft_printf("\n");
 
 	}
