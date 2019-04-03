@@ -75,6 +75,8 @@ typedef struct	s_carriage
 	int					sizes[4]; // 0 is unused
 	union converter		params[4]; // 0 is unused
 
+	t_bool				args_ok:1;
+
 }				t_carriage;
 
 

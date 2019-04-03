@@ -14,3 +14,7 @@ echo bigzork.cor
 sh bin/bool.sh resources/champs/cor/bigzork.cor
 echo Gagnant.cor
 sh bin/bool.sh resources/champs/cor/Gagnant.cor
+echo zork.cor
+sh bin/bool.sh resources/champs/cor/zork.cor
+echo jumper.cor
+sh bin/bool.sh resources/champs/cor/jumper.cor

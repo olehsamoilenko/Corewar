@@ -116,6 +116,8 @@ int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 
 t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
 {
+	// ft_printf()
+	// ft_printf("%d\n", car_pos);
 	int index = op_index(map[car_pos]->value); // return op ?
 	t_op *op = &op_tab[index];
 
@@ -141,7 +143,7 @@ int		define_type_1(int type)
 	else if (type == IND_CODE)
 		return (T_IND);
 	else
-		return (0);
+		return (7);
 }
 
 int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
@@ -169,9 +171,13 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 		third = op->args_type[2];
 	}
 
+	car->args_ok = true;
+
 	car->types[1] = define_type_1(first);
-	car->types[2] = define_type_1(second);
-	car->types[3] = define_type_1(third);
+	// if (car->op->args > 1)
+		car->types[2] = define_type_1(second);
+	// if (car->op->args > 2)
+		car->types[3] = define_type_1(third);
 
 	
 	car->sizes[1] = define_size(first, op->label);
@@ -197,6 +203,13 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	car->params[1].integer = arg_1;
 	car->params[2].integer = arg_2;
 	car->params[3].integer = arg_3;
+
+	if ((car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
+		car->args_ok = false;
+	if (car->op->args > 1 && (car->op->args_type[1] | car->types[2]) != car->op->args_type[1])
+		car->args_ok = false;
+	if (car->op->args > 2 && (car->op->args_type[2] | car->types[3]) != car->op->args_type[2])
+		car->args_ok = false;
 
 	return (delta);
 }
@@ -289,17 +302,17 @@ void	checking(t_war *war)
 // FLUTTERSHY		OK
 // HELLTRAIN		... 26469 wrong verbose
 // JUMPER			OK
-// MAXIDEF			
+// MAXIDEF			OK
 // MORTEL			OK
-// SLIDER			
+// SLIDER			OK
 // TOTO				OK
 // TURTLE			OK
-// ZORK				
+// ZORK				OK
 
 
-int		main(int argc, char **argv)
+
+int		main(int argc, char **argv) 
 {
-
 	t_war *war = init();
 	parse_params(argc, argv, war);
 	int mem_delta = MEM_SIZE / champions_count(war->champs);
@@ -322,14 +335,19 @@ int		main(int argc, char **argv)
 	while (true)
 	{
 		t_carriage *tmp = war->carriages;
+
+		
+
 		next_cycle(war);
 		
 		while (tmp)
 		{
 			t_carriage *car = tmp;
+			// ft_printf("%d\n", tmp->number);
 			if (car->op == NULL)
 			{
 				// ft_printf("%d\n", tmp->number);
+				
 				car->op = get_command(car->number, car->position, war->map, war);
 				if (car->op)
 				{
@@ -345,7 +363,8 @@ int		main(int argc, char **argv)
 				
 				int delta = get_args(car, war->map, car->op, war);
 
-				car->op->func(car, war);
+				if (car->args_ok)
+					car->op->func(car, war);
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
