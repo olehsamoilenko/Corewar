@@ -77,7 +77,8 @@ SRC =	ft_memset.c \
 		ft_list_size.c \
 		ft_isprime.c \
 		ft_lstadd_back.c \
-		get_next_line.c
+		get_next_line.c \
+		ft_itoa_base.c
 
 OBJ = $(SRC:.c=.o)
 

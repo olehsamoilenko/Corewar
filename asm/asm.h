@@ -116,6 +116,7 @@ typedef	struct	s_asm
 {
 	char		*filename;
 	int			fd;
+	int			fd_dis;
 	char		*name_champ;
 	char		*comment;
 	unsigned	row;

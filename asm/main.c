@@ -147,7 +147,7 @@ int		main(int argc, char const *argv[])
 			ft_arg_error("Missed filename");
 		disassembler(argv[2]);
 		printf("OK\n");
-		// system("leaks asm");
+		system("leaks asm");
 
 		return (0);
 	}
