@@ -148,23 +148,18 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
 	int v[7];
 
-	// car->p = ft_memalloc(sizeof(t_instr_params));
-
 	int delta = 0;
-	// car->position++;
 	delta++;
 	int first;
 	int second;
 	int third;
-	int codage;
-	// car->p->amount = op->args;
+
 	if (op->codage == true)
 	{
-		codage = map[car->position + delta]->value;
-		car->codage = codage;
-		first = codage >> 6;
-		second = codage >> 4 & 0b0011;
-		third = codage >> 2 & 0b000011;
+		car->codage = map[car->position + delta]->value;
+		first = car->codage >> 6;
+		second = car->codage >> 4 & 0b0011;
+		third = car->codage >> 2 & 0b000011;
 		delta++;
 	}
 	else
@@ -191,10 +186,6 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	else
 		car->sizes[3] = 0;
 
-	// ft_printf("%d\n", car->codage);
-	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
-	// ft_printf("sizes %d %d %d\n", car->sizes[1], car->sizes[2], car->sizes[3]);
-
 	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
 	arg_1 = get_bytes(car->position + delta, car->sizes[1], car->types[1], map);
 	delta += car->sizes[1];
@@ -206,25 +197,6 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	car->params[1].integer = arg_1;
 	car->params[2].integer = arg_2;
 	car->params[3].integer = arg_3;
-
-	// if ((op->args_type[0] | car->types[1]) != op->args_type[0])
-	// {
-	// 	car->types[1] = 0;
-	// 	car->sizes[1] = 0;
-	// }
-	// if ((op->args_type[1] | car->types[2]) != op->args_type[1])
-	// {
-	// 	car->types[2] = 0;
-	// 	car->sizes[2] = 0;
-	// }
-	// if ((op->args_type[2] | car->types[3]) != op->args_type[2])
-	// {
-	// 	car->types[3] = 0;
-	// 	car->sizes[3] = 0;
-	// }
-
-	// ft_printf("types %03x %03x %03x\n", car->types[1], car->types[2], car->types[3]);
-	// ft_printf("sizes %d %d %d\n", car->sizes[1], car->sizes[2], car->sizes[3]);
 
 	return (delta);
 }
@@ -255,7 +227,7 @@ void	remove_carriages(t_carriage **list, t_war *war)
 
 	while (*list && (war->cycle - (*list)->last_live >= war->cycles_to_die || war->cycles_to_die <= 0))
 	{
-		if (war->flag_verbose)
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			verbose_death(*list, war);
 		del = *list;
 		*list = (*list)->next;
@@ -315,8 +287,8 @@ void	checking(t_war *war)
 // BIGZORK			OK
 // EX				OK
 // FLUTTERSHY		OK
-// HELLTRAIN		
-// JUMPER			
+// HELLTRAIN		... 26469 wrong verbose
+// JUMPER			OK
 // MAXIDEF			
 // MORTEL			OK
 // SLIDER			
@@ -349,42 +321,37 @@ int		main(int argc, char **argv)
 	int i = -1;
 	while (true)
 	{
-
 		t_carriage *tmp = war->carriages;
 		next_cycle(war);
 		
-
 		while (tmp)
 		{
-			
-			// ft_printf("%d\n", tmp->number);
-			
-
 			t_carriage *car = tmp;
 			if (car->op == NULL)
 			{
+				// ft_printf("%d\n", tmp->number);
 				car->op = get_command(car->number, car->position, war->map, war);
 				if (car->op)
+				{
 					car->cooldown = car->op->cooldown;
+					// car->codage = war->map[car->position + 1]->value;
+				}
 				else
-					car->position += 1;
-
+					car->position = (car->position + 1) % MEM_SIZE;
 			}
-			
 			car->cooldown--;
 			if (car->op && car->cooldown == 0)
 			{
-				// ft_printf("finish\n");
+				
 				int delta = get_args(car, war->map, car->op, war);
+
 				car->op->func(car, war);
-				// int instr_len = 1 + car->op->codage + car->sizes[1] + car->sizes[2] + car->sizes[3];
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
 				}
 				else
 				{
-
 					adv(war, car->op, delta, car);
 					car->position = (car->position + delta) % MEM_SIZE;
 				}
@@ -395,6 +362,7 @@ int		main(int argc, char **argv)
 			tmp = tmp->next;
 			
 		}
+		
 		checking(war);
 
 		if (!war->carriages)

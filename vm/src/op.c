@@ -14,6 +14,41 @@
 
 // SWAP WITH OP.C FROM SUBJ
 
+// int		get_value_old(int param, int type, union converter *reg, t_war *war, int index)
+// {
+// 	if (type == T_DIR)
+// 		return (param);
+// 	else if (type == T_REG)
+// 		return (reg[param].integer);
+// 	else if (type == T_IND)
+// 	{
+// 		union converter num;
+// 		num.bytes[3] = war->map[index + 0]->value;
+// 		num.bytes[2] = war->map[index + 1]->value;
+// 		num.bytes[1] = war->map[index + 2]->value;
+// 		num.bytes[0] = war->map[index + 3]->value;
+// 		return (num.integer);
+// 	}
+// 	return (0);
+// }
+
+int		get_value(t_carriage *car, int num, t_war *war, int index)
+{
+	if (car->types[num] == T_DIR)
+		return (car->params[num].integer);
+	else if (car->types[num] == T_REG)
+		return (car->reg[car->params[num].integer].integer);
+	else if (car->types[num] == T_IND)
+	{
+		union converter num;
+		num.bytes[3] = war->map[(index + 0) % MEM_SIZE]->value;
+		num.bytes[2] = war->map[(index + 1) % MEM_SIZE]->value;
+		num.bytes[1] = war->map[(index + 2) % MEM_SIZE]->value;
+		num.bytes[0] = war->map[(index + 3) % MEM_SIZE]->value;
+		return (num.integer);
+	}
+	return (0);
+}
 
 void	op_live(t_carriage *car, t_war *war)
 {
@@ -51,14 +86,18 @@ void	op_ld(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	t_bool sucess = true;
+	// t_bool sucess = true;
+
 
 	int reg_num = car->params[2].integer;
 
 	if (reg_num < 1 || reg_num > 16)
 		return ;
 
-	car->reg[reg_num].integer = car->params[1].integer;
+	car->reg[reg_num].integer = get_value(car, 1, war,
+		car->position + car->params[1].integer % IDX_MOD);
+
+
 
 	if (car->reg[reg_num].integer == 0)
 		car->carry = true;
@@ -66,57 +105,41 @@ void	op_ld(t_carriage *car, t_war *war)
 		car->carry = false;
 	
 	// verbose
-	if (war->flag_verbose && war->cycle >= war->flag_dump && sucess)
+	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | ld %d r%d\n", car->number, car->params[1].integer, car->params[2].integer);
+		ft_printf("P%5d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
 	}
 
 }
 
-int		get_value(int param, int type, union converter *reg)
-{
-	if (type == T_DIR)
-		return (param);
-	else if (type == T_REG)
-		return (reg[param].integer);
-	return (0);
-}
+
 
 
 void	op_ldi(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1 = get_value(car->params[1].integer, car->types[1], car->reg);
-	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
-
-	
-	
-	// if (car->types[2] == T_DIR)
-	// 	value_2 = car->params[2].integer;
-	// else if (car->types[2] == T_REG)
-	// 	value_2 = car->reg[car->params[2].integer].integer;
+	int value_1 = get_value(car, 1, war, 0);
+	int value_2 = get_value(car, 2, war, 0);
 
 	int index = car->position + (value_1 + value_2) % IDX_MOD; // only T_DIR
 	
 
-	car->reg[car->params[3].integer].bytes[3] = war->map[index + 0]->value;
-	car->reg[car->params[3].integer].bytes[2] = war->map[index + 1]->value;
-	car->reg[car->params[3].integer].bytes[1] = war->map[index + 2]->value;
-	car->reg[car->params[3].integer].bytes[0] = war->map[index + 3]->value;
+	int reg_num = car->params[3].integer;
+	if (reg_num < 1 || reg_num > 16)
+		return ;
+		
 
-
-	// ft_printf("%02x ", car->reg[reg_number].bytes[0]);
-	// ft_printf("%02x ", car->reg[reg_number].bytes[1]);
-	// ft_printf("%02x ", car->reg[reg_number].bytes[2]);
-	// ft_printf("%02x ", car->reg[reg_number].bytes[3]);
-	// ft_printf("\n");
+	car->reg[reg_num].bytes[3] = war->map[index + 0]->value;
+	car->reg[reg_num].bytes[2] = war->map[index + 1]->value;
+	car->reg[reg_num].bytes[1] = war->map[index + 2]->value;
+	car->reg[reg_num].bytes[0] = war->map[index + 3]->value;
 
 
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | ldi %d %d r%d\n", car->number, value_1, value_2, car->params[3].integer);
+		ft_printf("P%5d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
 			value_1,
 			value_2,
@@ -132,8 +155,8 @@ void	op_lldi(t_carriage *car, t_war *war)
 	// show_args(war, car);
 	// ft_printf("%d\n", car->codage);
 
-	int value_1 = get_value(car->params[1].integer, car->types[1], car->reg);
-	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
+	int value_1 = get_value(car, 1, war, 0);
+	int value_2 = get_value(car, 2, war, 0);
 
 
 	int index = car->position + value_1 + value_2; // only T_DIR
@@ -196,16 +219,14 @@ void	op_st(t_carriage *car, t_war *war)
 
 
 
-
-
 void	op_sti(t_carriage *car, t_war *war)
 {
 	int i;
 
 
 	int reg_num = car->params[1].integer;
-	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
-	int value_3 = get_value(car->params[3].integer, car->types[3], car->reg);
+	int value_2 = get_value(car, 2, war, 0);
+	int value_3 = get_value(car, 3, war, 0);
 
 	if (reg_num < 1 || reg_num > 16)
 		return ;
@@ -336,8 +357,8 @@ void	op_and(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1 = get_value(car->params[1].integer, car->types[1], car->reg);
-	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
+	int value_1 = get_value(car, 1, war, 0);
+	int value_2 = get_value(car, 2, war, 0);
 
 	int reg_num = car->params[3].integer;
 
@@ -359,14 +380,42 @@ void	op_and(t_carriage *car, t_war *war)
 	
 }
 
+void	op_or(t_carriage *car, t_war *war)
+{
+	// show_args(war, car);
+
+	int value_1 = get_value(car, 1, war, 0);
+	int value_2 = get_value(car, 2, war, 0);
+
+	int reg_num = car->params[3].integer;
+
+	if (reg_num < 1 || reg_num > 16)
+		return ;
+
+	car->reg[reg_num].integer = value_1 | value_2;
+	if (car->reg[reg_num].integer == 0)
+		car->carry = true;
+	else
+		car->carry = false;
+
+	// verbose
+	if (war->flag_verbose && war->cycle >= war->flag_dump)
+	{
+		ft_printf("P%5d | or %d %d r%d\n", car->number,
+			value_1, value_2, reg_num);
+	}
+	
+}
+
 void	op_xor(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1 = get_value(car->params[1].integer, car->types[1], car->reg);
-	int value_2 = get_value(car->params[2].integer, car->types[2], car->reg);
+	int value_1 = get_value(car, 1, war, 0);
+	int value_2 = get_value(car, 2, war, 0);
 
 	car->reg[car->params[3].integer].integer = value_1 ^ value_2;
+
 	if (car->reg[car->params[3].integer].integer == 0)
 		car->carry = true;
 	else
@@ -379,6 +428,11 @@ void	op_xor(t_carriage *car, t_war *war)
 			value_1, value_2, car->params[3].integer);
 	}
 	
+}
+
+void	op_aff(t_carriage *car, t_war *war)
+{
+
 }
 
 void	op_new(t_carriage *car, t_war *war)
@@ -396,18 +450,20 @@ void	op_new(t_carriage *car, t_war *war)
 t_op		op_tab[] =  // [17]
 {
 //   name       args                                                                      code cycles codage label
-	{ "live",	1,	{					T_DIR,						0,				0	},	 1,	  10,	0,		0,	 &op_live	},
-	{   "ld",	2,	{			T_DIR | T_IND,					T_REG,				0	},	 2,	   5,	1,		0,	   &op_ld	},
-	{   "st",	2,	{					T_REG,			T_IND | T_REG,				0	},	 3,	   5,	1,		0,	   &op_st	},
-	{  "add",	3,	{					T_REG,					T_REG,			T_REG	},	 4,	  10,	1,		0,	  &op_add	},
-	{  "sub",	3,	{					T_REG,					T_REG,			T_REG	},	 5,	  10,	1,		0,	  &op_sub	},
-	{  "and",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 6,	   6,	1,		0,	  &op_and	},
-	{  "xor",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 8,	   6,	1,		0,	  &op_xor	},
-	{ "zjmp",	1,	{					T_DIR,						0,				0	},	 9,	  20,	0,		1,	 &op_zjmp	},
-	{  "ldi",	3,	{	T_REG | T_DIR | T_IND,			T_DIR | T_REG,			T_REG	},	10,	  25,	1,		1,	  &op_ldi	},
-	{  "sti",	3,	{					T_REG,	T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	  25,	1,		1,	  &op_sti	},
-	{ "fork",	1,	{					T_DIR,						0,				0	},	12,	 800,	0,		1,	 &op_fork	},
-	{ "lldi",	3,	{	T_REG | T_DIR | T_IND,			T_DIR | T_REG,			T_REG	},	14,	  50,	1,		1,	 &op_lldi	},
-	{"lfork",	1,	{					T_DIR,						0,				0	},	15,	1000,	0,		1,	&op_lfork	},
-	{      0,	0,	{						0,						0,				0	},	 0,	   0,	0,		0,			0	}
+	{ "live",	1,	{					T_DIR,						0,				0	},	 1,	  10,	0,	0,	 &op_live	},
+	{   "ld",	2,	{			T_DIR | T_IND,					T_REG,				0	},	 2,	   5,	1,	0,	   &op_ld	},
+	{   "st",	2,	{					T_REG,			T_IND | T_REG,				0	},	 3,	   5,	1,	0,	   &op_st	},
+	{  "add",	3,	{					T_REG,					T_REG,			T_REG	},	 4,	  10,	1,	0,	  &op_add	},
+	{  "sub",	3,	{					T_REG,					T_REG,			T_REG	},	 5,	  10,	1,	0,	  &op_sub	},
+	{  "and",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 6,	   6,	1,	0,	  &op_and	},
+	{   "or",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 7,	   6,	1,	0,	   &op_or	},
+	{  "xor",	3,	{	T_REG | T_IND | T_DIR,	T_REG | T_IND | T_DIR,			T_REG	},	 8,	   6,	1,	0,	  &op_xor	},
+	{ "zjmp",	1,	{					T_DIR,						0,				0	},	 9,	  20,	0,	1,	 &op_zjmp	},
+	{  "ldi",	3,	{	T_REG | T_DIR | T_IND,			T_DIR | T_REG,			T_REG	},	10,	  25,	1,	1,	  &op_ldi	},
+	{  "sti",	3,	{					T_REG,	T_REG | T_DIR | T_IND,	T_DIR | T_REG	},	11,	  25,	1,	1,	  &op_sti	},
+	{ "fork",	1,	{					T_DIR,						0,				0	},	12,	 800,	0,	1,	 &op_fork	},
+	{ "lldi",	3,	{	T_REG | T_DIR | T_IND,			T_DIR | T_REG,			T_REG	},	14,	  50,	1,	1,	 &op_lldi	},
+	{"lfork",	1,	{					T_DIR,						0,				0	},	15,	1000,	0,	1,	&op_lfork	},
+	{  "aff",	1,	{					T_REG,						0,				0	},	16,	   2,	1,	0,	  &op_aff	},
+	{      0,	0,	{						0,						0,				0	},	 0,	   0,	0,	0,			0	}
 };
