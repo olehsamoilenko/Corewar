@@ -1,6 +1,6 @@
 list=(
 # 42.cor
-# Asombra.cor
+Asombra.cor
 # Bazou.cor
 # Car.cor
 # Code_eater.cor

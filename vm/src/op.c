@@ -234,7 +234,7 @@ void	op_st(t_carriage *car, t_war *war)
 
 	int r1 = car->params[1].integer;
 
-	// show_union(car->reg[r1]);
+	
 
 	if (r1 < 1 || r1 > 16)
 	{
@@ -251,15 +251,20 @@ void	op_st(t_carriage *car, t_war *war)
 	}
 	else if (car->types[2] == T_REG)
 	{
-		int r2 = car->params[1].integer;
+		int r2 = car->params[2].integer;
 		if (r2 < 1 || r2 > 16)
 			return ;
-		car->reg[r2] = car->reg[r1];
-
-		
+		car->reg[r2].bytes[0] = car->reg[r1].bytes[0];
+		car->reg[r2].bytes[1] = car->reg[r1].bytes[1];
+		car->reg[r2].bytes[2] = car->reg[r1].bytes[2];
+		car->reg[r2].bytes[3] = car->reg[r1].bytes[3];
+		// show_union(car->reg[r1]);
+		// show_union(car->reg[r2]);
 	}
 
-	// show_union(car->reg[r1]);
+
+
+	
 
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
@@ -295,6 +300,9 @@ void	op_sti(t_carriage *car, t_war *war)
 		war->map[(index + 2) % MEM_SIZE]->value = car->reg[r1].bytes[1];
 		war->map[(index + 1) % MEM_SIZE]->value = car->reg[r1].bytes[2];
 		war->map[(index + 0) % MEM_SIZE]->value = car->reg[r1].bytes[3];
+
+		// if (war->cycle == 7365)
+		// 	ft_printf("%x\n", car->reg[r1].bytes[0]);
 	// }
 	// else if (car->types[2] == T_REG)
 	// {
