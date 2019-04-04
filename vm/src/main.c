@@ -288,8 +288,10 @@ void	checking(t_war *war)
 		war->champs[0]->lives_cur_period = 0;
 		war->all_lives = 0;
 	}
-		
+	
 }
+
+
 
 // 42				TOO BIG
 // CAR				LONG

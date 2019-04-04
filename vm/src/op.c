@@ -232,11 +232,11 @@ void	op_st(t_carriage *car, t_war *war)
 		index += MEM_SIZE;
 	// ft_printf("%d\n", index);
 
-	int reg_num = car->params[1].integer;
+	int r1 = car->params[1].integer;
 
-	// show_union(car->reg[reg_num]);
+	// show_union(car->reg[r1]);
 
-	if (reg_num < 1 || reg_num > 16)
+	if (r1 < 1 || r1 > 16)
 	{
 		// ft_printf("Incorrect reg\n");
 		return ;
@@ -244,15 +244,27 @@ void	op_st(t_carriage *car, t_war *war)
 
 	if (car->types[2] == T_IND)
 	{
-		war->map[(index + 0) % MEM_SIZE]->value = car->reg[reg_num].bytes[3];
-		war->map[(index + 1) % MEM_SIZE]->value = car->reg[reg_num].bytes[2];
-		war->map[(index + 2) % MEM_SIZE]->value = car->reg[reg_num].bytes[1];
-		war->map[(index + 3) % MEM_SIZE]->value = car->reg[reg_num].bytes[0];
+		war->map[(index + 0) % MEM_SIZE]->value = car->reg[r1].bytes[3];
+		war->map[(index + 1) % MEM_SIZE]->value = car->reg[r1].bytes[2];
+		war->map[(index + 2) % MEM_SIZE]->value = car->reg[r1].bytes[1];
+		war->map[(index + 3) % MEM_SIZE]->value = car->reg[r1].bytes[0];
 	}
+	else if (car->types[2] == T_REG)
+	{
+		int r2 = car->params[1].integer;
+		if (r2 < 1 || r2 > 16)
+			return ;
+		car->reg[r2] = car->reg[r1];
+
+		
+	}
+
+	show_union(car->reg[r1]);
+
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | st r%d %d\n", car->number, reg_num, car->params[2].integer);
+		ft_printf("P%5d | st r%d %d\n", car->number, r1, car->params[2].integer);
 	}
 }
 
@@ -262,26 +274,33 @@ void	op_sti(t_carriage *car, t_war *war)
 {
 	int i;
 
-	// show_args(war, car);
+	// show_union(car->reg[7]);
 
-	int reg_num = car->params[1].integer;
+	int r1 = car->params[1].integer;
 	int value_2;
 	int value_3;
 	if (!get_value(car, 2, war, 0, &value_2) || !get_value(car, 3, war, 0, &value_3))
 		return ;
 
-	if (reg_num < 1 || reg_num > 16)
+	if (r1 < 1 || r1 > 16)
 		return ;
 
 	int index = car->position + (value_2 + value_3) % IDX_MOD;
 	if (index < 0)
 		index += MEM_SIZE;
 
-
-	war->map[(index + 3) % MEM_SIZE]->value = car->reg[reg_num].bytes[0];
-	war->map[(index + 2) % MEM_SIZE]->value = car->reg[reg_num].bytes[1];
-	war->map[(index + 1) % MEM_SIZE]->value = car->reg[reg_num].bytes[2];
-	war->map[(index + 0) % MEM_SIZE]->value = car->reg[reg_num].bytes[3];
+	if (car->types[2] == T_REG)
+	{
+		war->map[(index + 3) % MEM_SIZE]->value = car->reg[r1].bytes[0];
+		war->map[(index + 2) % MEM_SIZE]->value = car->reg[r1].bytes[1];
+		war->map[(index + 1) % MEM_SIZE]->value = car->reg[r1].bytes[2];
+		war->map[(index + 0) % MEM_SIZE]->value = car->reg[r1].bytes[3];
+	}
+	else if (car->types[2] == T_REG)
+	{
+		ft_printf("ST ARG 2 T_REG\n");
+		exit(0);
+	}
 
 	i = -1;
 	while (++i < 4)
@@ -294,7 +313,7 @@ void	op_sti(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | sti r%d %d %d\n", car->number, reg_num, value_2, value_3);
+		ft_printf("P%5d | sti r%d %d %d\n", car->number, r1, value_2, value_3);
 		ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
 			value_2, value_3, value_2 + value_3, car->position + (value_2 + value_3) % IDX_MOD);
 	}
