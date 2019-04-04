@@ -93,6 +93,7 @@ void	write_to_file(t_asm *asm_parsing)
 	write(new_fd, all_code, (4 + PROG_NAME_LENGTH + 4 + 4 +
 								COMMENT_LENGTH + 4 + asm_parsing->position));
 	ft_strdel(&all_code);
-	printf("Writing output program to %s\n", file_to_write);
+	g_fd = 1;
+	ft_printf("Writing output program to %s\n", file_to_write);
 	ft_strdel(&file_to_write);
 }

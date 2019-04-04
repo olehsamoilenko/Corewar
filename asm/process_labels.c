@@ -64,6 +64,7 @@ void	count_bytes(t_asm *asm_parsing, t_codage *codage,
 	if (codage->count_args != g_op_tab[codage->instruction].count_args)
 		error_word2(current, "Wrong number of arguments");
 	free(instruction_args);
+	free(codage);
 }
 
 t_word	*process_label(t_asm *asm_parsing, t_word *current)
@@ -92,6 +93,5 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 			error_word2(current, "Separator is missed");
 	}
 	count_bytes(asm_parsing, codage, instruction_args, current);
-	free(codage);
 	return (current);
 }

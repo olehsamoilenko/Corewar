@@ -12,44 +12,6 @@
 
 #include "asm.h"
 
-// DELETE THIS
-void	print_asm_structure(t_asm *asm_parsing)
-{
-	printf("===========  ASM_PARSING  ==========\n");
-	printf("asm_parsing->name_champ = %s\n", asm_parsing->name_champ);
-	printf("asm_parsing->comment = %s\n", asm_parsing->comment);
-	printf("asm_parsing->row = %d\n", asm_parsing->row);
-	printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
-}
-
-// void	print_list(t_asm *asm_parsing)
-// {
-// 	t_word	*current;
-
-// 	current = asm_parsing->words;
-// 	while (current != NULL)
-// 	{
-// 		printf("current->name = %s\n", current->name);
-// 		printf("current->word_type = %s\n", test[current->word_type - 1]);
-// 		printf("current->row = %d\n", current->row);
-// 		// printf("current->symbol = %d\n", current->symbol);		
-// 		printf("======================================\n");
-// 		current = current->next;
-// 	}
-// }
-
-// void	print_labels(t_asm *asm_parsing)
-// {
-// 	t_label *current_label;
-
-// 	current_label = asm_parsing->labels;
-// 	while (current_label != NULL)
-// 	{
-// 		printf("label->name = %s | label->refer = %d\n", current_label->name, current_label->refer);
-// 		current_label = current_label->next;
-// 	}
-// }
-
 t_asm		*init_asm(int fd, const char *filename)
 {
 	t_asm	*asm_parsing;
@@ -114,23 +76,14 @@ static void	assembler(const char *filename)
 		ft_arg_error("Can't open this file");
 	asm_parsing = init_asm(fd, filename);
 	check_all_lines(asm_parsing, ret, fd, line);
-	// print_list(asm_parsing);
 	current = determine_commands(asm_parsing);
 	determine_labels(asm_parsing, current);
-	// print_labels(asm_parsing);
 	determine_instructions(asm_parsing, current);
 	write_to_file(asm_parsing);
 	free_all(asm_parsing);
 }
 
-int			check_for_disasm(char const *argv[])
-{
-	if (ft_strequ(argv[1], "-d"))
-		return (1);
-	return (0);
-}
-
-int		main(int argc, char const *argv[])
+int			main(int argc, char const *argv[])
 {
 	char *extention;
 
@@ -146,18 +99,16 @@ int		main(int argc, char const *argv[])
 		if (ft_strlen(argv[2]) < 5)
 			ft_arg_error("Missed filename");
 		disassembler(argv[2]);
-		printf("OK\n");
-		system("leaks asm");
-
+		// system("leaks asm");
 		return (0);
 	}
+	g_fd = 2;
 	extention = ft_strdup(ft_strrchr(argv[1], '.'));
 	if (!ft_strequ(extention, ".s"))
 		ft_arg_error("Extention of the file must be .s");
 	if (ft_strlen(argv[1]) < 3)
 		ft_arg_error("Missed filename");
 	assembler(argv[1]);
-	
 	// system("leaks asm");
 	return (0);
 }

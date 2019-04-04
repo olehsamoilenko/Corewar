@@ -43,3 +43,10 @@ void			free_all(t_asm *asm_parsing)
 	ft_strdel(&asm_parsing->byte_code);
 	free(asm_parsing);
 }
+
+int				check_for_disasm(char const *argv[])
+{
+	if (ft_strequ(argv[1], "-d"))
+		return (1);
+	return (0);
+}

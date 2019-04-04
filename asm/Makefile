@@ -30,7 +30,9 @@ SRC =	main.c \
 		write_args.c \
 		help_functions.c \
 		determine.c \
-		disassembler.c
+		disassembler.c \
+		get_args.c \
+		read_and_parse.c
 
 OBJ = $(SRC:.c=.o)
 

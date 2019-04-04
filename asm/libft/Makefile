@@ -78,9 +78,23 @@ SRC =	ft_memset.c \
 		ft_isprime.c \
 		ft_lstadd_back.c \
 		get_next_line.c \
-		ft_itoa_base.c
+		ft_itoa_base.c \
+		ft_printf.c
+
+SRC_PRINTF =	print_dec \
+				print_unsigned \
+				print_hex \
+				print_octal \
+				print_percent \
+				print_string \
+				print_char \
+				print_uni_string\
+				is_functions\
+				help_functions
 
 OBJ = $(SRC:.c=.o)
+
+OBJ_PRINTF = $(addprefix ft_printf/, $(addsuffix .o, $(SRC_PRINTF)))
 
 CFLAGS = -Wall -Wextra -Werror
 
@@ -99,7 +113,8 @@ PURPLEBOLD=\033[1;35m
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@ar rc $(NAME) $(OBJ)
+	@make -C ft_printf/
+	@ar rc $(NAME) $(OBJ) $(OBJ_PRINTF)
 	@echo "$(YELLOW)libft.a $(YELLOWBOLD)-(OK)- $(OFF)" 
 
 %.o: %.c
@@ -108,6 +123,7 @@ $(NAME): $(OBJ)
 
 clean:
 	@rm -rf $(OBJ)
+	@make clean -C ft_printf/
 	@echo "$(PURPLE)Objects $(REDBOLD)$(OBJ)$(OFF) $(PURPLE)have been destroyed.$(OFF)"
 
 fclean: clean

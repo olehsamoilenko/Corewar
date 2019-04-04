@@ -16,6 +16,7 @@
 # include <string.h>
 # include <stdlib.h>
 # include <unistd.h>
+# include "ft_printf.h"
 
 typedef	struct		s_list
 {
@@ -72,10 +73,10 @@ char				*ft_strtrim(char const *s);
 char				**ft_strsplit(char const *s, char c);
 char				*ft_itoa(int n);
 void				ft_putchar(char c);
-void				ft_putstr(char const *s);
+int					ft_putstr(char const *s);
 void				ft_putendl(char const *s);
 void				ft_putchar_fd(char c, int fd);
-void				ft_putstr_fd(char const *s, int fd);
+int					ft_putstr_fd(char const *s, int fd);
 void				ft_putendl_fd(char const *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
 void				ft_putnbr(int n);
@@ -90,5 +91,7 @@ int					ft_isspace(char c);
 int					ft_list_size(t_list *begin_list);
 int					ft_isprime(int num);
 void				ft_lstadd_back(t_list **alst, t_list *new);
+
+int					ft_printf(const char *format, ...);
 
 #endif
