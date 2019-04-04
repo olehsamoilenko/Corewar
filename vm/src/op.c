@@ -259,7 +259,7 @@ void	op_st(t_carriage *car, t_war *war)
 		
 	}
 
-	show_union(car->reg[r1]);
+	// show_union(car->reg[r1]);
 
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
@@ -289,18 +289,18 @@ void	op_sti(t_carriage *car, t_war *war)
 	if (index < 0)
 		index += MEM_SIZE;
 
-	if (car->types[2] == T_REG)
-	{
+	// if (car->types[2] == T_REG)
+	// {
 		war->map[(index + 3) % MEM_SIZE]->value = car->reg[r1].bytes[0];
 		war->map[(index + 2) % MEM_SIZE]->value = car->reg[r1].bytes[1];
 		war->map[(index + 1) % MEM_SIZE]->value = car->reg[r1].bytes[2];
 		war->map[(index + 0) % MEM_SIZE]->value = car->reg[r1].bytes[3];
-	}
-	else if (car->types[2] == T_REG)
-	{
-		ft_printf("ST ARG 2 T_REG\n");
-		exit(0);
-	}
+	// }
+	// else if (car->types[2] == T_REG)
+	// {
+	// 	ft_printf("ST ARG 2 T_REG\n");
+	// 	exit(0);
+	// }
 
 	i = -1;
 	while (++i < 4)
