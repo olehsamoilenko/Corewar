@@ -364,7 +364,13 @@ int		main(int argc, char **argv)
 			{
 				
 				int delta = get_args(car, war->map, car->op, war);
-
+				
+				// if (war->cycle == 18080)
+				// 	show_args(war, car);
+				// if (car->args_ok)
+				// 	ft_printf("TRUE\n");
+				// else
+				// 	ft_printf("FALSE\n");
 				if (car->args_ok)
 					car->op->func(car, war);
 				if (car->op->code == 0x09 && car->carry == true) // zjmp

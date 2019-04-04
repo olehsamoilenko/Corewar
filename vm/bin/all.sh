@@ -1,9 +1,9 @@
 list=(
 # 42.cor
 Asombra.cor
-# Bazou.cor
+Bazou.cor
 # Car.cor
-# Code_eater.cor
+# Code_eater.cor # 18080 different codage (mb take with command)
 # Douceur_power.cor
 # Eraser.cor
 # Explosive_Kitty.cor

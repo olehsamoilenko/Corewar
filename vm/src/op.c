@@ -50,6 +50,7 @@ int		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 	else if (car->types[num] == T_IND)
 	{
 		union converter num;
+		index = (index + MEM_SIZE) % MEM_SIZE;
 		num.bytes[3] = war->map[(index + 0) % MEM_SIZE]->value;
 		num.bytes[2] = war->map[(index + 1) % MEM_SIZE]->value;
 		num.bytes[1] = war->map[(index + 2) % MEM_SIZE]->value;
@@ -279,7 +280,21 @@ void	op_sti(t_carriage *car, t_war *war)
 {
 	int i;
 
-	// show_union(car->reg[7]);
+	if (war->cycle == 990)
+	{
+		// show_args(war, car);
+		// ft_printf("%d\n", car->codage);
+	}
+
+	if (war->cycle == 18080)
+	{
+		// show_args(war, car)	;
+		// ft_printf("%d\n", car->codage);
+		// reg_info(car->reg, war);
+		// (char)245 ;
+		// (unsigned char)4110417920
+
+	}
 
 	int r1 = car->params[1].integer;
 	int value_2;
@@ -307,6 +322,7 @@ void	op_sti(t_carriage *car, t_war *war)
 	// else if (car->types[2] == T_REG)
 	// {
 	// 	ft_printf("ST ARG 2 T_REG\n");
+	// (char)62723
 	// 	exit(0);
 	// }
 

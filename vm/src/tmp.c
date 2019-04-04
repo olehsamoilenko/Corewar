@@ -70,16 +70,16 @@ void	show_union(union converter a)
 	{
 		ft_printf("%02x ", a.bytes[i]);
 	}
-	ft_printf("\n");
+	ft_printf("\n");   
 }
 
-void	reg_info(int *reg, t_war *war)
+void	reg_info(union converter *reg, t_war *war)
 {
 	if (war->flag_verbose)
 	{
 		int i = -1;
 		while (++i <= REG_NUMBER)
-			ft_printf("%d ", reg[i]);
+			ft_printf("reg %d: %d\n", i, reg[i].integer);
 		ft_printf("\n");
 
 	}
