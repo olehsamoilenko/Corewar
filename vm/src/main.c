@@ -205,11 +205,18 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	car->params[2].integer = arg_2;
 	car->params[3].integer = arg_3;
 
-	if ((car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
+	// ft_printf("1 %d %d 2 %d %d 3 %d %d\n",
+	// 	car->types[1], car->sizes[1],
+	// 	car->types[2], car->sizes[2],
+	// 	car->types[3], car->sizes[3]);
+
+	if (car->sizes[1] == 0 || (car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
 		car->args_ok = false;
-	if (car->op->args > 1 && (car->op->args_type[1] | car->types[2]) != car->op->args_type[1])
+	if (car->op->args > 1 && (car->sizes[2] == 0 ||
+		(car->op->args_type[1] | car->types[2]) != car->op->args_type[1]))
 		car->args_ok = false;
-	if (car->op->args > 2 && (car->op->args_type[2] | car->types[3]) != car->op->args_type[2])
+	if (car->op->args > 2 && (car->sizes[3] == 0 ||
+		(car->op->args_type[2] | car->types[3]) != car->op->args_type[2]))
 		car->args_ok = false;
 
 	return (delta);
@@ -313,7 +320,6 @@ void	checking(t_war *war)
 // ZORK				OK
 
 
-
 int		main(int argc, char **argv) 
 {
 	t_war *war = init();
@@ -347,6 +353,24 @@ int		main(int argc, char **argv)
 				t_carriage *car = tmp;
 
 				if (car->op == NULL)
+				car->op = get_command(car->number, car->position, war->map, war);
+				if (car->op)
+				{
+					car->cooldown = car->op->cooldown;
+				}
+				else
+					car->position = (car->position + 1) % MEM_SIZE;
+			}
+			car->cooldown--;
+			if (car->op && car->cooldown == 0)
+			{
+				
+				int delta = get_args(car, war->map, car->op, war);
+				if (car->args_ok)
+					car->op->func(car, war);
+				// else
+				// 	ft_printf("%d ARGS KO\n", war->cycle);
+				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
 					car->op = get_command(car->number, car->position, war->map, war);

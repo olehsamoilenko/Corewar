@@ -281,20 +281,20 @@ void	op_sti(t_carriage *car, t_war *war)
 	int i;
 
 
-	if (war->cycle == 18080)
-	{
-		// show_args(war, car);
-		// ft_printf("%d\n", car->codage);
-		// reg_info(car->reg, war);
-		// (char)245 ;
-		// (unsigned char)4110417920
+	// if (war->cycle == 18080)
+	// {
+	// 	// show_args(war, car);
+	// 	// ft_printf("%d\n", car->codage);
+	// 	// reg_info(car->reg, war);
+	// 	// (char)245 ;
+	// 	// (unsigned char)4110417920
 
-	}
+	// }
 
 	int r1 = car->params[1].integer;
 	int value_2;
 	int value_3;
-	if (!get_value(car, 2, war, 0, &value_2) || !get_value(car, 3, war, 0, &value_3))
+	if (!get_value(car, 2, war, car->position + car->params[2].integer % IDX_MOD, &value_2) || !get_value(car, 3, war, car->position + car->params[2].integer % IDX_MOD, &value_3))
 		return ;
 
 	if (r1 < 1 || r1 > 16)
@@ -344,6 +344,9 @@ void	op_fork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
 	new->position = car->position + car->params[1].integer % IDX_MOD;
+	while (new->position < 0)
+		new->position += MEM_SIZE;
+	new->position %= MEM_SIZE;
 	push_carriage(new, &war->carriages);
 	int i = -1;
 	while (++i <= REG_NUMBER)
@@ -361,7 +364,10 @@ void	op_fork(t_carriage *car, t_war *war)
 void	op_lfork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
-	new->position = (car->position + car->params[1].integer) % MEM_SIZE;
+	new->position = car->position + car->params[1].integer;
+	while (new->position < 0)
+		new->position += MEM_SIZE;
+	new->position %= MEM_SIZE;
 	push_carriage(new, &war->carriages);
 	int i = -1;
 	while (++i <= REG_NUMBER)
@@ -380,7 +386,9 @@ void	op_lfork(t_carriage *car, t_war *war)
 void	op_zjmp(t_carriage *car, t_war *war)
 {
 	char *jump_status;
-
+	
+	// if (war->cycle == 17525)
+	// 	show_args(war, car);
 
 	if (car->carry == true)
 	{
@@ -442,8 +450,10 @@ void	op_and(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1; get_value(car, 1, war, 0, &value_1);
-	int value_2; get_value(car, 2, war, 0, &value_2);
+	int value_1;
+	int value_2;
+	if (!get_value(car, 1, war, 0, &value_1) || !get_value(car, 2, war, 0, &value_2))
+		return ;
 
 	int reg_num = car->params[3].integer;
 
@@ -469,8 +479,8 @@ void	op_or(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1; get_value(car, 1, war, 0, &value_1);
-	int value_2; get_value(car, 2, war, 0, &value_2);
+	int value_1; get_value(car, 1, war, car->position + car->params[2].integer % IDX_MOD, &value_1);
+	int value_2; get_value(car, 2, war, car->position + car->params[2].integer % IDX_MOD, &value_2);
 
 	int reg_num = car->params[3].integer;
 
@@ -489,7 +499,6 @@ void	op_or(t_carriage *car, t_war *war)
 		ft_printf("P%5d | or %d %d r%d\n", car->number,
 			value_1, value_2, reg_num);
 	}
-	
 }
 
 void	op_xor(t_carriage *car, t_war *war)
