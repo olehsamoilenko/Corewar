@@ -361,7 +361,7 @@ void	op_fork(t_carriage *car, t_war *war)
 void	op_lfork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
-	new->position = (car->position + car->params[1].integer) % MEM_SIZE;
+	new->position = (car->position + car->params[1].integer + MEM_SIZE) % MEM_SIZE;
 	push_carriage(new, &war->carriages);
 	int i = -1;
 	while (++i <= REG_NUMBER)
@@ -380,7 +380,9 @@ void	op_lfork(t_carriage *car, t_war *war)
 void	op_zjmp(t_carriage *car, t_war *war)
 {
 	char *jump_status;
-
+	
+	// if (war->cycle == 17525)
+	// 	show_args(war, car);
 
 	if (car->carry == true)
 	{
