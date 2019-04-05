@@ -346,31 +346,13 @@ int		main(int argc, char **argv)
 		t_carriage *tmp = war->carriages;
 
 		
-		if (next_cycle(war))
+if (next_cycle(war))
 		{
 			while (tmp)
 			{
 				t_carriage *car = tmp;
 
 				if (car->op == NULL)
-				car->op = get_command(car->number, car->position, war->map, war);
-				if (car->op)
-				{
-					car->cooldown = car->op->cooldown;
-				}
-				else
-					car->position = (car->position + 1) % MEM_SIZE;
-			}
-			car->cooldown--;
-			if (car->op && car->cooldown == 0)
-			{
-				
-				int delta = get_args(car, war->map, car->op, war);
-				if (car->args_ok)
-					car->op->func(car, war);
-				// else
-				// 	ft_printf("%d ARGS KO\n", war->cycle);
-				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 
 					car->op = get_command(car->number, car->position, war->map, war);
