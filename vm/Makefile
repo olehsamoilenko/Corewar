@@ -6,7 +6,7 @@
 #    By: osamoile <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/01 15:53:40 by osamoile          #+#    #+#              #
-#    Updated: 2018/08/23 19:21:36 by osamoile         ###   ########.fr        #
+#    Updated: 2019/04/05 11:38:02 by sbasnaka         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,14 +27,29 @@ LIST =			main \
 				tmp
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
+OFF=\033[0m
+
+RED=\033[31m
+REDBOLD=\033[1;31m
+GREEN=\033[32m
+GREENBOLD=\033[1;32m
+YELLOW=\033[33m
+YELLOWBOLD=\033[1;33m
+PURPLE=\033[35m
+PURPLEBOLD=\033[1;35m
+
+PURPLELIGHT=\033[38;2;102;102;255m
+
 all: $(NAME)
 
 obj/%.o: src/%.c $(HEADER)
 	@gcc $(FLAGS) -c $< -o $@ $(INC)
+	@echo "$(PURPLELIGHT)Compiling $(OFF)\033[1m$< $(OFF)$(PURPLELIGHT)done$(OFF)"
 
 $(NAME): obj $(OBJ)
 	@make -C libft
 	@gcc $(OBJ) -o $(NAME) $(LIB)
+	@echo "$(PURPLEBOLD)$(NAME)$(OFF)$(PURPLE) is ready$(OFF)"
 
 obj:
 	@mkdir obj
