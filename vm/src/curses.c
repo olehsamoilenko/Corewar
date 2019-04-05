@@ -21,7 +21,12 @@ void	print_memory(t_war *war)
 	{
 		// color on
 		if (war->map[i]->color == 0)
-			wattroff(war->win_mem, A_COLOR);
+		{
+			// wattroff(war->win_mem, A_COLOR);
+			wattron(war->win_mem, A_BOLD);
+			wattron(war->win_mem, COLOR_PAIR(14));
+			
+		}
 		else
 			wattron(war->win_mem, COLOR_PAIR(war->map[i]->color));
 
@@ -41,10 +46,15 @@ void	print_memory(t_war *war)
 		mvwaddstr(war->win_mem, i / 64 + 1, (i % 64) * 3 + 2, s);
 		wattroff(war->win_mem, A_BOLD);
 	}
+
 	t_carriage *tmp = war->carriages; // need?
 	while (tmp)
 	{
 		wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
+		if (war->map[tmp->position]->color == 0)
+		{
+			wattron(war->win_mem, COLOR_PAIR(15));
+		}
 		sprintf(s, "%02x", war->map[tmp->position]->value);
 		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
 		tmp = tmp->next;
@@ -97,6 +107,10 @@ void	define_colors()
 
 	// default
 	init_pair(13, COLOR_BLACK, COLOR_BLACK);
+
+	// added
+	init_pair(14, 8, COLOR_BLACK); // Bright black
+	init_pair(15, 8, 8);
 
 }
 

@@ -19,11 +19,13 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-void	next_cycle(t_war *war)
+t_bool	next_cycle(t_war *war)
 {
-	
+	int fd = open("check_values.txt", O_WRONLY | O_APPEND);
 	int key = 0;
-	
+	t_bool	need_cycle;
+
+	need_cycle = false;
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		key = wgetch(war->win_getch);
@@ -33,9 +35,10 @@ void	next_cycle(t_war *war)
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
 	{
 		war->cycle += 1;
+		dprintf(fd, "war->cycles = %d\n", war->cycle);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("It is now cycle %d\n", war->cycle);
-		
+		need_cycle = true;
 		// car->cooldown--;
 	}
 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
@@ -43,9 +46,7 @@ void	next_cycle(t_war *war)
 		// print_info(war);
 		print_memory(war);
 	}
-	
-	
-	
+	return (need_cycle);
 }
 
 int		champions_count(t_champion **champs)
@@ -339,67 +340,67 @@ int		main(int argc, char **argv)
 		t_carriage *tmp = war->carriages;
 
 		
-
-		next_cycle(war);
-		
-		while (tmp)
+		if (next_cycle(war))
 		{
-			t_carriage *car = tmp;
-
-			if (car->op == NULL)
+			while (tmp)
 			{
+				t_carriage *car = tmp;
 
-				car->op = get_command(car->number, car->position, war->map, war);
-				if (car->op)
+				if (car->op == NULL)
 				{
-					car->cooldown = car->op->cooldown;
+
+					car->op = get_command(car->number, car->position, war->map, war);
+					if (car->op)
+					{
+						car->cooldown = car->op->cooldown;
+					}
+					else
+						car->position = (car->position + 1) % MEM_SIZE;
 				}
-				else
-					car->position = (car->position + 1) % MEM_SIZE;
-			}
-			car->cooldown--;
-			if (car->op && car->cooldown == 0)
-			{
+				car->cooldown--;
+				if (car->op && car->cooldown == 0)
+				{
+					
+					int delta = get_args(car, war->map, car->op, war);
+					if (car->args_ok)
+						car->op->func(car, war);
+					// else
+					// 	ft_printf("CODAGE %x\n", car->codage);
+					if (car->op->code == 0x09 && car->carry == true) // zjmp
+					{
+
+					}
+					else
+					{
+						adv(war, car->op, delta, car);
+						car->position = (car->position + delta) % MEM_SIZE;
+					}
+					car->op = NULL;
+				}
+				if (war->flag_visual)
+					print_memory(war);
+				tmp = tmp->next;
 				
-				int delta = get_args(car, war->map, car->op, war);
-				if (car->args_ok)
-					car->op->func(car, war);
-				// else
-				// 	ft_printf("CODAGE %x\n", car->codage);
-				if (car->op->code == 0x09 && car->carry == true) // zjmp
-				{
-
-				}
-				else
-				{
-					adv(war, car->op, delta, car);
-					car->position = (car->position + delta) % MEM_SIZE;
-				}
-				car->op = NULL;
 			}
-			if (war->flag_visual)
-				print_memory(war);
-			tmp = tmp->next;
 			
-		}
-		
-		checking(war);
+			checking(war);
 
-		if (!war->carriages)
-		{
-			if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
+			if (!war->carriages)
 			{
-				ft_printf("Contestant %d, \"%s\", has won !\n",
-					war->last_live->number, war->last_live->header->prog_name);
+				if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
+				{
+					ft_printf("Contestant %d, \"%s\", has won !\n",
+						war->last_live->number, war->last_live->header->prog_name);
 
+				}
+				break ;
 			}
-			break ;
-		}
-		if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)
-		{
-			dump(war);
-			// ft_printf("sd");
-			// break ;
+			if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)
+			{
+				dump(war);
+				// ft_printf("sd");
+				// break ;
+			}
 		}
 	}
 
