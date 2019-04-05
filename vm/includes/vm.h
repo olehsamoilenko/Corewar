@@ -38,7 +38,7 @@ typedef struct	s_champion
 	int					lives_cur_period;
 }				t_champion;
 
-typedef struct	s_map_cell
+typedef struct	s_map_cell // fix
 {
 	unsigned char		value;
 	int					color;

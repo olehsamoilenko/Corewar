@@ -158,7 +158,7 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 
 	if (op->codage == true)
 	{
-		car->codage = map[car->position + delta]->value;
+		car->codage = map[(car->position + delta) % MEM_SIZE]->value;
 		first = car->codage >> 6;
 		second = car->codage >> 4 & 0b0011;
 		third = car->codage >> 2 & 0b000011;
@@ -345,16 +345,14 @@ int		main(int argc, char **argv)
 		while (tmp)
 		{
 			t_carriage *car = tmp;
-			// ft_printf("%d\n", tmp->number);
+
 			if (car->op == NULL)
 			{
-				// ft_printf("%d\n", tmp->number);
-				
+
 				car->op = get_command(car->number, car->position, war->map, war);
 				if (car->op)
 				{
 					car->cooldown = car->op->cooldown;
-					// car->codage = war->map[car->position + 1]->value;
 				}
 				else
 					car->position = (car->position + 1) % MEM_SIZE;
@@ -364,15 +362,10 @@ int		main(int argc, char **argv)
 			{
 				
 				int delta = get_args(car, war->map, car->op, war);
-				
-				// if (war->cycle == 18080)
-				// 	show_args(war, car);
-				// if (car->args_ok)
-				// 	ft_printf("TRUE\n");
-				// else
-				// 	ft_printf("FALSE\n");
 				if (car->args_ok)
 					car->op->func(car, war);
+				// else
+				// 	ft_printf("CODAGE %x\n", car->codage);
 				if (car->op->code == 0x09 && car->carry == true) // zjmp
 				{
 

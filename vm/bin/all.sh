@@ -2,23 +2,23 @@ list=(
 # 42.cor
 Asombra.cor
 Bazou.cor
-# Car.cor
-# Code_eater.cor # 18080 different codage (mb take with command)
-# Douceur_power.cor
-# Eraser.cor
-# Explosive_Kitty.cor
-# ForgottenOne.cor
+# Car.cor # very long
+Code_eater.cor
+# Douceur_power.cor # long
+Eraser.cor
+Explosive_Kitty.cor
+# ForgottenOne.cor # OK
 Gagnant.cor
-# Hidden.cor
-# Horace.cor
-# Izi_Miaou.cor
-# Kappa.cor
-# Kitty_Miaou.cor
-# Kittystrophic.cor
-# Machine-gun.cor
-# MarineKing.cor
-# Misaka_Mikoto.cor
-# NoIdea.cor
+Hidden.cor			
+# Horace.cor			# OK
+# Izi_Miaou.cor		# OK
+Kappa.cor			# 	SF
+# Kitty_Miaou.cor		# OK
+# Kittystrophic.cor	# OK
+# Machine-gun.cor		# OK
+# MarineKing.cor		# OK
+# Misaka_Mikoto.cor	# OK
+NoIdea.cor			# 	SF
 # O-Maley_Miaou.cor
 # Octobre_Rouge_V4.2.cor
 # Rainbow_dash.cor

@@ -32,7 +32,7 @@
 // 	return (0);
 // }
 
-int		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
+t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 {
 	if (car->types[num] == T_DIR)
 	{
@@ -280,15 +280,10 @@ void	op_sti(t_carriage *car, t_war *war)
 {
 	int i;
 
-	if (war->cycle == 990)
-	{
-		// show_args(war, car);
-		// ft_printf("%d\n", car->codage);
-	}
 
 	if (war->cycle == 18080)
 	{
-		// show_args(war, car)	;
+		// show_args(war, car);
 		// ft_printf("%d\n", car->codage);
 		// reg_info(car->reg, war);
 		// (char)245 ;
