@@ -249,6 +249,12 @@ void	op_st(t_carriage *car, t_war *war)
 		war->map[(index + 1) % MEM_SIZE]->value = car->reg[r1].bytes[2];
 		war->map[(index + 2) % MEM_SIZE]->value = car->reg[r1].bytes[1];
 		war->map[(index + 3) % MEM_SIZE]->value = car->reg[r1].bytes[0];
+		int i = -1;
+		while (++i < 4)
+		{
+			war->map[(index + i) % MEM_SIZE]->cycles_bold = war->cycle;
+			war->map[(index + i) % MEM_SIZE]->color = car->creator->number;
+		}
 	}
 	else if (car->types[2] == T_REG)
 	{
@@ -262,6 +268,8 @@ void	op_st(t_carriage *car, t_war *war)
 		// show_union(car->reg[r1]);
 		// show_union(car->reg[r2]);
 	}
+
+
 
 
 

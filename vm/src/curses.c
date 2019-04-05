@@ -50,11 +50,10 @@ void	print_memory(t_war *war)
 	t_carriage *tmp = war->carriages; // need?
 	while (tmp)
 	{
-		wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
 		if (war->map[tmp->position]->color == 0)
-		{
 			wattron(war->win_mem, COLOR_PAIR(15));
-		}
+		else
+			wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
 		sprintf(s, "%02x", war->map[tmp->position]->value);
 		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
 		tmp = tmp->next;
