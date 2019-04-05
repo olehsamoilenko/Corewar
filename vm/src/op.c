@@ -479,8 +479,8 @@ void	op_or(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1; get_value(car, 1, war, 0, &value_1);
-	int value_2; get_value(car, 2, war, 0, &value_2);
+	int value_1; get_value(car, 1, war, car->position + car->params[2].integer % IDX_MOD, &value_1);
+	int value_2; get_value(car, 2, war, car->position + car->params[2].integer % IDX_MOD, &value_2);
 
 	int reg_num = car->params[3].integer;
 
