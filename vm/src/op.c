@@ -153,6 +153,11 @@ void	op_ldi(t_carriage *car, t_war *war)
 	car->reg[reg_num].bytes[1] = war->map[index + 2]->value;
 	car->reg[reg_num].bytes[0] = war->map[index + 3]->value;
 
+	// if (car->reg[reg_num].integer == 0)
+	// 	car->carry = true;
+	// else
+	// 	car->carry = false;
+
 
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
@@ -187,6 +192,11 @@ void	op_lldi(t_carriage *car, t_war *war)
 	car->reg[reg_num].bytes[2] = war->map[index + 1]->value;
 	car->reg[reg_num].bytes[1] = war->map[index + 2]->value;
 	car->reg[reg_num].bytes[0] = war->map[index + 3]->value;
+
+	if (car->reg[reg_num].integer == 0)
+		car->carry = true;
+	else
+		car->carry = false;
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
