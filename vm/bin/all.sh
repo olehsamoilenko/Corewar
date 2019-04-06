@@ -57,10 +57,10 @@ list=(
 # live.cor					# OK
 # loose.cor					# OK
 # lou_forktologue.cor		# OK
-# littlepuppy.cor			# Seg Fault
+# littlepuppy.cor			# OK
 # master_of_puppets.cor		# OK
 # maxidef.cor				# OK
-# salamahenagalabadoun.cor	# KKOO
+# salamahenagalabadoun.cor	# OK
 # overwatch.cor				# OK
 # pai_mu_tan.cor			# OK
 # run_Kitty_RUN.cor			# OK
@@ -72,13 +72,13 @@ list=(
 # terminator.cor			# OK
 # ultima.cor				# OK
 # ultimate-surrender.cor	# OK
-# wave.cor					# long
-# meowluigi.cor				# long
-# mise_a_jour_windows95.cor	# long
-# Douceur_power.cor			# long
-# Octobre_Rouge_V4.2.cor	# long
-# helltrain.cor				# long
-# bee_gees.cor				# long
+# wave.cor					# 27438 OK
+# meowluigi.cor				# 27438 OK
+# mise_a_jour_windows95.cor	# 27438 OK
+# Douceur_power.cor			# 27438 OK
+# Octobre_Rouge_V4.2.cor	# 27438 OK
+# helltrain.cor				# 27438 OK
+# bee_gees.cor				# 27438 OK
 # youforkmytralala.cor		# OK
 )
 
