@@ -88,7 +88,7 @@ typedef struct	s_war
 	WINDOW				*win_getch;
 
 	t_mem_cell			*map[MEM_SIZE];
-	t_champion			*champs[4];
+	t_champion			*champs[5]; // champs[4] is NULL
 
 	t_carriage			*carriages;
 	int					processes_counter; // for number of carriage
@@ -162,5 +162,6 @@ void	curriage_info(t_carriage *car, t_war *war);
 char	*define_type(int type);
 void	show_union(union converter a);
 void	reg_info(union converter *reg, t_war *war);
+void	print_champions(t_champion *champs[]);
 
 #endif

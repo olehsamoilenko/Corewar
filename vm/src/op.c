@@ -78,7 +78,7 @@ void	op_live(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | live %d\n", car->number, car->params[1].integer);
+		ft_printf("P %4d | live %d\n", car->number, car->params[1].integer);
 		
 		if (player != NULL)
 		{
@@ -117,7 +117,7 @@ void	op_ld(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
+		ft_printf("P %4d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
 	}
 
 }
@@ -147,7 +147,7 @@ void	op_lld(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
+		ft_printf("P %4d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
 	}
 
 }
@@ -179,7 +179,7 @@ void	op_ldi(t_carriage *car, t_war *war)
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
+		ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
 			value_1,
 			value_2,
@@ -213,7 +213,7 @@ void	op_lldi(t_carriage *car, t_war *war)
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
+		ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
 		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
 			value_1,
 			value_2,
@@ -278,7 +278,7 @@ void	op_st(t_carriage *car, t_war *war)
 
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | st r%d %d\n", car->number, r1, car->params[2].integer);
+		ft_printf("P %4d | st r%d %d\n", car->number, r1, car->params[2].integer);
 	}
 }
 
@@ -340,7 +340,7 @@ void	op_sti(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | sti r%d %d %d\n", car->number, r1, value_2, value_3);
+		ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, value_2, value_3);
 		ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
 			value_2, value_3, value_2 + value_3, car->position + (value_2 + value_3) % IDX_MOD);
 	}
@@ -365,7 +365,7 @@ void	op_fork(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | fork %d (%d)\n", car->number, car->params[1].integer, car->position + car->params[1].integer % IDX_MOD);
+		ft_printf("P %4d | fork %d (%d)\n", car->number, car->params[1].integer, car->position + car->params[1].integer % IDX_MOD);
 	}
 }
 
@@ -386,7 +386,7 @@ void	op_lfork(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | lfork %d (%d)\n", car->number, car->params[1].integer,
+		ft_printf("P %4d | lfork %d (%d)\n", car->number, car->params[1].integer,
 			car->position + car->params[1].integer);
 	}
 }
@@ -413,7 +413,7 @@ void	op_zjmp(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | zjmp %d %s\n", car->number, car->params[1].integer, jump_status);
+		ft_printf("P %4d | zjmp %d %s\n", car->number, car->params[1].integer, jump_status);
 	}
 	
 }
@@ -433,7 +433,7 @@ void	op_add(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | add r%d r%d r%d\n", car->number, r1, r2, r3);
+		ft_printf("P %4d | add r%d r%d r%d\n", car->number, r1, r2, r3);
 	}
 	
 }
@@ -448,7 +448,7 @@ void	op_sub(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | sub r%d r%d r%d\n", car->number,
+		ft_printf("P %4d | sub r%d r%d r%d\n", car->number,
 			car->params[1].integer, car->params[2].integer, car->params[3].integer);
 	}
 	
@@ -477,7 +477,7 @@ void	op_and(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | and %d %d r%d\n", car->number,
+		ft_printf("P %4d | and %d %d r%d\n", car->number,
 			value_1, value_2, reg_num);
 	}
 	
@@ -504,7 +504,7 @@ void	op_or(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | or %d %d r%d\n", car->number,
+		ft_printf("P %4d | or %d %d r%d\n", car->number,
 			value_1, value_2, reg_num);
 	}
 }
@@ -531,7 +531,7 @@ void	op_xor(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | xor %d %d r%d\n", car->number,
+		ft_printf("P %4d | xor %d %d r%d\n", car->number,
 			value_1, value_2, r3);
 	}
 	
@@ -549,7 +549,7 @@ void	op_new(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P%5d | \n", car->number);
+		ft_printf("P %4d | \n", car->number);
 	}
 	
 }

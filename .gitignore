@@ -3,5 +3,5 @@
 *.a
 *.o
 vm/vm
-vm/bin/my
-vm/bin/origin
+vm/bin/my*
+vm/bin/origin*

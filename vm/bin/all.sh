@@ -1,12 +1,10 @@
 list=(
 # 42.cor					#
 # Car.cor					# very long
-# Douceur_power.cor			# long
-# ForgottenOne.cor			# LONG
-# Octobre_Rouge_V4.2.cor	# long
-# helltrain.cor				# long
 # barriere.cor				# big
-# bee_gees.cor				# long
+# ForgottenOne.cor			# LONG
+# mandragore.cor			# LONG
+# jinx.cor					# OK long
 # big_feet.cor				#
 # Asombra.cor				# OK
 # Bazou.cor					# OK
@@ -51,35 +49,37 @@ list=(
 # gateau.cor				# OK
 # gedeon.cor				# OK
 # zork.cor					# OK
-jinx.cor
-# justin_bee.cor
-# kamelkaze.cor
-# katchup.cor
-# lapsang.cor
-# le_pet_de_nonne.cor
-# littlepuppy.cor
-# live.cor
-# loose.cor
-# lou_forktologue.cor
-# mandragore.cor
-# master_of_puppets.cor
-# maxidef.cor
-# meowluigi.cor
-# mise_a_jour_windows95.cor
-# overwatch.cor
-# pai_mu_tan.cor
-# run_Kitty_RUN.cor
-# salamahenagalabadoun.cor
-# sam_2.0.cor
-# sencha.cor
-# skynet.cor
-# slider2.cor
-# tchupka.cor
-# terminator.cor
-# ultima.cor
-# ultimate-surrender.cor
-# wave.cor
-# youforkmytralala.cor
+# justin_bee.cor			# OK
+# kamelkaze.cor				# OK
+# katchup.cor				# OK
+# lapsang.cor				# OK
+# le_pet_de_nonne.cor		# OK
+# live.cor					# OK
+# loose.cor					# OK
+# lou_forktologue.cor		# OK
+# littlepuppy.cor			# Seg Fault
+# master_of_puppets.cor		# OK
+# maxidef.cor				# OK
+# salamahenagalabadoun.cor	# KKOO
+# overwatch.cor				# OK
+# pai_mu_tan.cor			# OK
+# run_Kitty_RUN.cor			# OK
+# sam_2.0.cor				# OK
+# sencha.cor				# OK
+# skynet.cor				# OK
+# slider2.cor				# OK
+# tchupka.cor				# OK
+# terminator.cor			# OK
+# ultima.cor				# OK
+# ultimate-surrender.cor	# OK
+# wave.cor					# long
+# meowluigi.cor				# long
+# mise_a_jour_windows95.cor	# long
+# Douceur_power.cor			# long
+# Octobre_Rouge_V4.2.cor	# long
+# helltrain.cor				# long
+# bee_gees.cor				# long
+# youforkmytralala.cor		# OK
 )
 
 for i in ${list[@]}; do

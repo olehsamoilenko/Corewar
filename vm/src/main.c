@@ -299,27 +299,6 @@ void	checking(t_war *war)
 	
 }
 
-
-
-// 42				TOO BIG
-// CAR				LONG
-// GAGNANT			OK
-// OCTOBRE			LONG
-// BARRIERE			TOO BIG
-// BEE_GEES			LONG
-// BIGZORK			OK
-// EX				OK
-// FLUTTERSHY		OK
-// HELLTRAIN		... 26469 wrong verbose
-// JUMPER			OK
-// MAXIDEF			OK
-// MORTEL			OK
-// SLIDER			OK
-// TOTO				OK
-// TURTLE			OK
-// ZORK				OK
-
-
 int		main(int argc, char **argv) 
 {
 	t_war *war = init();
@@ -327,7 +306,6 @@ int		main(int argc, char **argv)
 	int mem_delta = MEM_SIZE / champions_count(war->champs);
 	parse_champions(war->champs, war->map, mem_delta);
 	war->last_live = war->champs[0];
-	// print_champions(war->champs);
 	if (!war->flag_visual)
 		introduce(war->champs);
 
@@ -340,38 +318,30 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
+
 	int i = -1;
 	while (true)
 	{
 		t_carriage *tmp = war->carriages;
-
-		
-if (next_cycle(war))
+		if (next_cycle(war))
 		{
 			while (tmp)
 			{
 				t_carriage *car = tmp;
-
 				if (car->op == NULL)
 				{
-
 					car->op = get_command(car->number, car->position, war->map, war);
 					if (car->op)
-					{
 						car->cooldown = car->op->cooldown;
-					}
 					else
 						car->position = (car->position + 1) % MEM_SIZE;
 				}
 				car->cooldown--;
 				if (car->op && car->cooldown == 0)
 				{
-					
 					int delta = get_args(car, war->map, car->op, war);
 					if (car->args_ok)
 						car->op->func(car, war);
-					// else
-					// 	ft_printf("CODAGE %x\n", car->codage);
 					if (car->op->code == 0x09 && car->carry == true) // zjmp
 					{
 
@@ -386,11 +356,8 @@ if (next_cycle(war))
 				if (war->flag_visual)
 					print_memory(war);
 				tmp = tmp->next;
-				
 			}
-			
 			checking(war);
-
 			if (!war->carriages)
 			{
 				if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
@@ -404,7 +371,6 @@ if (next_cycle(war))
 			if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)
 			{
 				dump(war);
-				// ft_printf("sd");
 				// break ;
 			}
 		}

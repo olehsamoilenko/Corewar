@@ -9,6 +9,6 @@ else
 		num=$(cat bin/origin | grep "It is now cycle" | tail -1 | cut -c 17-)
 		sh bin/dump.sh $1 $(($num-1))
 	else
-		echo "KO"
+		echo "VERBOSE KO"
 	fi
 fi
