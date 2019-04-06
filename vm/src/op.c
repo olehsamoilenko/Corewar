@@ -122,7 +122,7 @@ void	op_lld(t_carriage *car, t_war *war)
 	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P %4d | ld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
+		ft_printf("P %4d | lld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
 	}
 
 }
@@ -134,7 +134,7 @@ void	op_ldi(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1; get_value(car, 1, war, 0, &value_1);
+	int value_1; get_value(car, 1, war, car->position + car->params[1].integer, &value_1);
 	int value_2; get_value(car, 2, war, 0, &value_2);
 
 	int index = car->position + (value_1 + value_2) % IDX_MOD; // only T_DIR
@@ -172,8 +172,10 @@ void	op_lldi(t_carriage *car, t_war *war)
 {
 	// show_args(war, car);
 
-	int value_1; get_value(car, 1, war, 0, &value_1);
-	int value_2; get_value(car, 2, war, 0, &value_2);
+	int value_1;
+	int value_2;
+	get_value(car, 1, war, car->position + car->params[1].integer, &value_1);
+	get_value(car, 2, war, 0, &value_2);
 
 	int index = car->position + value_1 + value_2; // only T_DIR
 
@@ -189,7 +191,7 @@ void	op_lldi(t_carriage *car, t_war *war)
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
 		ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
-		ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
+		ft_printf("       | -> load from %d + %d = %d (with pc %d)\n",
 			value_1,
 			value_2,
 			value_1 + value_2,
@@ -382,8 +384,13 @@ void	op_add(t_carriage *car, t_war *war)
 
 void	op_sub(t_carriage *car, t_war *war)
 {
-	car->reg[car->params[3].integer].integer = car->reg[car->params[1].integer].integer - car->reg[car->params[2].integer].integer;
-	if (car->reg[car->params[3].integer].integer == 0)
+	int r1 = car->params[1].integer;
+	int r2 = car->params[2].integer;
+	int r3 = car->params[3].integer;
+	if (r1 < 1 || r1 > 16 || r2 < 1 || r2 > 16 || r3 < 1 || r3 > 16)
+		return ;
+	car->reg[r3].integer = car->reg[r1].integer - car->reg[r2].integer;
+	if (car->reg[r3].integer == 0)
 		car->carry = true;
 	else
 		car->carry = false;
@@ -391,7 +398,7 @@ void	op_sub(t_carriage *car, t_war *war)
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
 		ft_printf("P %4d | sub r%d r%d r%d\n", car->number,
-			car->params[1].integer, car->params[2].integer, car->params[3].integer);
+			r1, r2, r3);
 	}
 	
 }
