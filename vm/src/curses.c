@@ -17,6 +17,11 @@ void	print_memory(t_war *war)
 	int i = -1;
 	char s[3];
 
+	if (war->flag_space == true)
+		mvwaddstr(war->win_info, 2, 3, "** STOP **");
+	else
+		mvwaddstr(war->win_info, 2, 3, " ** RUN **");
+
 	while (++i < MEM_SIZE)
 	{
 		// color on
@@ -43,7 +48,7 @@ void	print_memory(t_war *war)
 
 
 		sprintf(s, "%02x", war->map[i]->value);
-		mvwaddstr(war->win_mem, i / 64 + 1, (i % 64) * 3 + 2, s);
+		mvwaddstr(war->win_mem, i / 64 + 2, (i % 64) * 3 + 3, s);
 		wattroff(war->win_mem, A_BOLD);
 	}
 
@@ -55,7 +60,7 @@ void	print_memory(t_war *war)
 		else
 			wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
 		sprintf(s, "%02x", war->map[tmp->position]->value);
-		mvwaddstr(war->win_mem, tmp->position / 64 + 1, (tmp->position % 64) * 3 + 2, s);
+		mvwaddstr(war->win_mem, tmp->position / 64 + 2, (tmp->position % 64) * 3 + 3, s);
 		tmp = tmp->next;
 	}
 	wrefresh(war->win_mem);
@@ -65,19 +70,44 @@ void	print_memory(t_war *war)
 	char *itoa;
 	
 	itoa = ft_itoa(war->cycle);
-	mvwaddstr(war->win_info, 2, 10, itoa);
+	mvwaddstr(war->win_info, 7, 10, itoa);
 	ft_strdel(&itoa);
 	itoa = ft_itoa(war->processes_amount);
-	mvwaddstr(war->win_info, 4, 14, itoa);
+	mvwaddstr(war->win_info, 9, 14, itoa);
 	ft_strdel(&itoa);
-	itoa = ft_itoa(war->champs[0]->last_live);
-	mvwaddstr(war->win_info, 7, 37 - ft_strlen(itoa), itoa);
-	ft_strdel(&itoa);
-	itoa = ft_itoa(war->champs[0]->lives_cur_period);
-	mvwaddstr(war->win_info, 8, 37 - ft_strlen(itoa), itoa);
-	ft_strdel(&itoa);
+	// itoa = ft_itoa(war->champs[0]->last_live);
+	// mvwaddstr(war->win_info, 7, 37 - ft_strlen(itoa), itoa);
+	// ft_strdel(&itoa);
+	// itoa = ft_itoa(war->champs[0]->lives_cur_period);
+	// mvwaddstr(war->win_info, 8, 37 - ft_strlen(itoa), itoa);
+	// ft_strdel(&itoa);
+	// itoa = ft_itoa(war->champs[1]->lives_cur_period);
+	// mvwaddstr(war->win_info, 11, 37 - ft_strlen(itoa), itoa);
+	// ft_strdel(&itoa);
+	// itoa = ft_itoa(war->champs[1]->lives_cur_period);
+	// mvwaddstr(war->win_info, 12, 37 - ft_strlen(itoa), itoa);
+	// ft_strdel(&itoa);	
+
+	int player = 0;
+	int line = 12;
+	while (player < 4)
+	{
+		if (war->champs[player] != NULL)
+		{
+			itoa = ft_itoa(war->champs[player]->last_live);
+			mvwaddstr(war->win_info, line, 37 - ft_strlen(itoa), itoa);
+			ft_strdel(&itoa);
+			line++;
+			itoa = ft_itoa(war->champs[player]->lives_cur_period);
+			mvwaddstr(war->win_info, line, 37 - ft_strlen(itoa), itoa);
+			ft_strdel(&itoa);
+			line += 3;
+		}
+		player++;
+	}
+
 	itoa = ft_itoa(war->cycles_to_die);
-	mvwaddstr(war->win_info, 10, 17, itoa);
+	mvwaddstr(war->win_info, (line - 1), 17, itoa);
 	ft_strdel(&itoa);
 	// itoa = ft_itoa(war->cycles_to_die);
 	// mvwaddstr(war->win_info, 8, 17, itoa);
@@ -119,25 +149,63 @@ void	init_curses(t_war *war)
 	curs_set(0);
 	refresh();
 	define_colors();
-	war->win_mem = newwin(66, 195, 0, 0);
-	war->win_info = newwin(20, 60, 0, 197);
-	war->win_getch = newwin(10, 60, 21, 197);
+	war->win_mem = newwin(68, 197, 0, 0);
+	war->win_info = newwin(68, 60, 0, 196);
+	war->win_getch = newwin(10, 60, 60, 260);
 	// mvwaddstr(war->win_mem, 5, 0, "hello");
 	// wrefresh(war->win_mem);
-	box(war->win_mem, 0, 0);
-	box(war->win_info, 0, 0);
-	box(war->win_getch, 0, 0);
-	wattron(war->win_info, A_BOLD);
-	mvwaddstr(war->win_info, 2, 2, "Cycle :");
-	mvwaddstr(war->win_info, 4, 2, "Processes :");
-	mvwaddstr(war->win_info, 6, 2, "Player -1 : ");
-	wattron(war->win_info, COLOR_PAIR(1));
-	mvwaddstr(war->win_info, 6, 14, war->champs[0]->header->prog_name);
+	wattron(war->win_mem, COLOR_PAIR(15));
+	wattron(war->win_info, COLOR_PAIR(15));
+	wattron(war->win_getch, COLOR_PAIR(15));
+	
+	box(war->win_mem, '*', '*');
+	box(war->win_info, '*', '*');
+	box(war->win_getch, '*', '*');
+
+	wattroff(war->win_mem, A_COLOR);
 	wattroff(war->win_info, A_COLOR);
-	mvwaddstr(war->win_info, 7, 4, "Last live : ");
-	mvwaddstr(war->win_info, 8, 4, "Lives in current period : ");
-	mvwaddstr(war->win_info, 10, 2, "CYCLE_TO_DIE : ");
-	mvwaddstr(war->win_info, 12, 2, "CYCLE_DELTA : ");
+	wattroff(war->win_getch, A_COLOR);
+	
+	wattron(war->win_info, A_BOLD);
+	
+	mvwaddstr(war->win_info, 4, 3, "Cycles in second : ");	
+
+	mvwaddstr(war->win_info, 7, 3, "Cycle :");
+	mvwaddstr(war->win_info, 9, 3, "Processes :");
+
+	int player = 0;
+	int line = 11;
+	char *nbr_player = NULL;
+	while (player < 4)
+	{
+		if (war->champs[player] != NULL)
+		{
+			char *itoa = ft_itoa(player + 1);
+			nbr_player = ft_strjoin("Player -", itoa);
+			ft_strdel(&itoa);
+			itoa = nbr_player;
+			nbr_player = ft_strjoin(nbr_player, " : ");
+			ft_strdel(&itoa);
+
+			wattroff(war->win_info, A_COLOR);
+			mvwaddstr(war->win_info, line, 2, nbr_player);
+			ft_strdel(&nbr_player);
+
+			wattron(war->win_info, COLOR_PAIR(player + 1));
+			mvwaddstr(war->win_info, line, 14, war->champs[player]->header->prog_name);
+			line++;
+			wattroff(war->win_info, A_COLOR);
+			mvwaddstr(war->win_info, line, 4, "Last live : ");
+			line++;
+			mvwaddstr(war->win_info, line, 4, "Lives in current period : ");
+			line += 2;			
+		}
+		player++;
+	}
+
+	mvwaddstr(war->win_info, line, 2, "CYCLE_TO_DIE : ");
+	line += 2;
+	mvwaddstr(war->win_info, line, 2, "CYCLE_DELTA : ");
 	wrefresh(war->win_mem); // need ?
 	wrefresh(war->win_info);
 	wrefresh(war->win_getch);

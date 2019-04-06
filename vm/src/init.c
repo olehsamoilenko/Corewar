@@ -27,5 +27,6 @@ t_war	*init()
 	war->flag_dump = -1;
 	war->cycles_to_die = CYCLE_TO_DIE;
 	// war->cycles_after_check = 0;
+	war->flag_space = true;
 	return (war);
 }

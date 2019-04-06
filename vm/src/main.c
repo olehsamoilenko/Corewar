@@ -19,35 +19,68 @@ void	error(char *message) // .h
 	exit(0);
 }
 
+// t_bool	next_cycle(t_war *war)
+// {
+// 	int key = 0;
+// 	t_bool	need_cycle;
+
+// 	need_cycle = false;
+// 	if (war->flag_visual && war->cycle >= war->flag_dump)
+// 	{
+// 		key = wgetch(war->win_getch);
+// 		if (key == KEY_ESC)
+// 			over_over(war);
+// 	}
+// 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
+// 	{
+// 		war->cycle += 1;
+// 		if (war->flag_verbose && war->cycle >= war->flag_dump)
+// 			ft_printf("It is now cycle %d\n", war->cycle);
+// 		need_cycle = true;
+// 		// car->cooldown--;
+// 	}
+// 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
+// 	{
+// 		// print_info(war);
+// 		print_memory(war);
+// 	}
+// 	return (need_cycle);
+// }
+
 t_bool	next_cycle(t_war *war)
 {
-	int fd = open("check_values.txt", O_WRONLY | O_APPEND);
 	int key = 0;
 	t_bool	need_cycle;
 
 	need_cycle = false;
+
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		key = wgetch(war->win_getch);
-		if (key == 27)
+		
+		if (key == KEY_ESC)
 			over_over(war);
+		if (key == 32)
+			war->flag_space = (war->flag_space == true) ? false : true;
 	}
-	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
+	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual || war->flag_space == false)
 	{
 		war->cycle += 1;
-		dprintf(fd, "war->cycles = %d\n", war->cycle);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("It is now cycle %d\n", war->cycle);
 		need_cycle = true;
 		// car->cooldown--;
 	}
-	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
+	if (war->flag_visual && (key == KEY_S || key == 32 || war->cycle == war->flag_dump))
 	{
 		// print_info(war);
 		print_memory(war);
 	}
+
 	return (need_cycle);
 }
+
+
 
 int		champions_count(t_champion **champs)
 {

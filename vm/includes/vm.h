@@ -105,6 +105,7 @@ typedef struct	s_war
 	t_bool				flag_verbose:1;
 	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
+	t_bool				flag_space:1; // for stop game
 	t_bool				flag_dev:1; // FOR TESTING !
 	
 }				t_war;
