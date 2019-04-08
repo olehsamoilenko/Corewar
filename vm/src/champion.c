@@ -20,7 +20,7 @@
 #define ERR_BIG_CHAMP "Too big champion"
 #define ERR_SIZE_DIFFERS "File has a code size that differ from what its header says"
 #define ERR_SMALL_FILE "File is too small to be a champion"
-#define ERR_LOST_SIZE "Size of the champion is missed"
+// #define ERR_LOST_SIZE "Size of the champion is missed"
 
 t_champion	*find_champ(int number, t_war *war)
 {
@@ -154,7 +154,7 @@ int 	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, in
 		map[mem_start + i]->value = res;
 		map[mem_start + i]->color = number + 1;
 	}
-	printf("%d\n", bytes);
+	// printf("%d\n", bytes);
 	return (bytes);
 }
 

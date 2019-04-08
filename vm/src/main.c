@@ -15,7 +15,7 @@
 void	error(char *message) // .h
 {
 	ft_printf("Error: %s\n", message);
-	system("leaks vm | grep 'leaked bytes'");
+	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
 }
 
@@ -60,7 +60,7 @@ t_bool	next_cycle(t_war *war)
 		
 		if (key == KEY_ESC)
 			over_over(war);
-		if (key == 32)
+		if (key == KEY_SPACE)
 			war->flag_space = (war->flag_space == true) ? false : true;
 	}
 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual || war->flag_space == false)
@@ -71,7 +71,7 @@ t_bool	next_cycle(t_war *war)
 		need_cycle = true;
 		// car->cooldown--;
 	}
-	if (war->flag_visual && (key == KEY_S || key == 32 || war->cycle == war->flag_dump))
+	if (war->flag_visual && (key == KEY_S || key == KEY_SPACE || war->cycle == war->flag_dump))
 	{
 		// print_info(war);
 		print_memory(war);
@@ -114,7 +114,7 @@ int		op_index(int code)
 int		define_size(int arg_code, int label)
 {
 	if (arg_code == REG_CODE)
-		return(1);
+		return (1);
 	else if (arg_code == DIR_CODE)
 	{
 		if (label == false)
@@ -155,14 +155,14 @@ t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // r
 	int index = op_index(map[car_pos]->value); // return op ?
 	t_op *op = &op_tab[index];
 
-	if (war->flag_dev)
-		ft_printf("\tProcess %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
-			process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
+	// if (war->flag_dev)
+	// 	ft_printf("\tProcess %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
+	// 		process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
 
 	if (index == -1)
 	{
-		if (map[car_pos]->value > 0 && map[car_pos]->value < 17)
-			ft_printf("UNKNOWN COMMAND %02x\n", map[car_pos]->value);
+		// if (map[car_pos]->value > 0 && map[car_pos]->value < 17)
+		// 	ft_printf("UNKNOWN COMMAND %02x\n", map[car_pos]->value);
 		return (NULL);
 	}
 	return (op);
@@ -177,13 +177,11 @@ int		define_type_1(int type)
 	else if (type == IND_CODE)
 		return (T_IND);
 	else
-		return (7);
+		return (0b111);
 }
 
 int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 {
-	int v[7];
-
 	int delta = 0;
 	delta++;
 	int first;
@@ -208,10 +206,8 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	car->args_ok = true;
 
 	car->types[1] = define_type_1(first);
-	// if (car->op->args > 1)
-		car->types[2] = define_type_1(second);
-	// if (car->op->args > 2)
-		car->types[3] = define_type_1(third);
+	car->types[2] = define_type_1(second);
+	car->types[3] = define_type_1(third);
 
 	
 	car->sizes[1] = define_size(first, op->label);
@@ -226,22 +222,13 @@ int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
 	else
 		car->sizes[3] = 0;
 
-	unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
-	arg_1 = get_bytes(car->position + delta, car->sizes[1], car->types[1], map);
+	// unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
+	car->params[1].integer = get_bytes(car->position + delta, car->sizes[1], car->types[1], map);
 	delta += car->sizes[1];
-	arg_2 = get_bytes(car->position + delta, car->sizes[2], car->types[2], map);
+	car->params[2].integer = get_bytes(car->position + delta, car->sizes[2], car->types[2], map);
 	delta += car->sizes[2];
-	arg_3 = get_bytes(car->position + delta, car->sizes[3], car->types[3], map);
+	car->params[3].integer = get_bytes(car->position + delta, car->sizes[3], car->types[3], map);
 	delta += car->sizes[3];
-
-	car->params[1].integer = arg_1;
-	car->params[2].integer = arg_2;
-	car->params[3].integer = arg_3;
-
-	// ft_printf("1 %d %d 2 %d %d 3 %d %d\n",
-	// 	car->types[1], car->sizes[1],
-	// 	car->types[2], car->sizes[2],
-	// 	car->types[3], car->sizes[3]);
 
 	if (car->sizes[1] == 0 || (car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
 		car->args_ok = false;
@@ -270,7 +257,7 @@ void	introduce(t_champion **champs)
 void	verbose_death(t_carriage *car, t_war *war)
 {
 	ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
-		car->number, war->cycle - car->last_live, war->cycles_to_die);
+				car->number, war->cycle - car->last_live, war->cycles_to_die);	
 }
 
 void	remove_carriages(t_carriage **list, t_war *war)
@@ -415,6 +402,6 @@ int		main(int argc, char **argv)
 		over_curses(war);
 	// show_carriages(war);
 	// if (war->flag_dump == -1)
-	// 	system("leaks vm");
+	// 	system("leaks corewar");
 	return (0);
 }

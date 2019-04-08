@@ -20,14 +20,17 @@
 # include <fcntl.h>
 
 #define KEY_ESC 27
+#define KEY_SPACE 32
 #define KEY_S 115
 
 // reversed bytes ??? [ 17 00 00 00 ] is 23
 union converter // u_converter ?
 {
 	int				integer; // unsigned ?
-	unsigned char	bytes[4];
+	unsigned char	bytes[REG_SIZE];
 };
+
+
 
 typedef struct	s_champion
 {
@@ -71,9 +74,9 @@ typedef struct	s_carriage
 	struct s_carriage	*next;
 
 	int					codage;
-	int					types[4]; // 0 is unused
-	int					sizes[4]; // 0 is unused
-	union converter		params[4]; // 0 is unused
+	int					types[MAX_ARGS_NUMBER]; // 0 is unused
+	int					sizes[MAX_ARGS_NUMBER]; // 0 is unused
+	union converter		params[MAX_ARGS_NUMBER]; // 0 is unused
 
 	t_bool				args_ok:1;
 
@@ -88,7 +91,7 @@ typedef struct	s_war
 	WINDOW				*win_getch;
 
 	t_mem_cell			*map[MEM_SIZE];
-	t_champion			*champs[5]; // champs[4] is NULL
+	t_champion			*champs[MAX_PLAYERS + 1]; // champs[4] is NULL
 
 	t_carriage			*carriages;
 	int					processes_counter; // for number of carriage
@@ -106,7 +109,6 @@ typedef struct	s_war
 	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
 	t_bool				flag_space:1; // for stop game
-	t_bool				flag_dev:1; // FOR TESTING !
 	
 }				t_war;
 

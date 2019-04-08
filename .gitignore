@@ -2,6 +2,7 @@
 *.vscode*
 *.a
 *.o
-vm/vm
+vm/corewar
 vm/bin/my*
 vm/bin/origin*
+vm/check_values.txt

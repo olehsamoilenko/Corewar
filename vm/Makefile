@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME =			vm
+NAME =			corewar
 HEADER =		./includes/vm.h
 INC =			-I ./includes \
 				-I ./libft/includes
@@ -28,28 +28,21 @@ LIST =			main \
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 OFF=\033[0m
-
-RED=\033[31m
-REDBOLD=\033[1;31m
-GREEN=\033[32m
-GREENBOLD=\033[1;32m
-YELLOW=\033[33m
-YELLOWBOLD=\033[1;33m
-PURPLE=\033[35m
+PURPLE=\033[0;35m
 PURPLEBOLD=\033[1;35m
-
+WHITE=\033[1;37m
 PURPLELIGHT=\033[38;2;102;102;255m
 
 all: $(NAME)
 
 obj/%.o: src/%.c $(HEADER)
 	@gcc $(FLAGS) -c $< -o $@ $(INC)
-	@echo "$(PURPLELIGHT)Compiling $(OFF)\033[1m$< $(OFF)$(PURPLELIGHT)done$(OFF)"
+	@echo "$(PURPLELIGHT)Compiling $(WHITE)$< $(PURPLELIGHT)done$(OFF)"
 
 $(NAME): obj $(OBJ)
 	@make -C libft
 	@gcc $(OBJ) -o $(NAME) $(LIB)
-	@echo "$(PURPLEBOLD)$(NAME)$(OFF)$(PURPLE) is ready$(OFF)"
+	@echo "$(PURPLEBOLD)$(NAME)$(PURPLE) is ready$(OFF)"
 
 obj:
 	@mkdir obj
