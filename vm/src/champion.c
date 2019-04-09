@@ -20,7 +20,6 @@
 #define ERR_BIG_CHAMP "Too big champion"
 #define ERR_SIZE_DIFFERS "File has a code size that differ from what its header says"
 #define ERR_SMALL_FILE "File is too small to be a champion"
-// #define ERR_LOST_SIZE "Size of the champion is missed"
 
 t_champion	*find_champ(int number, t_war *war)
 {
@@ -33,35 +32,18 @@ t_champion	*find_champ(int number, t_war *war)
 	return (NULL); // mb sf
 }
 
-int		read_bytes(int fd, int amount, int *bytes)
-{
-	unsigned char buf[amount];
-	*bytes += read(fd, &buf, amount);
-
-	int res = 0;
-	int i = -1;
-	while (++i < amount)
-	{
-		if (i != 0)
-			res <<= 8;
-		res |= buf[i] /*& 0xFF*/;
-	}
-	return (res);
-}
-
 int	read_magic_header(int fd)
 {
 	int i;
-	// int res;
-
 	union converter header;
-	header.integer = COREWAR_EXEC_MAGIC;
-	int bytes;
+	unsigned char tmp;
 
+	header.integer = COREWAR_EXEC_MAGIC;
 	i = -1;
 	while (++i < 4)
 	{
-		if (read_bytes(fd, 1, &bytes) != header.bytes[3 - i])
+		read(fd, &tmp, 1);
+		if (tmp != header.bytes[3 - i])
 			return (0);
 	}
 	return (1);
@@ -70,55 +52,39 @@ int	read_magic_header(int fd)
 void	read_name(int fd, char *name)
 {
 	int i;
-	i = -1;
 	int res;
-	int bytes;
 
-	bytes = 0;
+	i = -1;
+	res = 0;
 	while (++i < PROG_NAME_LENGTH)
-	{
-		res = read_bytes(fd, 1, &bytes);
-		if (res != 0)
-			name[i] = res;
-
-	}
-	// printf("%d\n", bytes);
-	if (bytes != PROG_NAME_LENGTH)
+		res += read(fd, &name[i], 1);
+	if (res != PROG_NAME_LENGTH)
 		error(ERR_SMALL_FILE);
 }
 
 int		read_null(int fd)
 {
 	int i;
-	// int res;
-	int bytes;
+	int res;
+	unsigned int tmp;
 
 	i = -1;
-	bytes = 0;
-	while (++i < 4)
-	{
-		// res = ;
-		if (read_bytes(fd, 1, &bytes) != 0)
-			return (0);
-
-	}
-	if (bytes == 4)
-		return (1);
-	return (0);
+	res = read(fd, &tmp, 4);
+	if (res != 4 || tmp != 0)
+		return (0);
+	return (1);
 }
 
 int		read_exec_code_size(int fd)
 {
 	union converter size;
 	int i = -1;
-	int bytes;
-	// int res;
-	bytes = 0;
+	int res;
+
+	res = 0;
+	i = -1;
 	while (++i < 4)
-	{
-		// res = 
-		size.bytes[3 - i] = read_bytes(fd, 1, &bytes);
-	}
+		res += read(fd, &size.bytes[3 - i], 1);
 	return (size.integer);
 }
 
@@ -126,39 +92,30 @@ void	read_comment(int fd, char *comment)
 {
 	int i = -1;
 	int res;
-	int bytes;
 
-	bytes = 0;
+	res = 0;
 	while (++i < COMMENT_LENGTH)
-	{
-		res = read_bytes(fd, 1, &bytes);
-		if (res != 0)
-			comment[i] = res;
-	}
-	if (bytes != COMMENT_LENGTH)
+		res += read(fd, &comment[i], 1);
+	if (res != COMMENT_LENGTH)
 		error(ERR_SMALL_FILE);
 }
 
-int 	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, int mem_start)
+void	read_exec_code(int fd, t_mem_cell **map, t_champion *champ, int number, int mem_start)
 {
-	int i = -1;
-	int res;
-	int bytes;
+	int i;
+	char tmp;
 
-	bytes = 0;
-	// цикл всегда будет идти до prog_size, но код чемпиона может быть больше чем размер,
-	// который уже считали после имени
-	while (++i < champ->header->prog_size)
+	i = 0;
+	while (read(fd, &map[mem_start + 1]->value, 1))
 	{
-		res = read_bytes(fd, 1, &bytes);
-		map[mem_start + i]->value = res;
 		map[mem_start + i]->color = number + 1;
+		i++;
 	}
-	// printf("%d\n", bytes);
-	return (bytes);
+	if (i != champ->header->prog_size)
+		error(ERR_SIZE_DIFFERS);
 }
 
-void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
+void	parse_champions(t_champion *champs[], t_mem_cell **map, int mem_delta)
 {
 	int i = -1;
 	while (champs[++i] != NULL)
@@ -179,9 +136,7 @@ void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
 		read_comment(fd, champ->header->comment);
 		if (!read_null(fd))
 			error(ERR_NULL_AFTER_COMMENT);
-		if (read_exec_code(fd, map, champ, i, i * mem_delta) != champ->header->prog_size)
-			error(ERR_SIZE_DIFFERS);
-		// read_exec_code(fd, map, champ, i, i * mem_delta);
+		read_exec_code(fd, map, champ, i, i * mem_delta);
 		close(fd);
 	}
 }
