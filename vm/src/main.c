@@ -19,59 +19,32 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-// t_bool	next_cycle(t_war *war)
-// {
-// 	int key = 0;
-// 	t_bool	need_cycle;
-
-// 	need_cycle = false;
-// 	if (war->flag_visual && war->cycle >= war->flag_dump)
-// 	{
-// 		key = wgetch(war->win_getch);
-// 		if (key == KEY_ESC)
-// 			over_over(war);
-// 	}
-// 	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual)
-// 	{
-// 		war->cycle += 1;
-// 		if (war->flag_verbose && war->cycle >= war->flag_dump)
-// 			ft_printf("It is now cycle %d\n", war->cycle);
-// 		need_cycle = true;
-// 		// car->cooldown--;
-// 	}
-// 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump))
-// 	{
-// 		// print_info(war);
-// 		print_memory(war);
-// 	}
-// 	return (need_cycle);
-// }
-
 t_bool	next_cycle(t_war *war)
 {
 	int key = 0;
-	t_bool	need_cycle;
+	t_bool	need_cycle; // vadim epta sho eta
 
 	need_cycle = false;
 
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
-		key = wgetch(war->win_getch);
+		// if (war->flag_run == false)
+		key = getch();
 		
 		if (key == KEY_ESC)
 			over_over(war);
 		if (key == KEY_SPACE)
-			war->flag_space = (war->flag_space == true) ? false : true;
+			war->flag_run = (war->flag_run == true) ? false : true;
 	}
-	if (key == KEY_S || war->cycle < war->flag_dump || !war->flag_visual || war->flag_space == false)
+	
+	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump || war->flag_run == true)
 	{
 		war->cycle += 1;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("It is now cycle %d\n", war->cycle);
 		need_cycle = true;
-		// car->cooldown--;
 	}
-	if (war->flag_visual && (key == KEY_S || key == KEY_SPACE || war->cycle == war->flag_dump))
+	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump || war->flag_run == true))
 	{
 		// print_info(war);
 		print_memory(war);
@@ -380,7 +353,7 @@ int		main(int argc, char **argv)
 			checking(war);
 			if (!war->carriages)
 			{
-				if (war->flag_dump == -1 || war->flag_dump >= war->cycle)
+				if (!war->flag_visual && (war->flag_dump == -1 || war->flag_dump >= war->cycle))
 				{
 					ft_printf("Contestant %d, \"%s\", has won !\n",
 						war->last_live->number, war->last_live->header->prog_name);

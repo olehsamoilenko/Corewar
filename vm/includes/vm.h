@@ -23,14 +23,11 @@
 #define KEY_SPACE 32
 #define KEY_S 115
 
-// reversed bytes ??? [ 17 00 00 00 ] is 23
 union converter // u_converter ?
 {
 	int				integer; // unsigned ?
 	unsigned char	bytes[REG_SIZE];
 };
-
-
 
 typedef struct	s_champion
 {
@@ -48,17 +45,6 @@ typedef struct	s_map_cell // fix
 	int					cycles_live;
 	int					cycles_bold;
 }				t_mem_cell;
-
-// typedef struct s_op t_op;
-
-// typedef struct	s_instr_params
-// {
-	
-// 	// int					amount;
-	
-	
-	
-// }				t_instr_params;
 
 typedef struct	s_carriage
 {
@@ -82,13 +68,10 @@ typedef struct	s_carriage
 
 }				t_carriage;
 
-
-
 typedef struct	s_war
 {
 	WINDOW				*win_mem;
 	WINDOW				*win_info;
-	WINDOW				*win_getch;
 
 	t_mem_cell			*map[MEM_SIZE];
 	t_champion			*champs[MAX_PLAYERS + 1]; // champs[4] is NULL
@@ -106,15 +89,13 @@ typedef struct	s_war
 	int					all_lives;
 
 	t_bool				flag_verbose:1;
-	t_bool				flag_visual:1;
 	int					flag_dump; // -1 if not defined
-	t_bool				flag_space:1; // for stop game
+
+	t_bool				flag_visual:1;
+	t_bool				flag_run:1; // for stop game
+	int					cycles_in_second;
 	
 }				t_war;
-
-
-
-
 
 typedef struct	s_op
 {
@@ -132,17 +113,17 @@ typedef struct	s_op
 extern t_op op_tab[];
 
 // main
-void	error(char *message);
+void		error(char *message);
 
 // params
-void	parse_params(int argc, char **argv, t_war *war);
+void		parse_params(int argc, char **argv, t_war *war);
 
 // champion
-void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta);
+void		parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta);
 t_champion	*find_champ(int number, t_war *war);
 
 // init
-t_war	*init();
+t_war		*init();
 
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
@@ -150,21 +131,21 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 void		show_carriages(t_war *war);
 
 // verbose
-void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
-void	dump(t_war *war);
+void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
+void		dump(t_war *war);
 
 // curses
-void	print_memory(t_war *war);
-void	init_curses(t_war *war);
-void	over_over(t_war *war);
-void	over_curses(t_war *war);
+void		print_memory(t_war *war);
+void		init_curses(t_war *war);
+void		over_over(t_war *war);
+void		over_curses(t_war *war);
 
 // tmp
-void	show_args(t_war *war, t_carriage *car);
-void	curriage_info(t_carriage *car, t_war *war);
-char	*define_type(int type);
-void	show_union(union converter a);
-void	reg_info(union converter *reg, t_war *war);
-void	print_champions(t_champion *champs[]);
+void		show_args(t_war *war, t_carriage *car);
+void		curriage_info(t_carriage *car, t_war *war);
+char		*define_type(int type);
+void		show_union(union converter a);
+void		reg_info(union converter *reg, t_war *war);
+void		print_champions(t_champion *champs[]);
 
 #endif
