@@ -85,6 +85,7 @@ int		read_exec_code_size(int fd)
 	i = -1;
 	while (++i < 4)
 		res += read(fd, &size.bytes[3 - i], 1);
+	// ft_printf("%x\n", size.integer);
 	return (size.integer);
 }
 
@@ -100,13 +101,13 @@ void	read_comment(int fd, char *comment)
 		error(ERR_SMALL_FILE);
 }
 
-void	read_exec_code(int fd, t_mem_cell **map, t_champion *champ, int number, int mem_start)
+void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, int mem_start)
 {
 	int i;
-	char tmp;
+	unsigned char tmp;
 
 	i = 0;
-	while (read(fd, &map[mem_start + 1]->value, 1))
+	while (read(fd, &map[mem_start + i]->value, 1))
 	{
 		map[mem_start + i]->color = number + 1;
 		i++;
@@ -115,7 +116,7 @@ void	read_exec_code(int fd, t_mem_cell **map, t_champion *champ, int number, int
 		error(ERR_SIZE_DIFFERS);
 }
 
-void	parse_champions(t_champion *champs[], t_mem_cell **map, int mem_delta)
+void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
 {
 	int i = -1;
 	while (champs[++i] != NULL)
