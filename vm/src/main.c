@@ -46,10 +46,21 @@ t_bool	next_cycle(t_war *war)
 	}
 	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump || war->flag_run == true))
 	{
-		// print_info(war);
-		print_memory(war);
+		if (!war->flag_run)
+		{
+			print_memory(war);
+			war->last_print = war->cycle;
+		}
+		else
+		{
+			if (war->cycle - war->last_print == war->cycles_in_second)
+			{
+				print_memory(war);
+				war->last_print = war->cycle;
+				sleep(1);
+			}
+		}
 	}
-
 	return (need_cycle);
 }
 

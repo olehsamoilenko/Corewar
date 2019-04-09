@@ -90,10 +90,12 @@ typedef struct	s_war
 
 	t_bool				flag_verbose:1;
 	int					flag_dump; // -1 if not defined
+	// t_bool				flag_aff:1;
 
 	t_bool				flag_visual:1;
 	t_bool				flag_run:1; // for stop game
 	int					cycles_in_second;
+	int					last_print;
 	
 }				t_war;
 

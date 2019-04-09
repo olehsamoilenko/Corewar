@@ -89,6 +89,8 @@ void	parse_params(int argc, char **argv, t_war *war)
 			war->flag_verbose = true;
 		else if (ft_strequ(argv[i], "-visual"))
 			war->flag_visual = true;
+		// else if (ft_strequ(argv[i], "-a"))
+		// 	war->flag_aff = true;
 		else if (ft_strequ(argv[i], "-dump"))
 		{
 			if (i >= argc - 1 || !ft_isinteger(argv[i + 1]) || (n = ft_atoi(argv[i + 1])) < 0)

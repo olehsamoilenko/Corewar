@@ -478,7 +478,8 @@ void	op_xor(t_carriage *car, t_war *war)
 	int value_1;
 	int value_2;
 	int r3 = car->params[3].integer;
-	if (!get_value(car, 1, war, 0, &value_1) || !get_value(car, 2, war, 0, &value_2)
+	if (!get_value(car, 1, war, car->position + car->params[1].integer % IDX_MOD, &value_1) ||
+		!get_value(car, 2, war, car->position + car->params[2].integer % IDX_MOD, &value_2)
 		|| r3 < 1 || r3 > 16)
 		return ;
 	
@@ -501,6 +502,14 @@ void	op_xor(t_carriage *car, t_war *war)
 
 void	op_aff(t_carriage *car, t_war *war)
 {
+	int value_1;
+	if (!get_value(car, 1, war, 0, &value_1))
+		return ;
+
+	if (war->flag_verbose && war->cycle >= war->flag_dump)
+	{
+		ft_printf("Aff: %c\n", (char)value_1);
+	}
 
 }
 
