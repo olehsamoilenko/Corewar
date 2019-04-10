@@ -67,7 +67,7 @@ void	cut_label(t_asm *asm_parsing, char *line)
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
 															INDIRECT_ARG));
 	else
-		ft_error(asm_parsing, "Lexical error");
+		ft_error(asm_parsing);
 }
 
 void	cut_direct(t_asm *asm_parsing, char *line)

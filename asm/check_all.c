@@ -29,7 +29,7 @@ void	check_label(t_asm *asm_parsing, char *substring, char *line, int start)
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
 																	LABEL));
 	else
-		ft_error(asm_parsing, "Lexical error");
+		ft_error(asm_parsing);
 }
 
 void	check_for_doubles(t_asm *asm_parsing, char *line, char *substring)

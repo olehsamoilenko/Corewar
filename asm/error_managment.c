@@ -25,11 +25,9 @@ void	error_dis(char *message)
 	exit(1);
 }
 
-void	ft_error(t_asm *asm_parsing, char *message)
+void	ft_error(t_asm *asm_parsing)
 {
-	ft_printf("asm_parsing->row = %d\n", asm_parsing->row);
-	ft_printf("asm_parsing->symbol = %d\n", asm_parsing->symbol);
-	ft_printf("%s\n", message);
+	ft_printf("Not valid word on row %d in symbol %d\n", asm_parsing->row, asm_parsing->symbol);
 	// system("leaks asm");
 	exit(1);
 }

@@ -37,7 +37,7 @@ void	cut_other(t_asm *asm_parsing, char *line)
 	if (line[asm_parsing->symbol] == '-')
 		asm_parsing->symbol++;
 	if (!ft_strchr(LABEL_CHARS, line[asm_parsing->symbol]))
-		ft_error(asm_parsing, "Lexical errorss");
+		ft_error(asm_parsing);
 	while (line[asm_parsing->symbol] && ft_strchr(LABEL_CHARS,
 													line[asm_parsing->symbol]))
 		asm_parsing->symbol++;

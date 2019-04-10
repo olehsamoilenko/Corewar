@@ -152,7 +152,8 @@ int				check_for_instruction(char *name);
 **	error_managment.c
 */
 void			ft_arg_error(char *message);
-void			ft_error(t_asm *asm_parsing, char *message);
+// void			ft_error(t_asm *asm_parsing, char *message);
+void			ft_error(t_asm *asm_parsing);
 void			error_word(t_asm *asm_parsing, char *message);
 void			error_word2(t_word *word, char *message);
 void			error_dis(char *message);

@@ -12,6 +12,25 @@
 
 #include "asm.h"
 
+static void	check_code(t_asm *asm_parsing, unsigned char *all_code,
+										unsigned char codage, int instruction)
+{
+	instruction = parse_bytecode(asm_parsing, all_code, 1);
+	if (instruction > 16)
+		error_dis("Unknown instruction");
+	if (g_op_tab[instruction - 1].codage_octal == 1)
+	{
+		codage = parse_bytecode(asm_parsing, all_code, 1);
+		ft_printf("%s ", g_op_tab[instruction - 1].name);
+		get_args_codage(asm_parsing, all_code, instruction, codage);
+	}
+	else
+	{
+		ft_printf("%s ", g_op_tab[instruction - 1].name);
+		get_args(asm_parsing, all_code, instruction, codage);
+	}
+}
+
 static void	read_code(t_asm *asm_parsing, int size_code)
 {
 	unsigned char	*all_code;
@@ -21,23 +40,14 @@ static void	read_code(t_asm *asm_parsing, int size_code)
 
 	all_code = (unsigned char *)malloc(sizeof(char) * size_code);
 	ret = read(asm_parsing->fd, all_code, size_code);
+	if (ret != size_code)
+		error_dis("File has a code size that differ from what its header says");
+	ret = 0;
 	while (asm_parsing->position != size_code)
-	{
-		instruction = parse_bytecode(asm_parsing, all_code, 1);
-		if (instruction > 16)
-			error_dis("Unknown instruction");
-		if (g_op_tab[instruction - 1].codage_octal == 1)
-		{
-			codage = parse_bytecode(asm_parsing, all_code, 1);
-			ft_printf("%s ", g_op_tab[instruction - 1].name);
-			get_args_codage(asm_parsing, all_code, instruction, codage);
-		}
-		else
-		{
-			ft_printf("%s ", g_op_tab[instruction - 1].name);
-			get_args(asm_parsing, all_code, instruction, codage);
-		}
-	}
+		check_code(asm_parsing, all_code, codage, instruction);
+	ret = read(asm_parsing->fd, all_code, 1);
+	if (ret == 1)
+		error_dis("File has a code size that differ from what its header says");
 	free(all_code);
 }
 
