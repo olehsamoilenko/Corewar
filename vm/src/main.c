@@ -19,51 +19,126 @@ void	error(char *message) // .h
 	exit(0);
 }
 
+// t_bool	next_cycle(t_war *war)
+// {
+// 	int key = 0;
+// 	t_bool	need_cycle; // vadim epta sho eta
+
+// 	need_cycle = false;
+// 	if (war->flag_visual && war->cycle >= war->flag_dump)
+// 	{
+// 		// if (war->flag_run == false)
+// 		key = getch();
+// 		if (key == KEY_ESC)
+// 			over_over(war);
+// 		if (key == KEY_W)
+// 		{
+// 			if (war->cycles_in_second > 1)
+// 				war->cycles_in_second -= 1;			
+// 		}
+// 		if (key == KEY_E)
+// 			war->cycles_in_second += 1;
+// 		if (key == KEY_SPACE)
+// 			war->flag_run = (war->flag_run == true) ? false : true;
+// 		print_info(war);	          
+// 	}
+	
+// 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump || war->flag_run == true)
+// 	{
+// 		war->cycle += 1;
+// 		if (war->flag_verbose && war->cycle >= war->flag_dump)
+// 			ft_printf("It is now cycle %d\n", war->cycle);
+// 		need_cycle = true;
+// 	}
+// 	if (war->flag_visual && need_cycle == true)
+// 	{
+// 		if (!war->flag_run)
+// 		{
+// 			print_memory(war);
+// 			print_info(war);	
+// 			war->last_print = war->cycle;
+// 		}
+// 		else
+// 		{
+// 			if (war->cycle - war->last_print >= war->cycles_in_second)
+// 			{
+// 				print_memory(war);
+// 				print_info(war);	
+				
+// 				war->last_print = war->cycle;
+// 				sleep(1);
+// 			}
+// 		}
+// 	}
+// 	return (need_cycle);
+// }
+
+
 t_bool	next_cycle(t_war *war)
 {
 	int key = 0;
 	t_bool	need_cycle; // vadim epta sho eta
 
 	need_cycle = false;
-
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		// if (war->flag_run == false)
 		key = getch();
-		
 		if (key == KEY_ESC)
 			over_over(war);
+		if (key == KEY_W)
+		{
+			if (war->cycles_in_second > 1)
+				war->cycles_in_second -= 1;			
+		}
+		if (key == KEY_E)
+			war->cycles_in_second += 1;
 		if (key == KEY_SPACE)
 			war->flag_run = (war->flag_run == true) ? false : true;
+		print_info(war);
 	}
 	
-	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump || war->flag_run == true)
+
+	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
+	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)))
 	{
 		war->cycle += 1;
-		if (war->flag_verbose && war->cycle >= war->flag_dump)
-			ft_printf("It is now cycle %d\n", war->cycle);
+		
 		need_cycle = true;
-	}
-	if (war->flag_visual && (key == KEY_S || war->cycle == war->flag_dump || war->flag_run == true))
-	{
-		if (!war->flag_run)
+		
+		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
 		{
-			print_memory(war);
+			// print_memory(war);
+			// print_info(war);
+			war->time = (float)clock() / CLOCKS_PER_SEC;
 			war->last_print = war->cycle;
 		}
-		else
-		{
-			if (war->cycle - war->last_print == war->cycles_in_second)
-			{
-				print_memory(war);
-				war->last_print = war->cycle;
-				sleep(1);
-			}
-		}
+			// else
+			// {
+			// 	if ()
+			// 	{
+			// 		print_memory(war);
+			// 		print_info(war);
+			// 		war->time = (float)clock() / CLOCKS_PER_SEC;
+			// 		war->last_print = war->cycle;
+			// 		// sleep(1);
+			// 	}
+			// }
+		// }
+
 	}
+	if (war->flag_visual)
+	{
+		print_memory(war);
+		print_info(war);
+		// war->time = (float)clock() / CLOCKS_PER_SEC;
+		// war->last_print = war->cycle;
+	}
+	if (war->flag_verbose && war->cycle >= war->flag_dump)
+		ft_printf("It is now cycle %d\n", war->cycle);
+	
 	return (need_cycle);
 }
-
 
 
 int		champions_count(t_champion **champs)
@@ -357,8 +432,11 @@ int		main(int argc, char **argv)
 					}
 					car->op = NULL;
 				}
-				if (war->flag_visual)
-					print_memory(war);
+				// if (war->flag_visual)
+				// {
+				// 	print_memory(war);
+				// 	print_info(war);					
+				// }
 				tmp = tmp->next;
 			}
 			checking(war);
@@ -381,11 +459,24 @@ int		main(int argc, char **argv)
 	}
 
 	// show_carriages(war);
-	
+
 	if (war->flag_visual)
+	{
 		over_curses(war);
+	}
 	// show_carriages(war);
 	// if (war->flag_dump == -1)
 	// 	system("leaks corewar");
+
+	// printf("%f\n", (float)clock() / CLOCKS_PER_SEC);
+	// war->time = (float)clock() / CLOCKS_PER_SEC;
+	// while (1)
+	// {
+	// 	if ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)
+	// 	{
+	// 		war->time = (float)clock() / CLOCKS_PER_SEC;
+	// 		printf("HELLO VADIM %f\n", war->time);
+	// 	}
+	// }
 	return (0);
 }
