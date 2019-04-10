@@ -33,6 +33,7 @@ typedef	struct	s_box
 }				t_box;
 
 int				g_fd;
+
 int				ft_printf(const char *format, ...);
 int				print_dec(va_list arg, t_box *info);
 int				print_unsigned(va_list arg, t_box *info);
