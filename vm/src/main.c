@@ -64,7 +64,8 @@ t_bool	next_cycle(t_war *war)
 	}
 	if (war->flag_visual)
 	{
-		print_memory(war);
+		if (war->cycle >= war->flag_dump)
+			print_memory(war);
 		print_info(war);
 		// war->time = (float)clock() / CLOCKS_PER_SEC;
 		// war->last_print = war->cycle;
@@ -307,8 +308,8 @@ int		main(int argc, char **argv)
 	t_war *war = init();
 	parse_params(argc, argv, war);
 	int mem_delta = MEM_SIZE / champions_count(war->champs);
-	parse_champions(war->champs, war->map, mem_delta);
-	war->last_live = war->champs[0];
+	parse_champions(war->champs, war->map, mem_delta, war);
+	// war->last_live = war->champs[0];
 	if (!war->flag_visual)
 		introduce(war->champs);
 

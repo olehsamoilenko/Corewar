@@ -149,7 +149,7 @@ void		error(char *message);
 void		parse_params(int argc, char **argv, t_war *war);
 
 // champion
-void		parse_champions(t_champion *champs[], t_map_cell *map[], int mem_delta);
+void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_war *war);
 t_champion	*find_champ(int number, t_war *war);
 
 // init

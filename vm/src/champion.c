@@ -116,7 +116,7 @@ void	read_exec_code(int fd, t_map_cell **map, t_champion *champ, int number, int
 		error(ERR_SIZE_DIFFERS);
 }
 
-void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta)
+void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_war *war)
 {
 	int i = -1;
 	while (champs[++i] != NULL)
@@ -139,7 +139,7 @@ void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta)
 			error(ERR_NULL_AFTER_COMMENT);
 		// read_exec_code(fd, map, champ, i, i * mem_delta);
 		read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
-		
+		war->last_live = champ;
 		close(fd);
 	}
 }
