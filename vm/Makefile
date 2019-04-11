@@ -18,6 +18,9 @@ LIB =			-lncurses -lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
 LIST =			main \
 				op \
+				op_load \
+				op_utils \
+				op_logic \
 				params \
 				champion \
 				init \
