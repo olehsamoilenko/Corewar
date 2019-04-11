@@ -15,11 +15,7 @@
 t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 {
 	if (car->types[num] == T_DIR)
-	{
-
 		*res = car->params[num].integer;
-
-	}
 	else if (car->types[num] == T_REG)
 	{
 		int reg_num = car->params[num].integer;
@@ -30,7 +26,9 @@ t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 	else if (car->types[num] == T_IND)
 	{
 		union converter num;
-		index = (index + MEM_SIZE) % MEM_SIZE;
+		index %= MEM_SIZE;
+		if (index < 0)
+			index += MEM_SIZE;
 		num.bytes[3] = war->map[(index + 0) % MEM_SIZE]->value;
 		num.bytes[2] = war->map[(index + 1) % MEM_SIZE]->value;
 		num.bytes[1] = war->map[(index + 2) % MEM_SIZE]->value;
@@ -54,7 +52,6 @@ t_bool		check_carry(int value)
 		return (true);
 	else
 		return (false);
-
 }
 
 union converter get_from_map(t_war *war, int index)
@@ -63,10 +60,10 @@ union converter get_from_map(t_war *war, int index)
 	if (index < 0)
 		index += MEM_SIZE;
 	union converter reg;
-	reg.bytes[3] = war->map[index + 0]->value;
-	reg.bytes[2] = war->map[index + 1]->value;
-	reg.bytes[1] = war->map[index + 2]->value;
-	reg.bytes[0] = war->map[index + 3]->value;
+	reg.bytes[3] = war->map[(index + 0) % MEM_SIZE]->value;
+	reg.bytes[2] = war->map[(index + 1) % MEM_SIZE]->value;
+	reg.bytes[1] = war->map[(index + 2) % MEM_SIZE]->value;
+	reg.bytes[0] = war->map[(index + 3) % MEM_SIZE]->value;
 	return (reg);
 }
 
@@ -97,12 +94,64 @@ void	op_ld(t_carriage *car, t_war *war)
 		get_value(car, 1, war,
 			car->position + car->params[1].integer % IDX_MOD,
 			&car->reg[reg_num].integer);
-
 		car->carry = check_carry(car->reg[reg_num].integer);
-		
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("P %4d | ld %d r%d\n", car->number,
 			car->reg[reg_num].integer, car->params[2].integer);
+	}
+}
+
+void	op_ldi(t_carriage *car, t_war *war)
+{
+	int value_1;
+	int value_2;
+	int reg_num;
+
+	if (get_value(car, 1, war, car->position + car->params[1].integer, &value_1) &&
+	get_value(car, 2, war, 0, &value_2) && correct_reg(reg_num = car->params[3].integer))
+	{
+		int index = car->position + (value_1 + value_2) % IDX_MOD;
+		car->reg[reg_num] = get_from_map(war, index);
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
+		{
+			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
+			ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
+				value_1, value_2, value_1 + value_2, index);
+		}
+	}
+}
+
+void	op_lld(t_carriage *car, t_war *war)
+{
+	int reg_num;
+	if (correct_reg(reg_num = car->params[2].integer) &&
+	get_value(car, 1, war, car->position + car->params[1].integer,
+	&car->reg[reg_num].integer))
+	{
+		car->carry = check_carry(car->reg[reg_num].integer);
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
+			ft_printf("P %4d | lld %d r%d\n", car->number,
+			car->reg[reg_num].integer, reg_num);
+	}
+}
+
+void	op_lldi(t_carriage *car, t_war *war)
+{
+	int value_1;
+	int value_2;
+	int reg_num;
+	if (get_value(car, 1, war, car->position + car->params[1].integer, &value_1) &&
+	get_value(car, 2, war, 0, &value_2) && correct_reg (reg_num = car->params[3].integer))
+	{
+		int index = car->position + value_1 + value_2; // only T_DIR
+		car->reg[reg_num] = get_from_map(war, index);
+		car->carry = check_carry(car->reg[reg_num].integer);
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
+		{
+			ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
+			ft_printf("       | -> load from %d + %d = %d (with pc %d)\n",
+				value_1, value_2, value_1 + value_2, index);
+		}
 	}
 }
 
@@ -125,110 +174,13 @@ void	op_live(t_carriage *car, t_war *war)
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
 		ft_printf("P %4d | live %d\n", car->number, car->params[1].integer);
-		
 		if (player != NULL)
 		{
 			ft_printf("Player %d (%s) is said to be alive\n",
 				player->number, player->header->prog_name);
-
-		}
-		
-
-		// ft_printf("ADV %d (%x -> %x)\n", delta, car->position, car->position + delta);
-	}
-}
-
-
-
-void	op_lld(t_carriage *car, t_war *war)
-{
-	// show_args(war, car);
-
-	int reg_num = car->params[2].integer;
-
-	if (reg_num < 1 || reg_num > 16)
-		return ;
-
-	get_value(car, 1, war,
-		car->position + car->params[1].integer, &car->reg[reg_num].integer);
-
-	if (car->reg[reg_num].integer == 0)
-		car->carry = true;
-	else
-		car->carry = false;
-	
-	// verbose
-	if (war->flag_verbose && war->cycle >= war->flag_dump)
-	{
-		ft_printf("P %4d | lld %d r%d\n", car->number, car->reg[reg_num].integer, car->params[2].integer);
-	}
-
-}
-
-
-
-
-
-void	op_ldi(t_carriage *car, t_war *war)
-{
-	int value_1;
-	int value_2;
-	int reg_num;
-
-	if (get_value(car, 1, war, car->position + car->params[1].integer, &value_1) &&
-	get_value(car, 2, war, 0, &value_2) && correct_reg(reg_num = car->params[3].integer))
-	{
-		int index = car->position + (value_1 + value_2) % IDX_MOD;
-		car->reg[reg_num] = get_from_map(war, index);
-
-		if (war->flag_verbose && war->cycle >= war->flag_dump)
-		{
-			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
-			ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
-				value_1, value_2, value_1 + value_2, index);
 		}
 	}
 }
-
-void	op_lldi(t_carriage *car, t_war *war)
-{
-	// show_args(war, car);
-
-	int value_1;
-	int value_2;
-	get_value(car, 1, war, car->position + car->params[1].integer, &value_1);
-	get_value(car, 2, war, 0, &value_2);
-
-	int index = car->position + value_1 + value_2; // only T_DIR
-
-	int reg_num = car->params[3].integer;
-	if (reg_num < 1 || reg_num > 16)
-		return ;
-	
-	car->reg[reg_num].bytes[3] = war->map[index + 0]->value;
-	car->reg[reg_num].bytes[2] = war->map[index + 1]->value;
-	car->reg[reg_num].bytes[1] = war->map[index + 2]->value;
-	car->reg[reg_num].bytes[0] = war->map[index + 3]->value;
-
-	if (car->reg[reg_num].integer == 0)
-		car->carry = true;
-	else
-		car->carry = false;
-
-	if (war->flag_verbose && war->cycle >= war->flag_dump)
-	{
-		ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
-		ft_printf("       | -> load from %d + %d = %d (with pc %d)\n",
-			value_1,
-			value_2,
-			value_1 + value_2,
-			index);
-	}
-
-
-}
-
-
 
 void	op_st(t_carriage *car, t_war *war)
 {
@@ -257,8 +209,6 @@ void	op_st(t_carriage *car, t_war *war)
 			car->number, r1, car->params[2].integer);
 	}
 }
-
-
 
 void	op_sti(t_carriage *car, t_war *war)
 {
@@ -289,8 +239,8 @@ void	op_fork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
 	new->position = car->position + car->params[1].integer % IDX_MOD;
-	// if (new->position < 0)
-	// 	new->position += MEM_SIZE;
+	while (new->position < 0)
+		new->position += MEM_SIZE;
 	new->position %= MEM_SIZE;
 	push_carriage(new, &war->carriages);
 	int i = -1;
@@ -318,7 +268,6 @@ void	op_lfork(t_carriage *car, t_war *war)
 	new->last_live = car->last_live;
 	new->carry = car->carry;
 
-	// verbose
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
 		ft_printf("P %4d | lfork %d (%d)\n", car->number, car->params[1].integer,
@@ -437,20 +386,16 @@ void	op_xor(t_carriage *car, t_war *war)
 			ft_printf("P %4d | xor %d %d r%d\n",
 			car->number, value_1, value_2, reg_num);
 	}
-	
 }
 
 void	op_aff(t_carriage *car, t_war *war)
 {
 	int value_1;
-	if (!get_value(car, 1, war, 0, &value_1))
-		return ;
-
-	if (war->flag_verbose && war->cycle >= war->flag_dump)
+	if (get_value(car, 1, war, 0, &value_1))
 	{
-		ft_printf("Aff: %c\n", (char)value_1);
+		if (war->flag_verbose && war->cycle >= war->flag_dump)
+			ft_printf("Aff: %c\n", (char)value_1);
 	}
-
 }
 
 t_op		op_tab[] =  // [17]
