@@ -16,20 +16,18 @@ void	error(char *message) // .h
 {
 	ft_putstr_fd("Error: ", 2);
 	ft_putendl_fd(message, 2);
-	// ft_printf("Error: %s\n", message);
 	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
 }
 
 t_bool	next_cycle(t_war *war)
 {
-	int key = 0;
-	t_bool	need_cycle; // vadim epta sho eta
+	int		key = 0;
+	t_bool	success;
 
-	need_cycle = false;
+	success = false;
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
-		// if (war->flag_run == false)
 		key = getch();
 		if (key == KEY_ESC)
 			over_over(war);
@@ -44,20 +42,14 @@ t_bool	next_cycle(t_war *war)
 			war->flag_run = (war->flag_run == true) ? false : true;
 		print_info(war);
 	}
-	
-
 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
 	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1.0 / war->cycles_in_second)))
 	{
 		war->cycle += 1;
-		need_cycle = true;
-		
+		success = true;
 		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
 		{
-			// print_memory(war);
-			// print_info(war);
 			war->time = (float)clock() / CLOCKS_PER_SEC;
-
 			war->last_print = war->cycle;
 		}
 		war->time += 1.0 / war->cycles_in_second;
@@ -67,17 +59,14 @@ t_bool	next_cycle(t_war *war)
 		if (war->cycle >= war->flag_dump)
 			print_memory(war);
 		print_info(war);
-		// war->time = (float)clock() / CLOCKS_PER_SEC;
-		// war->last_print = war->cycle;
 	}
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 		ft_printf("It is now cycle %d\n", war->cycle);
-	
-	return (need_cycle);
+	return (success);
 }
 
 
-int		champions_count(t_champion **champs)
+int		chmps_count(t_champion **champs)
 {
 	int count = 0;
 	int i = -1;
@@ -86,13 +75,15 @@ int		champions_count(t_champion **champs)
 	return (count);
 }
 
-void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta, t_war *war)
+void	throw_basic_carriages(t_war *war)
 {
-	int i = -1;
-	while (champs[++i] != NULL)
+	int i;
+
+	i = -1;
+	while (war->champs[++i] != NULL)
 	{
-		push_carriage(create_carriage(mem_delta * (champs[i]->number - 1),
-		champs[i]->number, war, champs[i]), carriages);
+		t_carriage *car = create_carriage(war, war->champs[i]);
+		push_carriage(car, &war->carriages);
 	}
 }
 
@@ -126,22 +117,21 @@ int		define_size(int arg_code, int label)
 
 int		get_bytes(int start, int amount, int type, t_map_cell *map[])
 {
-	int res = 0;
-	int i = -1;
+	int res;
+	int i;
+
+	res = 0;
+	i = -1;
 	while (++i < amount)
 	{
 		if (i != 0)
 			res <<= 8;
-		res |= map[(start + i) % MEM_SIZE]->value /*& 0xFF*/;
-		// ft_printf("%x\n", res);
+		res |= map[(start + i) % MEM_SIZE]->value;
 	}
-	// ft_printf("\n");
 	if (amount == 2)
-	{
 		return ((short)res);
-	}
-
-	return (res); // to unsigned ?
+	else
+		return (res);
 }
 
 t_op		*get_command(int process, int car_pos, t_map_cell **map, t_war *war) // returns index
@@ -205,17 +195,20 @@ t_bool	args_ok(t_carriage *car)
 	return (true);
 }
 
-void	introduce(t_champion **champs) // fix
+void	introduce(t_champion **champs, t_bool flag_visual) // fix
 {
 	int i;
 
-	i = -1;
-	ft_printf("Introducing contestants...\n");
-	while (champs[++i])
+	if (!flag_visual)
 	{
-		ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
-			champs[i]->number, champs[i]->header->prog_size,
-			champs[i]->header->prog_name, champs[i]->header->comment);
+		i = -1;
+		ft_printf("Introducing contestants...\n");
+		while (champs[++i])
+		{
+			ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
+				champs[i]->number, champs[i]->header->prog_size,
+				champs[i]->header->prog_name, champs[i]->header->comment);
+		}
 	}
 }
 
@@ -270,17 +263,46 @@ void	checking(t_war *war)
 	}
 }
 
+void	run_all_carriages(t_war *war)
+{
+	t_carriage *car;
+
+	car = war->carriages;
+	while (car)
+	{
+		if (car->op == NULL)
+		{
+			car->op = get_command(car->number, car->position, war->map, war);
+			if (car->op)
+				car->cooldown = car->op->cooldown;
+			else
+				car->position = (car->position + 1) % MEM_SIZE;
+		}
+		car->cooldown--;
+		if (car->op && car->cooldown == 0)
+		{
+			int delta = get_args(car, war->map, car->op, war);
+			if (args_ok(car))
+				car->op->func(car, war);
+			if (car->carry == false || car->op->code != 0x09)
+			{
+				adv(war, car->op, delta, car);
+				car->position = (car->position + delta) % MEM_SIZE;
+			}
+			car->op = NULL;
+		}
+		car = car->next;
+	}
+}
+
 int		main(int argc, char **argv) 
 {
-	t_war *war = init();
-	parse_params(argc, argv, war);
-	int mem_delta = MEM_SIZE / champions_count(war->champs);
-	parse_champions(war->champs, war->map, mem_delta, war);
-	// war->last_live = war->champs[0];
-	if (!war->flag_visual)
-		introduce(war->champs);
+	t_war *war;
 
-	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
+	parse_params(argc, argv, war = init());
+	parse_champions(war);
+	introduce(war->champs, war->flag_visual);
+	throw_basic_carriages(war);
 
 	if (war->flag_visual)
 		init_curses(war);
@@ -289,43 +311,12 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-
-	int i = -1;
 	while (true)
 	{
 		t_carriage *tmp = war->carriages;
 		if (next_cycle(war))
 		{
-			while (tmp)
-			{
-				t_carriage *car = tmp;
-				if (car->op == NULL)
-				{
-					car->op = get_command(car->number, car->position, war->map, war);
-					if (car->op)
-						car->cooldown = car->op->cooldown;
-					else
-						car->position = (car->position + 1) % MEM_SIZE;
-				}
-				car->cooldown--;
-				if (car->op && car->cooldown == 0)
-				{
-					int delta = get_args(car, war->map, car->op, war);
-					if (args_ok(car))
-						car->op->func(car, war);
-					if (car->op->code == 0x09 && car->carry == true) // zjmp
-					{
-
-					}
-					else
-					{
-						adv(war, car->op, delta, car);
-						car->position = (car->position + delta) % MEM_SIZE;
-					}
-					car->op = NULL;
-				}
-				tmp = tmp->next;
-			}
+			run_all_carriages(war);
 			checking(war);
 			if (!war->carriages)
 			{
@@ -333,7 +324,6 @@ int		main(int argc, char **argv)
 				{
 					ft_printf("Contestant %d, \"%s\", has won !\n",
 						war->last_live->number, war->last_live->header->prog_name);
-
 				}
 				break ;
 			}

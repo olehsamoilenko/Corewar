@@ -17,7 +17,7 @@ INC =			-I ./includes \
 LIB =			-lncurses -lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
 LIST =			main \
-				op \
+				op_general \
 				op_load \
 				op_utils \
 				op_logic \

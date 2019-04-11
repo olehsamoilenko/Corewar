@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   op.c                                               :+:      :+:    :+:   */
+/*   op_general.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: osamoile <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -66,7 +66,7 @@ void	op_sti(t_carriage *car, t_war *war)
 
 void	op_fork(t_carriage *car, t_war *war)
 {
-	t_carriage *new = create_carriage(0, 0, war, car->creator);
+	t_carriage *new = create_carriage(war, car->creator);
 	new->position = car->position + car->params[1].integer % IDX_MOD;
 	while (new->position < 0)
 		new->position += MEM_SIZE;
@@ -85,7 +85,7 @@ void	op_fork(t_carriage *car, t_war *war)
 
 void	op_lfork(t_carriage *car, t_war *war)
 {
-	t_carriage *new = create_carriage(0, 0, war, car->creator);
+	t_carriage *new = create_carriage(war, car->creator);
 	new->position = car->position + car->params[1].integer;
 	while (new->position < 0)
 		new->position += MEM_SIZE;
