@@ -16,20 +16,18 @@ void	error(char *message) // .h
 {
 	ft_putstr_fd("Error: ", 2);
 	ft_putendl_fd(message, 2);
-	// ft_printf("Error: %s\n", message);
 	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
 }
 
 t_bool	next_cycle(t_war *war)
 {
-	int key = 0;
-	t_bool	need_cycle; // vadim epta sho eta
+	int		key = 0;
+	t_bool	success;
 
-	need_cycle = false;
+	success = false;
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
-		// if (war->flag_run == false)
 		key = getch();
 		if (key == KEY_ESC)
 			over_over(war);
@@ -44,20 +42,14 @@ t_bool	next_cycle(t_war *war)
 			war->flag_run = (war->flag_run == true) ? false : true;
 		print_info(war);
 	}
-	
-
 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
 	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1.0 / war->cycles_in_second)))
 	{
 		war->cycle += 1;
-		need_cycle = true;
-		
+		success = true;
 		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
 		{
-			// print_memory(war);
-			// print_info(war);
 			war->time = (float)clock() / CLOCKS_PER_SEC;
-
 			war->last_print = war->cycle;
 		}
 		war->time += 1.0 / war->cycles_in_second;
@@ -67,17 +59,14 @@ t_bool	next_cycle(t_war *war)
 		if (war->cycle >= war->flag_dump)
 			print_memory(war);
 		print_info(war);
-		// war->time = (float)clock() / CLOCKS_PER_SEC;
-		// war->last_print = war->cycle;
 	}
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 		ft_printf("It is now cycle %d\n", war->cycle);
-	
-	return (need_cycle);
+	return (success);
 }
 
 
-int		champions_count(t_champion **champs)
+int		chmps_count(t_champion **champs)
 {
 	int count = 0;
 	int i = -1;
@@ -86,13 +75,15 @@ int		champions_count(t_champion **champs)
 	return (count);
 }
 
-void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int mem_delta, t_war *war)
+void	throw_basic_carriages(t_war *war)
 {
-	int i = -1;
-	while (champs[++i] != NULL)
+	int i;
+
+	i = -1;
+	while (war->champs[++i] != NULL)
 	{
-		push_carriage(create_carriage(mem_delta * (champs[i]->number - 1),
-		champs[i]->number, war, champs[i]), carriages);
+		t_carriage *car = create_carriage(war, war->champs[i]);
+		push_carriage(car, &war->carriages);
 	}
 }
 
@@ -109,16 +100,16 @@ int		op_index(int code)
 
 int		define_size(int arg_code, int label)
 {
-	if (arg_code == REG_CODE)
+	if (arg_code == T_REG)
 		return (1);
-	else if (arg_code == DIR_CODE)
+	else if (arg_code == T_DIR)
 	{
 		if (label == false)
 			return (4);
 		else
 			return (2);
 	}
-	else if (arg_code == IND_CODE)
+	else if (arg_code == T_IND)
 		return (2);
 	else
 		return (0);
@@ -126,22 +117,21 @@ int		define_size(int arg_code, int label)
 
 int		get_bytes(int start, int amount, int type, t_map_cell *map[])
 {
-	int res = 0;
-	int i = -1;
+	int res;
+	int i;
+
+	res = 0;
+	i = -1;
 	while (++i < amount)
 	{
 		if (i != 0)
 			res <<= 8;
-		res |= map[(start + i) % MEM_SIZE]->value /*& 0xFF*/;
-		// ft_printf("%x\n", res);
+		res |= map[(start + i) % MEM_SIZE]->value;
 	}
-	// ft_printf("\n");
 	if (amount == 2)
-	{
 		return ((short)res);
-	}
-
-	return (res); // to unsigned ?
+	else
+		return (res);
 }
 
 t_op		*get_command(int process, int car_pos, t_map_cell **map, t_war *war) // returns index
@@ -153,7 +143,7 @@ t_op		*get_command(int process, int car_pos, t_map_cell **map, t_war *war) // re
 	return (op);
 }
 
-int		define_type_1(int type)
+int		define_type(int type)
 {
 	if (type == REG_CODE)
 		return(T_REG);
@@ -165,109 +155,85 @@ int		define_type_1(int type)
 		return (0b111);
 }
 
-int	get_args(t_carriage *car, t_map_cell **map, t_op *op, t_war *war)
+int		get_args(t_carriage *car, t_map_cell **map, t_op *op, t_war *war)
 {
-	int delta = 0;
-	delta++;
-	int first;
-	int second;
-	int third;
-
 	if (op->codage == true)
 	{
-		car->codage = map[(car->position + delta) % MEM_SIZE]->value;
-		first = car->codage >> 6;
-		second = car->codage >> 4 & 0b0011;
-		third = car->codage >> 2 & 0b000011;
-		delta++;
+		car->codage = map[(car->position + 1) % MEM_SIZE]->value;
+		car->types[1] = define_type(car->codage >> 6);
+		car->types[2] = define_type(car->codage >> 4 & 0b0011);
+		car->types[3] = define_type(car->codage >> 2 & 0b000011);
 	}
 	else
 	{
-		first = op->args_type[0];
-		second = op->args_type[1];
-		third = op->args_type[2];
+		car->types[1] = define_type(op->args_type[0]);
+		car->types[2] = define_type(op->args_type[1]);
+		car->types[3] = define_type(op->args_type[2]);
 	}
+	car->sizes[1] = define_size(car->types[1], op->label);
+	car->sizes[2] = car->op->args > 1 ? define_size(car->types[2], op->label) : 0;
+	car->sizes[3] = car->op->args > 2 ? define_size(car->types[3], op->label) : 0;
+	car->params[1].integer = get_bytes(car->position + op->codage + 1,
+	car->sizes[1], car->types[1], map);
+	car->params[2].integer = get_bytes(car->position + op->codage + 1 +
+	car->sizes[1], car->sizes[2], car->types[2], map);
+	car->params[3].integer = get_bytes(car->position + op->codage + 1 +
+	car->sizes[1] + car->sizes[2], car->sizes[3], car->types[3], map);
+	return (op->codage + 1 + car->sizes[1] + car->sizes[2] + car->sizes[3]);
+}
 
-	car->args_ok = true;
-
-	car->types[1] = define_type_1(first);
-	car->types[2] = define_type_1(second);
-	car->types[3] = define_type_1(third);
-
-	
-	car->sizes[1] = define_size(first, op->label);
-	
-	if (car->op->args > 1)
-		car->sizes[2] = define_size(second, op->label);
-	else
-		car->sizes[2] = 0;
-
-	if (car->op->args > 2)
-		car->sizes[3] = define_size(third, op->label);
-	else
-		car->sizes[3] = 0;
-
-	// unsigned int arg_1 = 0, arg_2 = 0, arg_3 = 0;
-	car->params[1].integer = get_bytes(car->position + delta, car->sizes[1], car->types[1], map);
-	delta += car->sizes[1];
-	car->params[2].integer = get_bytes(car->position + delta, car->sizes[2], car->types[2], map);
-	delta += car->sizes[2];
-	car->params[3].integer = get_bytes(car->position + delta, car->sizes[3], car->types[3], map);
-	delta += car->sizes[3];
-
+t_bool	args_ok(t_carriage *car)
+{
 	if (car->sizes[1] == 0 || (car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
-		car->args_ok = false;
+		return (false);
 	if (car->op->args > 1 && (car->sizes[2] == 0 ||
 		(car->op->args_type[1] | car->types[2]) != car->op->args_type[1]))
-		car->args_ok = false;
+		return (false);
 	if (car->op->args > 2 && (car->sizes[3] == 0 ||
 		(car->op->args_type[2] | car->types[3]) != car->op->args_type[2]))
-		car->args_ok = false;
-
-	return (delta);
+		return (false);
+	return (true);
 }
 
-void	introduce(t_champion **champs) // fix
+void	introduce(t_champion **champs, t_bool flag_visual) // fix
 {
-	ft_printf("Introducing contestants...\n");
-	int i = -1;
-	while (champs[++i])
+	int i;
+
+	if (!flag_visual)
 	{
-		ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
-			champs[i]->number, champs[i]->header->prog_size,
-			champs[i]->header->prog_name, champs[i]->header->comment);
+		i = -1;
+		ft_printf("Introducing contestants...\n");
+		while (champs[++i])
+		{
+			ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
+				champs[i]->number, champs[i]->header->prog_size,
+				champs[i]->header->prog_name, champs[i]->header->comment);
+		}
 	}
-}
-
-void	verbose_death(t_carriage *car, t_war *war)
-{
-	ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
-				car->number, war->cycle - car->last_live, war->cycles_to_die);	
 }
 
 void	remove_carriages(t_carriage **list, t_war *war)
 {
-	// show_carriages(war);
-
 	t_carriage *del;
+	t_carriage *tmp;
 
 	while (*list && (war->cycle - (*list)->last_live >= war->cycles_to_die || war->cycles_to_die <= 0))
 	{
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
-			verbose_death(*list, war);
+			ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
+				(*list)->number, war->cycle - (*list)->last_live, war->cycles_to_die);
 		del = *list;
 		*list = (*list)->next;
 		free(del);
 	}
-
-	t_carriage *tmp = *list;
+	tmp = *list;
 	while (tmp && tmp->next)
 	{
-		// ft_printf("Checked %d\n", tmp->next->number);
 		if (war->cycle - tmp->next->last_live >= war->cycles_to_die || war->cycles_to_die <= 0)
 		{
 			if (war->flag_verbose && war->cycle >= war->flag_dump)
-				verbose_death(tmp->next, war);
+				ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
+					tmp->next->number, war->cycle - tmp->next->last_live, war->cycles_to_die);	
 			del = tmp->next;
 			tmp->next = tmp->next->next;
 			free(del);
@@ -275,46 +241,68 @@ void	remove_carriages(t_carriage **list, t_war *war)
 		else
 			tmp = tmp->next;
 	}
-
-	// show_carriages(war);
 }
 
 void	checking(t_war *war)
 {
 	war->cycles_after_check += 1;
-	// ft_printf("LIVES: %d\n", war->champs[0]->lives_cur_period);
 	if (war->cycles_after_check >= war->cycles_to_die)
 	{
 		war->checks += 1;
 		remove_carriages(&war->carriages, war);
-		// ft_printf("LIVES %d\n", war->all_lives);
 		if (war->all_lives >= NBR_LIVE || war->checks == MAX_CHECKS)
 		{
 			war->cycles_to_die -= CYCLE_DELTA;
-			
 			war->checks = 0;
 			if (war->flag_verbose && war->cycle >= war->flag_dump)
 				ft_printf("Cycle to die is now %d\n", war->cycles_to_die);
 		}
-
 		war->cycles_after_check = 0;
 		war->champs[0]->lives_cur_period = 0;
 		war->all_lives = 0;
 	}
-	
+}
+
+void	run_all_carriages(t_war *war)
+{
+	t_carriage *car;
+
+	car = war->carriages;
+	while (car)
+	{
+		if (car->op == NULL)
+		{
+			car->op = get_command(car->number, car->position, war->map, war);
+			if (car->op)
+				car->cooldown = car->op->cooldown;
+			else
+				car->position = (car->position + 1) % MEM_SIZE;
+		}
+		car->cooldown--;
+		if (car->op && car->cooldown == 0)
+		{
+			int delta = get_args(car, war->map, car->op, war);
+			if (args_ok(car))
+				car->op->func(car, war);
+			if (car->carry == false || car->op->code != 0x09)
+			{
+				adv(war, car->op, delta, car);
+				car->position = (car->position + delta) % MEM_SIZE;
+			}
+			car->op = NULL;
+		}
+		car = car->next;
+	}
 }
 
 int		main(int argc, char **argv) 
 {
-	t_war *war = init();
-	parse_params(argc, argv, war);
-	int mem_delta = MEM_SIZE / champions_count(war->champs);
-	parse_champions(war->champs, war->map, mem_delta, war);
-	// war->last_live = war->champs[0];
-	if (!war->flag_visual)
-		introduce(war->champs);
+	t_war *war;
 
-	throw_basic_carriages(war->champs, &war->carriages, mem_delta, war);
+	parse_params(argc, argv, war = init());
+	parse_champions(war);
+	introduce(war->champs, war->flag_visual);
+	throw_basic_carriages(war);
 
 	if (war->flag_visual)
 		init_curses(war);
@@ -323,48 +311,12 @@ int		main(int argc, char **argv)
 	if (!war->flag_visual && war->cycle == war->flag_dump)
 		dump(war); // dump 0
 
-
-	int i = -1;
 	while (true)
 	{
 		t_carriage *tmp = war->carriages;
 		if (next_cycle(war))
 		{
-			while (tmp)
-			{
-				t_carriage *car = tmp;
-				if (car->op == NULL)
-				{
-					car->op = get_command(car->number, car->position, war->map, war);
-					if (car->op)
-						car->cooldown = car->op->cooldown;
-					else
-						car->position = (car->position + 1) % MEM_SIZE;
-				}
-				car->cooldown--;
-				if (car->op && car->cooldown == 0)
-				{
-					int delta = get_args(car, war->map, car->op, war);
-					if (car->args_ok)
-						car->op->func(car, war);
-					if (car->op->code == 0x09 && car->carry == true) // zjmp
-					{
-
-					}
-					else
-					{
-						adv(war, car->op, delta, car);
-						car->position = (car->position + delta) % MEM_SIZE;
-					}
-					car->op = NULL;
-				}
-				// if (war->flag_visual)
-				// {
-				// 	print_memory(war);
-				// 	print_info(war);					
-				// }
-				tmp = tmp->next;
-			}
+			run_all_carriages(war);
 			checking(war);
 			if (!war->carriages)
 			{
@@ -372,24 +324,14 @@ int		main(int argc, char **argv)
 				{
 					ft_printf("Contestant %d, \"%s\", has won !\n",
 						war->last_live->number, war->last_live->header->prog_name);
-
 				}
 				break ;
 			}
 			if (!war->flag_visual && !war->flag_verbose && war->cycle == war->flag_dump)
-			{
 				dump(war);
-				// break ;
-			}
 		}
 	}
-
-	// show_carriages(war);
-
 	if (war->flag_visual)
-	{
 		over_curses(war);
-	}
-
 	return (0);
 }

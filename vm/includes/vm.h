@@ -64,8 +64,6 @@ typedef struct	s_carriage
 	t_converter			params[MAX_ARGS_NUMBER];
 	struct s_carriage	*next;
 
-	t_bool				args_ok:1; // remove
-
 }				t_carriage;
 
 typedef struct	s_war
@@ -144,12 +142,13 @@ typedef struct	s_op
 
 // main
 void		error(char *message);
+int		chmps_count(t_champion **champs);
 
 // params
 void		parse_params(int argc, char **argv, t_war *war);
 
 // champion
-void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_war *war);
+void	parse_champions(t_war *war);
 t_champion	*find_champ(int number, t_war *war);
 
 // init
@@ -157,7 +156,7 @@ t_war		*init();
 
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
-t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *creator);
+t_carriage	*create_carriage(t_war *war, t_champion *creator);
 void		show_carriages(t_war *war);
 
 // verbose

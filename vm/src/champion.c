@@ -101,32 +101,37 @@ void	read_comment(int fd, char *comment)
 		error(ERR_SMALL_FILE);
 }
 
-void	read_exec_code(int fd, t_map_cell **map, t_champion *champ, int number, int mem_start)
+void	read_exec_code(int fd, t_champion *champ, t_war *war)
 {
 	int i;
 	unsigned char tmp;
 
+	int mem_delta = MEM_SIZE / chmps_count(war->champs);
+	int mem_start = (champ->number - 1) * mem_delta;
+
+
 	i = 0;
-	while (read(fd, &map[mem_start + i]->value, 1))
+	while (read(fd, &war->map[mem_start + i]->value, 1))
 	{
-		map[mem_start + i]->color = number + 1;
+		war->map[mem_start + i]->color = champ->number - 1 + 1;
 		i++;
 	}
 	if (i != champ->header->prog_size)
 		error(ERR_SIZE_DIFFERS);
 }
 
-void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_war *war)
+void	parse_champions(t_war *war)
 {
+	int fd;
+	t_champion *champ;
 	int i = -1;
-	while (champs[++i] != NULL)
+	while (war->champs[++i] != NULL)
 	{
-		t_champion *champ = champs[i];
+		champ = war->champs[i];
 		champ->header = ft_memalloc(sizeof(header_t));
-		int fd = open(champ->file, O_RDONLY);
-		if (fd == -1)
+		if ((fd = open(champ->file, O_RDONLY)) == -1)
 			error(ERR_OPEN_CHAMP);
-		if (!read_magic_header(fd)) // to var from header
+		if (!read_magic_header(fd))
 			error(ERR_MAGIC_HEADER);
 		read_name(fd, champ->header->prog_name);
 		if (!read_null(fd))
@@ -137,9 +142,7 @@ void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_wa
 		read_comment(fd, champ->header->comment);
 		if (!read_null(fd))
 			error(ERR_NULL_AFTER_COMMENT);
-		// read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
-		read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
-		
+		read_exec_code(fd, champ, war);
 		war->last_live = champ;
 		close(fd);
 	}
