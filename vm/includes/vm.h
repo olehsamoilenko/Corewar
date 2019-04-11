@@ -25,11 +25,11 @@
 # define KEY_W 119
 # define KEY_E 101
 
-union converter // u_converter ?
+typedef union	u_converter
 {
-	int				integer; // unsigned ?
+	int				integer;
 	unsigned char	bytes[REG_SIZE];
-};
+}				t_converter;
 
 typedef struct	s_champion
 {
@@ -40,42 +40,69 @@ typedef struct	s_champion
 	int					lives_cur_period;
 }				t_champion;
 
-typedef struct	s_map_cell // fix
+typedef struct	s_map_cell
 {
 	unsigned char		value;
 	int					color;
 	int					cycles_live;
 	int					cycles_bold;
-}				t_mem_cell;
+}				t_map_cell;
 
 typedef struct	s_carriage
 {
 	int					number;
 	t_champion			*creator;
-	int					position; // PC, program counter
-	union converter		reg[REG_NUMBER + 1]; // r1 is reg[1] r0 is unused
-
+	int					position;
+	t_converter			reg[REG_NUMBER + 1];
 	struct s_op			*op;
 	int					cooldown;
 	t_bool				carry:1;
 	int					last_live;
+	int					codage;
+	int					types[MAX_ARGS_NUMBER];
+	int					sizes[MAX_ARGS_NUMBER];
+	t_converter			params[MAX_ARGS_NUMBER];
 	struct s_carriage	*next;
 
-	int					codage;
-	int					types[MAX_ARGS_NUMBER]; // 0 is unused
-	int					sizes[MAX_ARGS_NUMBER]; // 0 is unused
-	union converter		params[MAX_ARGS_NUMBER]; // 0 is unused
-
-	t_bool				args_ok:1;
+	t_bool				args_ok:1; // remove
 
 }				t_carriage;
 
 typedef struct	s_war
 {
+	t_map_cell			*map[MEM_SIZE];
+	t_champion			*champs[MAX_PLAYERS + 1]; // champs[4] is NULL
+
+	t_carriage			*carriages;
+	int					processes_counter; // for number of carriage
+
+	int					cycle; // current cycle
+	int					cycles_after_check;
+	int					cycles_to_die;
+	int					checks;
+
+	t_champion			*last_live; // if anybody ?
+	int					all_lives;
+
+	t_bool				flag_verbose:1;
+	int					flag_dump; // -1 if not defined
+	t_bool				flag_visual:1;
+	t_bool				flag_run:1; // for stop game
+
+	WINDOW				*win_mem;
+	WINDOW				*win_info;
+	int					cycles_in_second; // need per_sec
+	int					last_print;
+	int					last_line; // for winner
+	int					processes_amount; // for visual
+	float				time;
+}				t_war;
+
+/*
 	WINDOW				*win_mem;
 	WINDOW				*win_info;
 
-	t_mem_cell			*map[MEM_SIZE];
+	t_map_cell			*map[MEM_SIZE];
 	t_champion			*champs[MAX_PLAYERS + 1]; // champs[4] is NULL
 
 	t_carriage			*carriages;
@@ -101,8 +128,7 @@ typedef struct	s_war
 
 	int					last_line; // for winner
 	float				time;
-	
-}				t_war;
+*/
 
 typedef struct	s_op
 {
@@ -123,7 +149,7 @@ void		error(char *message);
 void		parse_params(int argc, char **argv, t_war *war);
 
 // champion
-void		parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta);
+void		parse_champions(t_champion *champs[], t_map_cell *map[], int mem_delta);
 t_champion	*find_champ(int number, t_war *war);
 
 // init
@@ -149,8 +175,8 @@ void		over_curses(t_war *war);
 t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res);
 t_bool		correct_reg(int reg_num);
 t_bool		check_carry(int value);
-union converter get_from_map(t_war *war, int index);
-void	throw_on_map(union converter value, t_war *war, t_carriage *car, int index);
+t_converter	get_from_map(t_war *war, int index);
+void		throw_on_map(t_converter value, t_war *war, t_carriage *car, int index);
 
 // op
 void		op_live(t_carriage *car, t_war *war);
@@ -171,14 +197,14 @@ void		op_lfork(t_carriage *car, t_war *war);
 void		op_aff(t_carriage *car, t_war *war);
 
 // tmp
-void		show_args(t_war *war, t_carriage *car);
-void		curriage_info(t_carriage *car, t_war *war);
-char		*define_type(int type);
-void		show_union(union converter a);
-void		reg_info(union converter *reg, t_war *war);
-void		print_champions(t_champion *champs[]);
+// void		show_args(t_war *war, t_carriage *car);
+// void		curriage_info(t_carriage *car, t_war *war);
+// char		*define_type(int type);
+// void		show_union(union converter a);
+// void		reg_info(union converter *reg, t_war *war);
+// void		print_champions(t_champion *champs[]);
 
-static t_op		op_tab[] =  // [17]
+static t_op		g_op_tab[] =  // [17]
 {
 	{
 		.name = "live",
@@ -283,7 +309,7 @@ static t_op		op_tab[] =  // [17]
 	{
 		.name = "sti",
 		.args = 3,
-		.args_type = {T_REG, T_REG | T_DIR | T_IND,	T_DIR | T_REG},
+		.args_type = {T_REG, T_REG | T_DIR | T_IND, T_DIR | T_REG},
 		.code = 0x0b,
 		.cooldown = 25,
 		.codage = true,

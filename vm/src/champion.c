@@ -35,7 +35,7 @@ t_champion	*find_champ(int number, t_war *war)
 int	read_magic_header(int fd)
 {
 	int i;
-	union converter header;
+	t_converter header;
 	unsigned char tmp;
 
 	header.integer = COREWAR_EXEC_MAGIC;
@@ -77,7 +77,7 @@ int		read_null(int fd)
 
 int		read_exec_code_size(int fd)
 {
-	union converter size;
+	t_converter size;
 	int i = -1;
 	int res;
 
@@ -101,7 +101,7 @@ void	read_comment(int fd, char *comment)
 		error(ERR_SMALL_FILE);
 }
 
-void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, int mem_start)
+void	read_exec_code(int fd, t_map_cell **map, t_champion *champ, int number, int mem_start)
 {
 	int i;
 	unsigned char tmp;
@@ -116,7 +116,7 @@ void	read_exec_code(int fd, t_mem_cell *map[], t_champion *champ, int number, in
 		error(ERR_SIZE_DIFFERS);
 }
 
-void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
+void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta)
 {
 	int i = -1;
 	while (champs[++i] != NULL)

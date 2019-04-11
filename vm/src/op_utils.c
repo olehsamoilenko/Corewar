@@ -38,7 +38,7 @@ t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 	}
 	else if (car->types[num] == T_IND)
 	{
-		union converter num;
+		t_converter num;
 		index %= MEM_SIZE;
 		if (index < 0)
 			index += MEM_SIZE;
@@ -59,9 +59,9 @@ t_bool		correct_reg(int reg_num)
 		return (true);
 }
 
-union converter get_from_map(t_war *war, int index)
+t_converter get_from_map(t_war *war, int index)
 {
-	union converter reg;
+	t_converter reg;
 
 	index %= MEM_SIZE;
 	if (index < 0)
@@ -73,7 +73,7 @@ union converter get_from_map(t_war *war, int index)
 	return (reg);
 }
 
-void	throw_on_map(union converter value, t_war *war, t_carriage *car, int index)
+void	throw_on_map(t_converter value, t_war *war, t_carriage *car, int index)
 {
 	int i;
 
