@@ -27,6 +27,7 @@ LIST =			main \
 				carriage \
 				verbose \
 				curses \
+				curses_print \
 				tmp
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
