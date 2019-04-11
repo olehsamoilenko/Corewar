@@ -145,6 +145,13 @@ void		init_curses(t_war *war);
 void		over_over(t_war *war);
 void		over_curses(t_war *war);
 
+// op_utils
+t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res);
+t_bool		correct_reg(int reg_num);
+t_bool		check_carry(int value);
+union converter get_from_map(t_war *war, int index);
+void	throw_on_map(union converter value, t_war *war, t_carriage *car, int index);
+
 // op
 void		op_live(t_carriage *car, t_war *war);
 void		op_ld(t_carriage *car, t_war *war);

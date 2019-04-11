@@ -14,7 +14,9 @@
 
 void	error(char *message) // .h
 {
-	ft_printf("Error: %s\n", message);
+	ft_putstr_fd("Error: ", 2);
+	ft_putendl_fd(message, 2);
+	// ft_printf("Error: %s\n", message);
 	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
 }

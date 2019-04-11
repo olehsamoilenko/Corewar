@@ -12,20 +12,6 @@
 
 #include "vm.h"
 
-void		show_carriages(t_war *war)
-{
-	// if (war->flag_dev)
-	// {
-		t_carriage *tmp = war->carriages;
-		while (tmp)
-		{
-			ft_printf("Position: %d Process: %d Cooldown: %d\n", tmp->position, tmp->number, tmp->cooldown);
-			tmp = tmp->next;
-		}
-	// }
-	
-}
-
 void	push_carriage(t_carriage *car, t_carriage **list)
 {
 	car->next = *list;
@@ -34,7 +20,9 @@ void	push_carriage(t_carriage *car, t_carriage **list)
 
 t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *creator)
 {
-	t_carriage *car = ft_memalloc(sizeof(t_carriage));
+	t_carriage *car;
+
+	car = ft_memalloc(sizeof(t_carriage));
 	car->position = position;
 	car->creator = creator;
 	car->number = ++(war->processes_counter);
@@ -44,4 +32,3 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 	car->args_ok = true;
 	return (car);
 }
-
