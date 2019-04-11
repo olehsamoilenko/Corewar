@@ -91,7 +91,8 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 	int i = -1;
 	while (champs[++i] != NULL)
 	{
-		push_carriage(create_carriage(mem_delta * i, i + 1, war, champs[i]), carriages);
+		push_carriage(create_carriage(mem_delta * (champs[i]->number - 1),
+		champs[i]->number, war, champs[i]), carriages);
 	}
 }
 
@@ -204,7 +205,7 @@ t_bool	args_ok(t_carriage *car)
 	return (true);
 }
 
-void	introduce(t_champion **champs)
+void	introduce(t_champion **champs) // fix
 {
 	int i;
 
