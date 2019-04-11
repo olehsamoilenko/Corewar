@@ -91,7 +91,8 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 	int i = -1;
 	while (champs[++i] != NULL)
 	{
-		push_carriage(create_carriage(mem_delta * i, i + 1, war, champs[i]), carriages);
+		push_carriage(create_carriage(mem_delta * (champs[i]->number - 1),
+		champs[i]->number, war, champs[i]), carriages);
 	}
 }
 
@@ -226,7 +227,7 @@ int	get_args(t_carriage *car, t_map_cell **map, t_op *op, t_war *war)
 	return (delta);
 }
 
-void	introduce(t_champion **champs)
+void	introduce(t_champion **champs) // fix
 {
 	ft_printf("Introducing contestants...\n");
 	int i = -1;

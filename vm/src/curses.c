@@ -74,38 +74,27 @@ void	print_info(t_war *war)
 void	print_memory(t_war *war)
 {
 	int i = -1;
-	char s[3];
 
 	while (++i < MEM_SIZE)
 	{
 		// color on
 		if (war->map[i]->color == 0)
 		{
-			// wattroff(war->win_mem, A_COLOR);
 			wattron(war->win_mem, A_BOLD);
 			wattron(war->win_mem, COLOR_PAIR(14));
-			
 		}
 		else
 			wattron(war->win_mem, COLOR_PAIR(war->map[i]->color));
-
-		// bold
 		if (war->map[i]->cycles_bold && war->cycle - war->map[i]->cycles_bold < 50 - 1) 
 			wattron(war->win_mem, A_BOLD);
-
-		// live
 		if (war->map[i]->cycles_live && war->cycle - war->map[i]->cycles_live < 50 - 1) // 50 ?
 		{
 			wattron(war->win_mem, A_BOLD);
 			wattron(war->win_mem, COLOR_PAIR(8 + war->map[i]->color));
 		}
-
-
-		sprintf(s, "%02x", war->map[i]->value);
-		mvwaddstr(war->win_mem, i / 64 + 2, (i % 64) * 3 + 3, s);
+		mvwprintw(war->win_mem, i / 64 + 2, (i % 64) * 3 + 3, "%02x", war->map[i]->value);
 		wattroff(war->win_mem, A_BOLD);
 	}
-
 	t_carriage *tmp = war->carriages; // need?
 	while (tmp)
 	{
@@ -113,8 +102,7 @@ void	print_memory(t_war *war)
 			wattron(war->win_mem, COLOR_PAIR(15));
 		else
 			wattron(war->win_mem, COLOR_PAIR(4 + war->map[tmp->position]->color)); // number
-		sprintf(s, "%02x", war->map[tmp->position]->value);
-		mvwaddstr(war->win_mem, tmp->position / 64 + 2, (tmp->position % 64) * 3 + 3, s);
+		mvwprintw(war->win_mem, tmp->position / 64 + 2, (tmp->position % 64) * 3 + 3, "%02x", war->map[tmp->position]->value);
 		tmp = tmp->next;
 	}
 	wrefresh(war->win_mem);
@@ -127,25 +115,17 @@ void	define_colors()
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);
 	init_pair(3, COLOR_RED, COLOR_BLACK);
 	init_pair(4, COLOR_CYAN, COLOR_BLACK);
-	// carriage
 	init_pair(5, COLOR_BLACK, COLOR_GREEN);
 	init_pair(6, COLOR_BLACK, COLOR_BLUE);
 	init_pair(7, COLOR_BLACK, COLOR_RED);
 	init_pair(8, COLOR_BLACK, COLOR_CYAN);
-
-	// live
 	init_pair(9, COLOR_WHITE, COLOR_GREEN);
 	init_pair(10, COLOR_WHITE, COLOR_BLUE);
 	init_pair(11, COLOR_WHITE, COLOR_RED);
 	init_pair(12, COLOR_WHITE, COLOR_CYAN);
-
-	// default
 	init_pair(13, COLOR_BLACK, COLOR_BLACK);
-
-	// added
-	init_pair(14, 8, COLOR_BLACK); // Bright black
+	init_pair(14, 8, COLOR_BLACK);
 	init_pair(15, 8, 8);
-
 }
 
 void	init_curses(t_war *war)
@@ -155,14 +135,11 @@ void	init_curses(t_war *war)
 	noecho();
 	nodelay(stdscr, true);
 	refresh();
-	// cbreak();
 	define_colors();
 	war->win_mem = newwin(68, 197, 0, 0);
 	war->win_info = newwin(68, 60, 0, 196);
-
-	wrefresh(war->win_mem); // need ?
+	wrefresh(war->win_mem);
 	wrefresh(war->win_info);
-	// wrefresh(war->win_getch);
 }
 
 void	over_over(t_war *war)
@@ -177,13 +154,11 @@ void	over_over(t_war *war)
 void	over_curses(t_war *war)
 {
 	int key;
-	// status("overing", war);
 	mvwaddstr(war->win_info, war->last_line + 4, 3, "* WINNER * - ");
 	wattron(war->win_info, COLOR_PAIR(war->last_live->number));
 	mvwaddstr(war->win_info, war->last_line + 4, 16, war->last_live->header->prog_name);
 	wattroff(war->win_info, A_COLOR);
-	wrefresh(war->win_info);	
-	
+	wrefresh(war->win_info);
 	while ((key = getch()) != KEY_ESC)
 	{
 

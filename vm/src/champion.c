@@ -137,8 +137,9 @@ void	parse_champions(t_champion *champs[], t_map_cell **map, int mem_delta, t_wa
 		read_comment(fd, champ->header->comment);
 		if (!read_null(fd))
 			error(ERR_NULL_AFTER_COMMENT);
-		// read_exec_code(fd, map, champ, i, i * mem_delta);
+		// read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
 		read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
+		
 		war->last_live = champ;
 		close(fd);
 	}
