@@ -16,6 +16,15 @@ void	print_info(t_war *war)
 {
 	char *itoa;
 
+	wresize(war->win_mem, 68, 197);
+	wresize(war->win_info, 68, 60);
+	wattron(war->win_mem, COLOR_PAIR(15));
+	wattron(war->win_info, COLOR_PAIR(15));
+	box(war->win_mem, '*', '*');
+	box(war->win_info, '*', '*');
+	wattroff(war->win_mem, A_COLOR);
+	wattroff(war->win_info, A_COLOR);
+
 	if (war->flag_run == false)
 		mvwaddstr(war->win_info, 2, 3, "** STOP **");
 	else
@@ -151,44 +160,9 @@ void	init_curses(t_war *war)
 	war->win_mem = newwin(68, 197, 0, 0);
 	war->win_info = newwin(68, 60, 0, 196);
 
-	wattron(war->win_mem, COLOR_PAIR(15));
-	wattron(war->win_info, COLOR_PAIR(15));
-	// wattron(war->win_getch, COLOR_PAIR(15));
-	
-	box(war->win_mem, '*', '*');
-	box(war->win_info, '*', '*');
-
-	// wresize(war->win_mem, 68, 197);
-
-	wattroff(war->win_mem, A_COLOR);
-	wattroff(war->win_info, A_COLOR);
-	// wattroff(war->win_getch, A_COLOR);
-	
-	// wattron(war->win_info, A_BOLD);
-	// int player = 0;
-	// int line = 7;
-	// while (player < 4)
-	// {
-	// 	if (war->champs[player] != NULL)
-	// 	{
-	// 		wattroff(war->win_info, A_COLOR);
-	// 		mvwprintw(war->win_info, line + 4 * war->champs[player]->number, 3, "Player -%d : ", war->champs[player]->number);
-	// 		wattron(war->win_info, COLOR_PAIR(war->champs[player]->number));
-	// 		char *sub_name = ft_strsub(war->champs[player]->header->prog_name, 0, 41);
-	// 		mvwaddstr(war->win_info, line + 4 * war->champs[player]->number, 15, sub_name);
-	// 		ft_strdel(&sub_name);
-	// 		// line += 4;
-	// 		wattroff(war->win_info, A_COLOR);		
-	// 	}
-	// 	player++;
-	// }
-
-
-	// line += 2;
 	wrefresh(war->win_mem); // need ?
 	wrefresh(war->win_info);
 	// wrefresh(war->win_getch);
-
 }
 
 void	over_over(t_war *war)
