@@ -29,6 +29,5 @@ t_carriage	*create_carriage(int position, int player, t_war *war, t_champion *cr
 	war->processes_amount++;
 	car->reg[1].integer = -player;
 	car->carry = false;
-	car->args_ok = true;
 	return (car);
 }

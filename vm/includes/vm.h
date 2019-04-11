@@ -64,8 +64,6 @@ typedef struct	s_carriage
 	t_converter			params[MAX_ARGS_NUMBER];
 	struct s_carriage	*next;
 
-	t_bool				args_ok:1; // remove
-
 }				t_carriage;
 
 typedef struct	s_war

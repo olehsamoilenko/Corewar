@@ -64,7 +64,6 @@ void	op_sti(t_carriage *car, t_war *war)
 	}
 }
 
-
 void	op_fork(t_carriage *car, t_war *war)
 {
 	t_carriage *new = create_carriage(0, 0, war, car->creator);
@@ -123,7 +122,3 @@ void	op_zjmp(t_carriage *car, t_war *war)
 		ft_printf("P %4d | zjmp %d %s\n", car->number,
 		car->params[1].integer, jump_status);
 }
-
-
-
-
