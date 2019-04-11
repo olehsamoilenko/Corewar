@@ -14,6 +14,9 @@
 # define VM_H
 
 # include "libft.h"
+
+# include <time.h>
+
 # include "op.h"
 # include <stdio.h> // trash
 # include <curses.h>
@@ -22,6 +25,9 @@
 #define KEY_ESC 27
 #define KEY_SPACE 32
 #define KEY_S 115
+
+# define KEY_W 119
+# define KEY_E 101
 
 union converter // u_converter ?
 {
@@ -94,8 +100,11 @@ typedef struct	s_war
 
 	t_bool				flag_visual:1;
 	t_bool				flag_run:1; // for stop game
-	int					cycles_in_second;
+	int					cycles_in_second; // need per_sec
 	int					last_print;
+
+	int					last_line; // for winner
+	float				time;
 	
 }				t_war;
 
@@ -137,6 +146,7 @@ void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
 void		dump(t_war *war);
 
 // curses
+void		print_info(t_war *war);
 void		print_memory(t_war *war);
 void		init_curses(t_war *war);
 void		over_over(t_war *war);

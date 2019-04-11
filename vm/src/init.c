@@ -28,6 +28,6 @@ t_war	*init()
 	war->cycles_to_die = CYCLE_TO_DIE;
 	// war->cycles_after_check = 0;
 	war->flag_run = false;
-	war->cycles_in_second = 10;
+	war->cycles_in_second = 50;
 	return (war);
 }
