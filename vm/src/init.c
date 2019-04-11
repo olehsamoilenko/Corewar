@@ -20,7 +20,7 @@ t_war	*init()
 	
 	while (++i < MEM_SIZE)
 	{
-		war->map[i] = ft_memalloc(sizeof(t_mem_cell));
+		war->map[i] = ft_memalloc(sizeof(t_map_cell));
 		war->map[i]->value = 0x00; // fake 
 	}
 	war->carriages = NULL;

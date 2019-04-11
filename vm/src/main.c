@@ -21,73 +21,6 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-// t_bool	next_cycle(t_war *war)
-// {
-// 	int key = 0;
-// 	t_bool	need_cycle; // vadim epta sho eta
-
-// 	need_cycle = false;
-// 	if (war->flag_visual && war->cycle >= war->flag_dump)
-// 	{
-// 		// if (war->flag_run == false)
-// 		key = getch();
-// 		if (key == KEY_ESC)
-// 			over_over(war);
-// 		if (key == KEY_W)
-// 		{
-// 			if (war->cycles_in_second > 1)
-// 				war->cycles_in_second -= 1;			
-// 		}
-// 		if (key == KEY_E)
-// 			war->cycles_in_second += 1;
-// 		if (key == KEY_SPACE)
-// 			war->flag_run = (war->flag_run == true) ? false : true;
-// 		print_info(war);
-// 	}
-	
-
-// 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
-// 	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)))
-// 	{
-// 		war->cycle += 1;
-		
-// 		need_cycle = true;
-		
-// 		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
-// 		{
-// 			// print_memory(war);
-// 			// print_info(war);
-// 			war->time = (float)clock() / CLOCKS_PER_SEC;
-// 			war->last_print = war->cycle;
-// 		}
-// 			// else
-// 			// {
-// 			// 	if ()
-// 			// 	{
-// 			// 		print_memory(war);
-// 			// 		print_info(war);
-// 			// 		war->time = (float)clock() / CLOCKS_PER_SEC;
-// 			// 		war->last_print = war->cycle;
-// 			// 		// sleep(1);
-// 			// 	}
-// 			// }
-// 		// }
-
-// 	}
-// 	if (war->flag_visual)
-// 	{
-// 		print_memory(war);
-// 		print_info(war);
-// 		// war->time = (float)clock() / CLOCKS_PER_SEC;
-// 		// war->last_print = war->cycle;
-// 	}
-// 	if (war->flag_verbose && war->cycle >= war->flag_dump)
-// 		ft_printf("It is now cycle %d\n", war->cycle);
-	
-// 	return (need_cycle);
-// }
-
-
 t_bool	next_cycle(t_war *war)
 {
 	int key = 0;
@@ -164,9 +97,9 @@ void		throw_basic_carriages(t_champion *champs[], t_carriage **carriages, int me
 int		op_index(int code)
 {
 	int i = -1;
-	while (op_tab[++i].name)
+	while (g_op_tab[++i].name)
 	{
-		if (op_tab[i].code == code)
+		if (g_op_tab[i].code == code)
 			return (i);
 	}
 	return (-1);
@@ -189,7 +122,7 @@ int		define_size(int arg_code, int label)
 		return (0);
 }
 
-int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
+int		get_bytes(int start, int amount, int type, t_map_cell *map[])
 {
 	int res = 0;
 	int i = -1;
@@ -209,23 +142,12 @@ int		get_bytes(int start, int amount, int type, t_mem_cell *map[])
 	return (res); // to unsigned ?
 }
 
-t_op		*get_command(int process, int car_pos, t_mem_cell *map[], t_war *war) // returns index
+t_op		*get_command(int process, int car_pos, t_map_cell **map, t_war *war) // returns index
 {
-	// ft_printf()
-	// ft_printf("%d\n", car_pos);
 	int index = op_index(map[car_pos]->value); // return op ?
-	t_op *op = &op_tab[index];
-
-	// if (war->flag_dev)
-	// 	ft_printf("\tProcess %d FOUND %02x pos %d, index %d, name %s, cooldown %i\n",
-	// 		process, map[car_pos]->value, car_pos, index, op->name, op_tab[index].cooldown);
-
+	t_op *op = &g_op_tab[index];
 	if (index == -1)
-	{
-		// if (map[car_pos]->value > 0 && map[car_pos]->value < 17)
-		// 	ft_printf("UNKNOWN COMMAND %02x\n", map[car_pos]->value);
 		return (NULL);
-	}
 	return (op);
 }
 
@@ -241,7 +163,7 @@ int		define_type_1(int type)
 		return (0b111);
 }
 
-int	get_args(t_carriage *car, t_mem_cell *map[], t_op *op, t_war *war)
+int	get_args(t_carriage *car, t_map_cell **map, t_op *op, t_war *war)
 {
 	int delta = 0;
 	delta++;
@@ -466,19 +388,6 @@ int		main(int argc, char **argv)
 	{
 		over_curses(war);
 	}
-	// show_carriages(war);
-	// if (war->flag_dump == -1)
-	// 	system("leaks corewar");
 
-	// printf("%f\n", (float)clock() / CLOCKS_PER_SEC);
-	// war->time = (float)clock() / CLOCKS_PER_SEC;
-	// while (1)
-	// {
-	// 	if ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)
-	// 	{
-	// 		war->time = (float)clock() / CLOCKS_PER_SEC;
-	// 		printf("HELLO VADIM %f\n", war->time);
-	// 	}
-	// }
 	return (0);
 }
