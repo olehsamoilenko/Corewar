@@ -40,36 +40,48 @@ void	error(char *message) // .h
 // 			war->cycles_in_second += 1;
 // 		if (key == KEY_SPACE)
 // 			war->flag_run = (war->flag_run == true) ? false : true;
-// 		print_info(war);	          
+// 		print_info(war);
 // 	}
 	
-// 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump || war->flag_run == true)
+
+// 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
+// 	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)))
 // 	{
 // 		war->cycle += 1;
-// 		if (war->flag_verbose && war->cycle >= war->flag_dump)
-// 			ft_printf("It is now cycle %d\n", war->cycle);
+		
 // 		need_cycle = true;
-// 	}
-// 	if (war->flag_visual && need_cycle == true)
-// 	{
-// 		if (!war->flag_run)
+		
+// 		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
 // 		{
-// 			print_memory(war);
-// 			print_info(war);	
+// 			// print_memory(war);
+// 			// print_info(war);
+// 			war->time = (float)clock() / CLOCKS_PER_SEC;
 // 			war->last_print = war->cycle;
 // 		}
-// 		else
-// 		{
-// 			if (war->cycle - war->last_print >= war->cycles_in_second)
-// 			{
-// 				print_memory(war);
-// 				print_info(war);	
-				
-// 				war->last_print = war->cycle;
-// 				sleep(1);
-// 			}
-// 		}
+// 			// else
+// 			// {
+// 			// 	if ()
+// 			// 	{
+// 			// 		print_memory(war);
+// 			// 		print_info(war);
+// 			// 		war->time = (float)clock() / CLOCKS_PER_SEC;
+// 			// 		war->last_print = war->cycle;
+// 			// 		// sleep(1);
+// 			// 	}
+// 			// }
+// 		// }
+
 // 	}
+// 	if (war->flag_visual)
+// 	{
+// 		print_memory(war);
+// 		print_info(war);
+// 		// war->time = (float)clock() / CLOCKS_PER_SEC;
+// 		// war->last_print = war->cycle;
+// 	}
+// 	if (war->flag_verbose && war->cycle >= war->flag_dump)
+// 		ft_printf("It is now cycle %d\n", war->cycle);
+	
 // 	return (need_cycle);
 // }
 
@@ -100,10 +112,9 @@ t_bool	next_cycle(t_war *war)
 	
 
 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
-	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1)))
+	(war->flag_run && ((float)clock() / CLOCKS_PER_SEC - war->time >= 1.0 / war->cycles_in_second)))
 	{
 		war->cycle += 1;
-		
 		need_cycle = true;
 		
 		if (war->flag_visual && (!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
@@ -111,21 +122,10 @@ t_bool	next_cycle(t_war *war)
 			// print_memory(war);
 			// print_info(war);
 			war->time = (float)clock() / CLOCKS_PER_SEC;
+
 			war->last_print = war->cycle;
 		}
-			// else
-			// {
-			// 	if ()
-			// 	{
-			// 		print_memory(war);
-			// 		print_info(war);
-			// 		war->time = (float)clock() / CLOCKS_PER_SEC;
-			// 		war->last_print = war->cycle;
-			// 		// sleep(1);
-			// 	}
-			// }
-		// }
-
+		war->time += 1.0 / war->cycles_in_second;
 	}
 	if (war->flag_visual)
 	{

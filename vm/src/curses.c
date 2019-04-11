@@ -25,21 +25,41 @@ void	print_info(t_war *war)
 
 	mvwprintw(war->win_info, 7, 3, "Cycle : %d", war->cycle);
 	mvwprintw(war->win_info, 9, 3, "Processes : %d             ", war->processes_amount);
+
+	wattron(war->win_info, A_BOLD);
 	int player = 0;
-	int line = 12;
+	int line = 7;
 	while (player < 4)
 	{
 		if (war->champs[player] != NULL)
 		{
-			mvwprintw(war->win_info, line, 5, "Last live : %21d", war->champs[player]->last_live);
-			line++;
-			mvwprintw(war->win_info, line, 5, "Lives in current period : %7d", war->champs[player]->lives_cur_period);
-			line += 3;
+			wattroff(war->win_info, A_COLOR);
+			mvwprintw(war->win_info, line + 4 * war->champs[player]->number, 3, "Player -%d : ", war->champs[player]->number);
+			wattron(war->win_info, COLOR_PAIR(war->champs[player]->number));
+			char *sub_name = ft_strsub(war->champs[player]->header->prog_name, 0, 41);
+			mvwaddstr(war->win_info, line + 4 * war->champs[player]->number, 15, sub_name);
+			ft_strdel(&sub_name);
+			// line += 4;
+			wattroff(war->win_info, A_COLOR);		
 		}
 		player++;
 	}
-	war->last_line = line;
-	wrefresh(war->win_info);	
+
+	 player = 0;
+	 line = 7;
+	while (player < 4)
+	{
+		if (war->champs[player] != NULL)
+		{
+			mvwprintw(war->win_info, line + 4 * war->champs[player]->number + 1, 5, "Last live : %21d", war->champs[player]->last_live);
+			mvwprintw(war->win_info, line + 4 * war->champs[player]->number + 2, 5, "Lives in current period : %7d", war->champs[player]->lives_cur_period);
+			if (line + 4 * war->champs[player]->number + 2 > war->last_line)
+				war->last_line = line + 4 * war->champs[player]->number + 2;
+		}
+		player++;
+	}
+	mvwprintw(war->win_info, war->last_line + 2, 3, "CYCLE_TO_DIE : %d              ", war->cycles_to_die);
+	wrefresh(war->win_info);
 }
 
 void	print_memory(t_war *war)
@@ -138,31 +158,33 @@ void	init_curses(t_war *war)
 	box(war->win_mem, '*', '*');
 	box(war->win_info, '*', '*');
 
+	// wresize(war->win_mem, 68, 197);
+
 	wattroff(war->win_mem, A_COLOR);
 	wattroff(war->win_info, A_COLOR);
 	// wattroff(war->win_getch, A_COLOR);
 	
-	wattron(war->win_info, A_BOLD);
-	
-	// mvwprintw(war->win_info, 4, 3, "Cycles in second : %d", war->cycles_in_second);
+	// wattron(war->win_info, A_BOLD);
+	// int player = 0;
+	// int line = 7;
+	// while (player < 4)
+	// {
+	// 	if (war->champs[player] != NULL)
+	// 	{
+	// 		wattroff(war->win_info, A_COLOR);
+	// 		mvwprintw(war->win_info, line + 4 * war->champs[player]->number, 3, "Player -%d : ", war->champs[player]->number);
+	// 		wattron(war->win_info, COLOR_PAIR(war->champs[player]->number));
+	// 		char *sub_name = ft_strsub(war->champs[player]->header->prog_name, 0, 41);
+	// 		mvwaddstr(war->win_info, line + 4 * war->champs[player]->number, 15, sub_name);
+	// 		ft_strdel(&sub_name);
+	// 		// line += 4;
+	// 		wattroff(war->win_info, A_COLOR);		
+	// 	}
+	// 	player++;
+	// }
 
-	int player = 0;
-	int line = 11;
-	while (player < 4)
-	{
-		if (war->champs[player] != NULL)
-		{
-			wattroff(war->win_info, A_COLOR);
-			mvwprintw(war->win_info, line, 3, "Player -%d : ", player + 1);
-			wattron(war->win_info, COLOR_PAIR(player + 1));
-			mvwaddstr(war->win_info, line, 15, war->champs[player]->header->prog_name);
-			line += 4;
-			wattroff(war->win_info, A_COLOR);		
-		}
-		player++;
-	}
-	mvwprintw(war->win_info, line, 2, "CYCLE_TO_DIE : %d", war->cycles_to_die);
-	line += 2;
+
+	// line += 2;
 	wrefresh(war->win_mem); // need ?
 	wrefresh(war->win_info);
 	// wrefresh(war->win_getch);
@@ -182,9 +204,10 @@ void	over_curses(t_war *war)
 {
 	int key;
 	// status("overing", war);
-	mvwaddstr(war->win_info, war->last_line + 1, 3, "* WINNER * - ");
-	// wattron(war->win_info);
-	mvwaddstr(war->win_info, war->last_line + 1, 16, war->last_live->header->prog_name);
+	mvwaddstr(war->win_info, war->last_line + 4, 3, "* WINNER * - ");
+	wattron(war->win_info, COLOR_PAIR(war->last_live->number));
+	mvwaddstr(war->win_info, war->last_line + 4, 16, war->last_live->header->prog_name);
+	wattroff(war->win_info, A_COLOR);
 	wrefresh(war->win_info);	
 	
 	while ((key = getch()) != KEY_ESC)

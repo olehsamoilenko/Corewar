@@ -137,7 +137,9 @@ void	parse_champions(t_champion *champs[], t_mem_cell *map[], int mem_delta)
 		read_comment(fd, champ->header->comment);
 		if (!read_null(fd))
 			error(ERR_NULL_AFTER_COMMENT);
-		read_exec_code(fd, map, champ, i, i * mem_delta);
+		// read_exec_code(fd, map, champ, i, i * mem_delta);
+		read_exec_code(fd, map, champ, champ->number - 1, (champ->number - 1) * mem_delta);
+		
 		close(fd);
 	}
 }
