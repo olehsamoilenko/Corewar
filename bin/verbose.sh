@@ -3,6 +3,6 @@ then
 	echo "Usage: sh verbose.sh CHAMPION"
 else
 	./resources/corewar $1 -v 31 -a > bin/origin
-	./corewar $1 -verbose > bin/my
+	./vm/corewar $1 -verbose > bin/my
 	diff -y bin/my bin/origin | less
 fi

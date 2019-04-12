@@ -2,7 +2,7 @@ if [[ $1 == "" ]]
 then
 	echo "Usage: sh bool.sh CHAMPION"
 else
-	./corewar $1 -verbose > bin/my
+	./vm/corewar $1 -verbose > bin/my
 	./resources/corewar $1 -v 31 -a > bin/origin
 	if [ "$(diff -u bin/my bin/origin)" == "" ]
 	then

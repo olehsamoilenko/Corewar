@@ -20,26 +20,30 @@ void	error(char *message) // .h
 	exit(0);
 }
 
+void	handle_key(int key, t_war *war)
+{
+	if (key == KEY_ESC)
+		over_over(war);
+	if (key == KEY_W)
+	{
+		if (war->cycles_in_second > 1)
+			war->cycles_in_second -= 1;			
+	}
+	if (key == KEY_E)
+		war->cycles_in_second += 1;
+	if (key == KEY_SPACE)
+		war->flag_run = (war->flag_run == true) ? false : true;
+}
+
 t_bool	next_cycle(t_war *war)
 {
-	int		key = 0;
+	int		key;
 	t_bool	success;
 
 	success = false;
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
-		key = getch();
-		if (key == KEY_ESC)
-			over_over(war);
-		if (key == KEY_W)
-		{
-			if (war->cycles_in_second > 1)
-				war->cycles_in_second -= 1;			
-		}
-		if (key == KEY_E)
-			war->cycles_in_second += 1;
-		if (key == KEY_SPACE)
-			war->flag_run = (war->flag_run == true) ? false : true;
+		handle_key(key = getch(), war);
 		print_info(war);
 	}
 	if (!war->flag_visual || key == KEY_S || war->cycle < war->flag_dump ||
