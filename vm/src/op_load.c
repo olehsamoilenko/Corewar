@@ -70,9 +70,9 @@ void	op_ldi(t_carriage *car, t_war *war)
 		{
 			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1,
 													value_2, reg_num);
-			ft_printf("       | -> load from %d + %d = %d (with pc \
-														and mod %d)\n",
-				value_1, value_2, value_1 + value_2, index);
+			ft_printf("       | -> load from %d + %d = %d ",
+				value_1, value_2, value_1 + value_2);
+			ft_printf("(with pc and mod %d)\n", index);
 		}
 	}
 }

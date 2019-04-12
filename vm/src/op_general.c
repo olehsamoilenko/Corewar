@@ -59,9 +59,9 @@ void	op_sti(t_carriage *car, t_war *war)
 		{
 			ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, value_2,
 																	value_3);
-			ft_printf("       | -> store to %d + %d = %d (with pc and \
-																	mod %d)\n",
-				value_2, value_3, value_2 + value_3, index);
+			ft_printf("       | -> store to %d + %d = %d ",
+				value_2, value_3, value_2 + value_3);
+			ft_printf("(with pc and mod %d)\n", index);
 		}
 	}
 }
