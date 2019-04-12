@@ -55,7 +55,7 @@ int		main(int argc, char **argv)
 	parse_params(argc, argv, war = init());
 	parse_champions(war);
 	throw_basic_carriages(war);
-	introduce(war->champs, war->flag_visual);
+	introduce(war, war->champs, war->flag_visual);
 	init_curses(war);
 	if (war->flag_dump == 0)
 		dump(war);
