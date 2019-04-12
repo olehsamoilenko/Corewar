@@ -12,6 +12,25 @@
 
 #include "vm.h"
 
+void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
+{
+	int			i;
+	t_champion	*current;
+
+	if (!flag_visual)
+	{
+		i = -1;
+		ft_printf("Introducing contestants...\n");
+		while (champs[++i])
+		{
+			current = find_champ(-(i + 1), war);
+			ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
+				i + 1, current->header->prog_size,
+				current->header->prog_name, current->header->comment);
+		}
+	}
+}
+
 void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car)
 {
 	int j;

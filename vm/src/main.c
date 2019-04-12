@@ -12,31 +12,33 @@
 
 #include "vm.h"
 
+t_war	*init(void)
+{
+	t_war	*war;
+	int		i;
+
+	i = -1;
+	war = ft_memalloc(sizeof(t_war));
+	while (++i < MEM_SIZE)
+	{
+		war->map[i] = ft_memalloc(sizeof(t_map_cell));
+		war->map[i]->value = 0x00;
+	}
+	war->carriages = NULL;
+	war->flag_dump = -1;
+	war->cycles_to_die = CYCLE_TO_DIE;
+	g_fd = 1;
+	war->flag_run = false;
+	war->cycles_in_second = 50;
+	return (war);
+}
+
 void	error(char *message) // .h
 {
 	ft_putstr_fd("Error: ", 2);
 	ft_putendl_fd(message, 2);
 	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
-}
-
-void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
-{
-	int			i;
-	t_champion	*current;
-
-	if (!flag_visual)
-	{
-		i = -1;
-		ft_printf("Introducing contestants...\n");
-		while (champs[++i])
-		{
-			current = find_champ(-(i + 1), war);
-			ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
-				i + 1, current->header->prog_size,
-				current->header->prog_name, current->header->comment);
-		}
-	}
 }
 
 int		main(int argc, char **argv) 
