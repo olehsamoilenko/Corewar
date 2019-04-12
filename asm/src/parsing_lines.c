@@ -18,10 +18,10 @@ void	cut_word(t_asm *asm_parsing, char *line, char *substring, int start)
 	if (check_for_instruction(substring))
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
 																INSTRUCTION));
-	else if (check_for_register(substring))
+	else if (check_for_register(asm_parsing, substring))
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
 																REGISTER));
-	else if (check_for_number(substring))
+	else if (check_for_number(asm_parsing, substring))
 		add_word_to_list(asm_parsing, create_word(asm_parsing, substring,
 																INDIRECT_ARG));
 	else
@@ -33,8 +33,6 @@ void	cut_other(t_asm *asm_parsing, char *line)
 	int		start;
 	char	*substring;
 
-	start = 0;
-	substring = NULL;
 	start = asm_parsing->symbol;
 	if (line[asm_parsing->symbol] == '-')
 		asm_parsing->symbol++;
@@ -70,8 +68,6 @@ void	parse_word(t_asm *asm_parsing, char *line)
 	int		start;
 	char	*substring;
 
-	start = 0;
-	substring = NULL;
 	if (line[asm_parsing->symbol] == '.')
 		cut_command(asm_parsing, line);
 	else if (line[asm_parsing->symbol] == '"')

@@ -53,7 +53,8 @@ static void		get_reg_ind(int *args, int i, int instruction, int arg_content)
 	ft_strdel(&tmp);
 }
 
-static void		get_dir(int instruction, int arg_content, int i)
+static void		get_dir(t_asm *asm_parsing, int instruction, int arg_content,
+																	int i)
 {
 	char *tmp;
 
@@ -90,7 +91,7 @@ void			get_args_codage(t_asm *asm_parsing, unsigned char *all_code,
 		if (args[i] == REG_CODE)
 			get_reg_ind(args, i, instruction, arg_content);
 		else if (args[i] == DIR_CODE)
-			get_dir(instruction, arg_content, i);
+			get_dir(asm_parsing, instruction, arg_content, i);
 		else if (args[i] == IND_CODE)
 			get_reg_ind(args, i, instruction, arg_content);
 		if (arg_size == -1)
@@ -100,14 +101,13 @@ void			get_args_codage(t_asm *asm_parsing, unsigned char *all_code,
 }
 
 void			get_args(t_asm *asm_parsing, unsigned char *all_code,
-														int instruction)
+									int instruction, unsigned char codage)
 {
 	int		arg;
 	int		arg_size;
 	int		arg_content;
 	char	*tmp;
 
-	arg = 0;
 	if (g_op_tab[instruction - 1].label_size == 0)
 		arg_size = 4;
 	else
