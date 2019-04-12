@@ -33,14 +33,14 @@ void	get_command(t_war *war, t_carriage *car)
 
 t_bool	args_ok(t_carriage *car)
 {
-	if (car->sizes[1] == 0 ||
-		(car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
+	if (car->size[1] == 0 ||
+		(car->op->args_type[0] | car->type[1]) != car->op->args_type[0])
 		return (false);
-	if (car->op->args > 1 && (car->sizes[2] == 0 ||
-		(car->op->args_type[1] | car->types[2]) != car->op->args_type[1]))
+	if (car->op->args > 1 && (car->size[2] == 0 ||
+		(car->op->args_type[1] | car->type[2]) != car->op->args_type[1]))
 		return (false);
-	if (car->op->args > 2 && (car->sizes[3] == 0 ||
-		(car->op->args_type[2] | car->types[3]) != car->op->args_type[2]))
+	if (car->op->args > 2 && (car->size[3] == 0 ||
+		(car->op->args_type[2] | car->type[3]) != car->op->args_type[2]))
 		return (false);
 	return (true);
 }

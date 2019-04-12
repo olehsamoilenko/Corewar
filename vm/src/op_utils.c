@@ -27,16 +27,16 @@ t_bool		get_value(t_carriage *car, int num, t_war *war, int index, int *res)
 {
 	int reg_num;
 
-	if (car->types[num] == T_DIR)
-		*res = car->params[num].integer;
-	else if (car->types[num] == T_REG)
+	if (car->type[num] == T_DIR)
+		*res = car->param[num].integer;
+	else if (car->type[num] == T_REG)
 	{
-		if (!correct_reg(reg_num = car->params[num].integer))
+		if (!correct_reg(reg_num = car->param[num].integer))
 			return (false);
 		else
 			*res = car->reg[reg_num].integer;
 	}
-	else if (car->types[num] == T_IND)
+	else if (car->type[num] == T_IND)
 	{
 		t_converter num;
 		index %= MEM_SIZE;

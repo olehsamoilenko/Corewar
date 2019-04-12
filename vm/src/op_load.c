@@ -18,7 +18,7 @@ void	op_live(t_carriage *car, t_war *war)
 
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
-	player = find_champ(car->params[1].integer, war);
+	player = find_champ(car->param[1].integer, war);
 	if (player != NULL)
 	{
 		player->last_live = war->cycle;
@@ -28,7 +28,7 @@ void	op_live(t_carriage *car, t_war *war)
 	war->all_lives += 1;
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P %4d | live %d\n", car->number, car->params[1].integer);
+		ft_printf("P %4d | live %d\n", car->number, car->param[1].integer);
 		if (player != NULL)
 		{
 			ft_printf("Player %d (%s) is said to be alive\n",
@@ -41,15 +41,15 @@ void	op_ld(t_carriage *car, t_war *war)
 {
 	int reg_num;
 
-	if (correct_reg(reg_num = car->params[2].integer))
+	if (correct_reg(reg_num = car->param[2].integer))
 	{
 		get_value(car, 1, war,
-			car->position + car->params[1].integer % IDX_MOD,
+			car->position + car->param[1].integer % IDX_MOD,
 			&car->reg[reg_num].integer);
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("P %4d | ld %d r%d\n", car->number,
-			car->reg[reg_num].integer, car->params[2].integer);
+			car->reg[reg_num].integer, car->param[2].integer);
 	}
 }
 
@@ -60,9 +60,9 @@ void	op_ldi(t_carriage *car, t_war *war)
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->params[1].integer,
+	if (get_value(car, 1, war, car->position + car->param[1].integer,
 		&value_1) && get_value(car, 2, war, 0, &value_2) &&
-						correct_reg(reg_num = car->params[3].integer))
+						correct_reg(reg_num = car->param[3].integer))
 	{
 		index = car->position + (value_1 + value_2) % IDX_MOD;
 		car->reg[reg_num] = get_from_map(war, index);
@@ -81,8 +81,8 @@ void	op_lld(t_carriage *car, t_war *war)
 {
 	int reg_num;
 
-	if (correct_reg(reg_num = car->params[2].integer) &&
-	get_value(car, 1, war, car->position + car->params[1].integer,
+	if (correct_reg(reg_num = car->param[2].integer) &&
+	get_value(car, 1, war, car->position + car->param[1].integer,
 	&car->reg[reg_num].integer))
 	{
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
@@ -99,9 +99,9 @@ void	op_lldi(t_carriage *car, t_war *war)
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->params[1].integer,
+	if (get_value(car, 1, war, car->position + car->param[1].integer,
 		&value_1) && get_value(car, 2, war, 0, &value_2) &&
-						correct_reg(reg_num = car->params[3].integer))
+						correct_reg(reg_num = car->param[3].integer))
 	{
 		index = car->position + value_1 + value_2;
 		car->reg[reg_num] = get_from_map(war, index);

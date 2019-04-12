@@ -62,30 +62,29 @@ int		define_type(int type)
 
 int		get_args(t_carriage *car, t_war *war)
 {
-	// t_car->op *op;
-
-	// op = car->op;
 	if (car->op->codage == true)
 	{
 		car->codage = war->map[(car->position + 1) % MEM_SIZE]->value;
-		car->types[1] = define_type(car->codage >> 6);
-		car->types[2] = define_type(car->codage >> 4 & 0b0011);
-		car->types[3] = define_type(car->codage >> 2 & 0b000011);
+		car->type[1] = define_type(car->codage >> 6);
+		car->type[2] = define_type(car->codage >> 4 & 0b0011);
+		car->type[3] = define_type(car->codage >> 2 & 0b000011);
 	}
 	else
 	{
-		car->types[1] = define_type(car->op->args_type[0]);
-		car->types[2] = define_type(car->op->args_type[1]);
-		car->types[3] = define_type(car->op->args_type[2]);
+		car->type[1] = define_type(car->op->args_type[0]);
+		car->type[2] = define_type(car->op->args_type[1]);
+		car->type[3] = define_type(car->op->args_type[2]);
 	}
-	car->sizes[1] = define_size(car->types[1], car->op->label);
-	car->sizes[2] = car->op->args > 1 ? define_size(car->types[2], car->op->label) : 0;
-	car->sizes[3] = car->op->args > 2 ? define_size(car->types[3], car->op->label) : 0;
-	car->params[1].integer = get_bytes(car->position + car->op->codage + 1,
-	car->sizes[1], car->types[1], war->map);
-	car->params[2].integer = get_bytes(car->position + car->op->codage + 1 +
-	car->sizes[1], car->sizes[2], car->types[2], war->map);
-	car->params[3].integer = get_bytes(car->position + car->op->codage + 1 +
-	car->sizes[1] + car->sizes[2], car->sizes[3], car->types[3], war->map);
-	return (car->op->codage + 1 + car->sizes[1] + car->sizes[2] + car->sizes[3]);
+	car->size[1] = define_size(car->type[1], car->op->label);
+	car->size[2] = car->op->args > 1 ?
+		define_size(car->type[2], car->op->label) : 0;
+	car->size[3] = car->op->args > 2 ?
+		define_size(car->type[3], car->op->label) : 0;
+	car->param[1].integer = get_bytes(car->position + car->op->codage + 1,
+	car->size[1], car->type[1], war->map);
+	car->param[2].integer = get_bytes(car->position + car->op->codage + 1 +
+	car->size[1], car->size[2], car->type[2], war->map);
+	car->param[3].integer = get_bytes(car->position + car->op->codage + 1 +
+	car->size[1] + car->size[2], car->size[3], car->type[3], war->map);
+	return (car->op->codage + 1 + car->size[1] + car->size[2] + car->size[3]);
 }

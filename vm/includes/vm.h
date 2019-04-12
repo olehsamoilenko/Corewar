@@ -76,9 +76,9 @@ typedef struct	s_carriage
 	t_bool				carry:1;
 	int					last_live;
 	int					codage;
-	int					types[MAX_ARGS_NUMBER];
-	int					sizes[MAX_ARGS_NUMBER];
-	t_converter			params[MAX_ARGS_NUMBER];
+	int					type[MAX_ARGS_NUMBER];
+	int					size[MAX_ARGS_NUMBER];
+	t_converter			param[MAX_ARGS_NUMBER];
 	struct s_carriage	*next;
 
 }				t_carriage;
