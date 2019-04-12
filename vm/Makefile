@@ -29,7 +29,9 @@ LIST =			main \
 				curses \
 				curses_print \
 				get_args \
-				next_cycle
+				next_cycle \
+				run_carriages \
+				check
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 OFF=\033[0m

@@ -188,6 +188,12 @@ t_bool		check_carry(int value);
 t_converter	get_from_map(t_war *war, int index);
 void		throw_on_map(t_converter value, t_war *war, t_carriage *car, int index);
 
+// run_carriages
+void	run_carriages(t_war *war);
+
+// check
+void	check(t_war *war);
+
 // op
 void		op_live(t_carriage *car, t_war *war);
 void		op_ld(t_carriage *car, t_war *war);
