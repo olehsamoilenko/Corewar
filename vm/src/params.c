@@ -22,41 +22,49 @@
 #define ERR_DUMP "Flag -dump needs a number"
 #define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
 
-void	usage()
+void	usage(void)
 {
-	ft_printf("Usage: ./corewar <[-n number] champion1.cor> <...> [-verbose] [-visual] [-dev] [-dump cycle_number]\n");
+	ft_printf("Usage: ./corewar <[-n number] champion1.cor> <...> [-verbose] \
+									[-visual] [-dev] [-dump cycle_number]\n");
 	system("leaks corewar | grep 'leaked bytes'");
 	exit(0);
 }
 
-t_bool		is_champion(char *name) // t_bool
+t_bool		is_champion(char *name)
 {
-	t_bool res;
-	char *cor = ft_strsub(name, ft_strlen(name) - 4, 4);
+	t_bool	res;
+	char	*cor;
+
+	cor = ft_strsub(name, ft_strlen(name) - 4, 4);
 	if (ft_strlen(name) > 4 && ft_strequ(cor, ".cor"))
 		res = true;
 	else
 		res = false;
 	ft_strdel(&cor);
 	return (res);
-
 }
 
 t_champion	*create_champion(char *file)
 {
-	t_champion *champ = ft_memalloc(sizeof(t_champion));
+	t_champion *champ;
+
+	champ = ft_memalloc(sizeof(t_champion));
 	champ->file = file;
 	return (champ);
 }
 
-
-void check_champs_number(t_war *war, int cur_champs)
+void	check_champs_number(t_war *war, int cur_champs)
 {
-	int i = -1;
+	int		i;
+	int		zero_count;
+	t_bool	nums[4];
+	int		j;
+
+	i = -1;
 	if (war->champs[0] == NULL)
 		error(ERR_NO_CHAMPS);
-	t_bool nums[4] = {false, false, false, false};
-	int zero_count = 0;
+	ft_bzero(nums, 16);
+	zero_count = 0;
 	while (++i < cur_champs)
 	{
 		if (war->champs[i]->number == 0)
@@ -73,7 +81,7 @@ void check_champs_number(t_war *war, int cur_champs)
 	{
 		if (war->champs[i]->number == 0)
 		{
-			int j = 0;
+			j = 0;
 			while (nums[j] != false)
 				j++;
 			war->champs[i]->number = j + 1;
@@ -88,7 +96,7 @@ void	get_n_args(int argc, char **argv, t_war *war, int *cur_champs, int *i)
 {
 	int n;
 
-	if (*i >= argc - 1 || !ft_isinteger(argv[*i + 1]) || 
+	if (*i >= argc - 1 || !ft_isinteger(argv[*i + 1]) ||
 		(n = ft_atoi(argv[*i + 1])) < 1 || n > MAX_PLAYERS)
 		error(ERR_N_NUMBER);
 	if (*i < argc - 2)
@@ -110,7 +118,8 @@ void	get_dump(int argc, char **argv, t_war *war, int *i)
 {
 	int n;
 
-	if (*i >= argc - 1 || !ft_isinteger(argv[*i + 1]) || (n = ft_atoi(argv[*i + 1])) < 0)
+	if (*i >= argc - 1 || !ft_isinteger(argv[*i + 1]) ||
+							(n = ft_atoi(argv[*i + 1])) < 0)
 		error(ERR_DUMP);
 	war->flag_dump = ft_atoi(argv[*i + 1]);
 	*i += 1;

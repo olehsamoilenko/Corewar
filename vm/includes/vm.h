@@ -70,6 +70,7 @@ typedef struct	s_war
 {
 	t_map_cell			*map[MEM_SIZE];
 	t_champion			*champs[MAX_PLAYERS + 1]; // champs[4] is NULL
+	int					amount_champs;
 
 	t_carriage			*carriages;
 	int					processes_counter; // for number of carriage
