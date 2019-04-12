@@ -3,6 +3,7 @@
 *.a
 *.o
 vm/corewar
+asm/asm
 vm/bin/my*
 vm/bin/origin*
 vm/check_values.txt

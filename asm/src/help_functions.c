@@ -53,7 +53,7 @@ t_instruction	*init_instruction_args(void)
 	return (instruction_args);
 }
 
-int				check_for_number(t_asm *asm_parsing, char *name)
+int				check_for_number(char *name)
 {
 	int i;
 

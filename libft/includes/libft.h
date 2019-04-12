@@ -18,6 +18,12 @@
 # include <unistd.h>
 # include "ft_printf.h"
 
+typedef enum		e_bool
+{
+	false,
+	true
+}					t_bool;
+
 typedef	struct		s_list
 {
 	void			*content;
@@ -91,7 +97,7 @@ int					ft_isspace(char c);
 int					ft_list_size(t_list *begin_list);
 int					ft_isprime(int num);
 void				ft_lstadd_back(t_list **alst, t_list *new);
-
+int					ft_isinteger(char *line);
 int					ft_printf(const char *format, ...);
 
 #endif

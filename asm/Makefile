@@ -3,74 +3,68 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vbrovenk <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: osamoile <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2019/03/09 14:05:55 by vbrovenk          #+#    #+#              #
-#    Updated: 2019/03/09 14:05:56 by vbrovenk         ###   ########.fr        #
+#    Created: 2018/08/01 15:53:40 by osamoile          #+#    #+#              #
+#    Updated: 2019/04/05 11:38:02 by sbasnaka         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = asm
-INCLUDE = asm.h
-LIBFT_INC = ./libft/includes
-LIBFT = libft/libft.a
-SRC =	main.c \
-		list_of_words.c \
-		list_of_labels.c \
-		parsing_lines.c \
-		op.c \
-		check_all.c \
-		error_managment.c \
-		convert_and_write.c \
-		free_all.c \
-		process_instruction.c \
-		process_labels.c \
-		cut_functions.c \
-		process_args.c \
-		write_args.c \
-		help_functions.c \
-		determine.c \
-		disassembler.c \
-		get_args.c \
-		read_and_parse.c
-
-OBJ = $(SRC:.c=.o)
-
-CFLAGS = -Wall -Wextra -Werror
-
+NAME =			asm
+HEADER =		./includes/asm.h
+INC =			-I ./includes \
+				-I ../libft/includes
+LIB =			-lft -L ../libft
+FLAGS =			#-Wall -Wextra -Werror
+LIST =			main \
+				list_of_words \
+				list_of_labels \
+				parsing_lines \
+				op \
+				check_all \
+				error_managment \
+				convert_and_write \
+				free_all \
+				process_instruction \
+				process_labels \
+				cut_functions \
+				process_args \
+				write_args \
+				help_functions \
+				determine \
+				disassembler \
+				get_args \
+				read_and_parse
+OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 OFF=\033[0m
-
-RED=\033[31m
-REDBOLD=\033[1;31m
-GREEN=\033[32m
-GREENBOLD=\033[1;32m
-YELLOW=\033[33m
-YELLOWBOLD=\033[1;33m
-PURPLE=\033[35m
+PURPLE=\033[0;35m
 PURPLEBOLD=\033[1;35m
-
+WHITE=\033[1;37m
 PURPLELIGHT=\033[38;2;102;102;255m
 
 all: $(NAME)
 
-$(NAME): lib $(OBJ)
-	@gcc $(OBJ) $(LIBFT) -o $(NAME)
-	@echo "$(PURPLEBOLD)ASM$(OFF)$(PURPLE) is ready$(OFF)"
+obj/%.o: src/%.c $(HEADER)
+	@gcc $(FLAGS) -c $< -o $@ $(INC)
+	@echo "$(PURPLELIGHT)Compiling $(WHITE)$< $(PURPLELIGHT)done$(OFF)"
 
-lib:
-	@make -C libft/
+$(NAME): ../libft/libft.a obj $(OBJ)
+	@gcc $(OBJ) -o $(NAME) $(LIB)
+	@echo "$(PURPLEBOLD)$(NAME)$(PURPLE) is ready$(OFF)"
 
-%.o: %.c $(INCLUDE)
-	@gcc -c $< -o $@ -I $(LIBFT_INC)
-	@echo "$(PURPLELIGHT)Compiling $(OFF)\033[1m$< $(OFF)$(PURPLELIGHT)done$(OFF)"
+../libft/libft.a:
+	@make -C ../libft
+
+obj:
+	@mkdir obj
 
 clean:
-	@make clean -C libft/
-	@rm -rf $(OBJ)
-
+	@make -C ../libft clean
+	@rm -rf obj
+	
 fclean: clean
-	@make fclean -C libft/
-	@rm -rf $(NAME)
+	@make -C ../libft fclean
+	@rm -f $(NAME)
 
 re: fclean all

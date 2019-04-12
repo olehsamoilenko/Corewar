@@ -79,6 +79,7 @@ SRC =	ft_memset.c \
 		ft_lstadd_back.c \
 		get_next_line.c \
 		ft_itoa_base.c \
+		ft_isinteger.c \
 		ft_printf.c
 
 SRC_PRINTF =	print_dec \
@@ -124,9 +125,9 @@ $(NAME): $(OBJ)
 clean:
 	@rm -rf $(OBJ)
 	@make clean -C ft_printf/
-	@echo "$(PURPLE)Objects $(REDBOLD)$(OBJ)$(OFF) $(PURPLE)have been destroyed.$(OFF)"
 
 fclean: clean
+	@make fclean -C ft_printf/
 	@rm -rf $(NAME)
 	@echo "$(PURPLE)Binary $(REDBOLD)$(NAME)$(OFF) $(PURPLE)have been destroyed.$(OFF)"
 

@@ -27,7 +27,7 @@ static void	check_code(t_asm *asm_parsing, unsigned char *all_code,
 	else
 	{
 		ft_printf("%s ", g_op_tab[instruction - 1].name);
-		get_args(asm_parsing, all_code, instruction, codage);
+		get_args(asm_parsing, all_code, instruction);
 	}
 }
 
@@ -38,6 +38,8 @@ static void	read_code(t_asm *asm_parsing, int size_code)
 	int				ret;
 	unsigned char	codage;
 
+	instruction = 0;
+	codage = '\0';
 	all_code = (unsigned char *)malloc(sizeof(char) * size_code);
 	ret = read(asm_parsing->fd, all_code, size_code);
 	if (ret != size_code)

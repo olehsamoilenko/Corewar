@@ -72,6 +72,8 @@ static void	assembler(const char *filename)
 	t_asm	*asm_parsing;
 	t_word	*current;
 
+	ret = 0;
+	line = NULL;
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		ft_arg_error("Can't open this file");
 	asm_parsing = init_asm(fd, filename);

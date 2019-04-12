@@ -18,7 +18,7 @@ void	check_label(t_asm *asm_parsing, char *substring, char *line, int start)
 
 	i = 0;
 	substring = take_word(++asm_parsing->symbol, line, start);
-	while (i < ft_strlen(substring) - 1)
+	while (i < (int)ft_strlen(substring) - 1)
 	{
 		if (ft_strchr(LABEL_CHARS, substring[i]) != NULL)
 			i++;
@@ -66,7 +66,7 @@ int		check_for_instruction(char *name)
 	return (0);
 }
 
-int		check_for_register(t_asm *asm_parsing, char *name)
+int		check_for_register(char *name)
 {
 	int	i;
 

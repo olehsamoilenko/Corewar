@@ -14,9 +14,12 @@
 
 int		ft_isinteger(char *line)
 {
-	int num = ft_atoi(line);
-	char *itoa = ft_itoa(num);
-	int res;
+	int		num;
+	char	*itoa;
+	int		res;
+
+	num = ft_atoi(line);
+	itoa = ft_itoa(num);
 	if (ft_strequ(itoa, line))
 		res = 1;
 	else

@@ -43,7 +43,6 @@ all: $(OBJ)
 
 clean:
 	@rm -rf $(OBJ)
-	@echo "$(RED)Objects $(REDBOLD)$(OBJ)$(OFF) $(RED)have been destroyed.$(OFF)"
 
 fclean: clean
 	@rm -rf $(NAME)

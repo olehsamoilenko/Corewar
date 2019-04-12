@@ -145,7 +145,7 @@ void			check_for_doubles(t_asm *asm_parsing,
 												char *line, char *substring);
 void			check_all_lines(t_asm *asm_parsing,
 												int ret, int fd, char *line);
-int				check_for_register(t_asm *asm_parsing, char *name);
+int				check_for_register(char *name);
 int				check_for_instruction(char *name);
 
 /*
@@ -220,7 +220,7 @@ void			ignore_comment(t_asm *asm_parsing, char *line);
 char			*take_word(int end, char *line, int start);
 int				find_instruction(t_word *current);
 t_instruction	*init_instruction_args(void);
-int				check_for_number(t_asm *asm_parsing, char *name);
+int				check_for_number(char *name);
 
 /*
 **	determine.c
@@ -242,7 +242,7 @@ int				parse_bytecode(t_asm *asm_parsing, unsigned char *all_code,
 void			get_args_codage(t_asm *asm_parsing, unsigned char *all_code,
 										int instruction, unsigned char codage);
 void			get_args(t_asm *asm_parsing, unsigned char *all_code,
-										int instruction, unsigned char codage);
+														int instruction);
 /*
 **	read_and_parse.c
 */

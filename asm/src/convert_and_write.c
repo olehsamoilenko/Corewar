@@ -16,7 +16,6 @@ void	write_int_to_byte(t_asm *asm_parsing, int nbr, int size)
 {
 	int		i;
 	int		count_bits;
-	char	*temp;
 	int		position;
 
 	count_bits = 0;
