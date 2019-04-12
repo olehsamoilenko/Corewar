@@ -34,16 +34,19 @@ void	define_colors(void)
 
 void	init_curses(t_war *war)
 {
-	initscr();
-	curs_set(false);
-	noecho();
-	nodelay(stdscr, true);
-	refresh();
-	define_colors();
-	war->win_mem = newwin(68, 197, 0, 0);
-	war->win_info = newwin(68, 60, 0, 196);
-	wrefresh(war->win_mem);
-	wrefresh(war->win_info);
+	if (war->flag_visual)
+	{
+		initscr();
+		curs_set(false);
+		noecho();
+		nodelay(stdscr, true);
+		refresh();
+		define_colors();
+		war->win_mem = newwin(68, 197, 0, 0);
+		war->win_info = newwin(68, 60, 0, 196);
+		wrefresh(war->win_mem);
+		wrefresh(war->win_info);
+	}
 }
 
 void	over_over(t_war *war)

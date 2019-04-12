@@ -12,15 +12,7 @@
 
 #include "vm.h"
 
-#define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
-#define ERR_NO_CHAMPS "There are any champions present"
-#define ERR_N_NUMBER "Flag -n needs a number in range of 1 to 4"
-#define ERR_N_CHAMP "Flag -n needs a champion"
-#define ERR_SAME_N "Duplication of champion's number is forbidden"
-#define ERR_CHAMP_FORMAT "Champion format must be 'name.cor'"
-#define ERR_BIG_N "Champion's number exceeds their amount"
-#define ERR_DUMP "Flag -dump needs a number"
-#define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
+
 
 void	usage(void)
 {

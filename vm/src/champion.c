@@ -143,6 +143,18 @@ void	read_exec_code(int fd, t_champion *champ, t_war *war)
 		error(ERR_SIZE_DIFFERS);
 }
 
+void	throw_basic_carriages(t_war *war)
+{
+	int i;
+
+	i = -1;
+	while (war->champs[++i] != NULL)
+	{
+		t_carriage *car = create_carriage(war, war->champs[i]);
+		push_carriage(car, &war->carriages);
+	}
+}
+
 void	parse_champions(t_war *war)
 {
 	int fd;
@@ -169,4 +181,5 @@ void	parse_champions(t_war *war)
 		war->last_live = champ;
 		close(fd);
 	}
+	throw_basic_carriages(war);
 }
