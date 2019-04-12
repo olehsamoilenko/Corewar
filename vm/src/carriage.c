@@ -23,7 +23,7 @@ t_carriage	*create_carriage(t_war *war, t_champion *creator)
 	t_carriage	*car;
 	int			mem_delta;
 
-	mem_delta = MEM_SIZE / chmps_count(war->champs);
+	mem_delta = MEM_SIZE / war->amount_champs;
 	car = ft_memalloc(sizeof(t_carriage));
 	car->position = mem_delta * (creator->number - 1);
 	car->creator = creator;

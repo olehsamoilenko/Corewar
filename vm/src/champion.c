@@ -51,7 +51,7 @@ void		read_exec_code(int fd, t_champion *champ, t_war *war)
 	int i;
 	unsigned char tmp;
 
-	int mem_delta = MEM_SIZE / chmps_count(war->champs);
+	int mem_delta = MEM_SIZE / war->amount_champs;
 	int mem_start = (champ->number - 1) * mem_delta;
 
 

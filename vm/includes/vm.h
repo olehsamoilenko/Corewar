@@ -160,7 +160,6 @@ typedef struct	s_op
 
 // main
 void		error(char *message);
-int		chmps_count(t_champion **champs);
 
 // params
 void		parse_params(int argc, char **argv, t_war *war);

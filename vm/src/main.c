@@ -20,15 +20,6 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-int		chmps_count(t_champion **champs)
-{
-	int count = 0;
-	int i = -1;
-	while (champs[++i] != NULL)
-		count++;
-	return (count);
-}
-
 void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
 {
 	int			i;
