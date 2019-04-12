@@ -29,9 +29,10 @@ int		chmps_count(t_champion **champs)
 	return (count);
 }
 
-void	introduce(t_champion **champs, t_bool flag_visual) // fix
+void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
 {
-	int i;
+	int			i;
+	t_champion	*current;
 
 	if (!flag_visual)
 	{
@@ -39,9 +40,10 @@ void	introduce(t_champion **champs, t_bool flag_visual) // fix
 		ft_printf("Introducing contestants...\n");
 		while (champs[++i])
 		{
+			current = find_champ(-(i + 1), war);
 			ft_printf("* Player %d, weighing %d bytes, \"%s\" (\"%s\") !\n",
-				champs[i]->number, champs[i]->header->prog_size,
-				champs[i]->header->prog_name, champs[i]->header->comment);
+				i + 1, current->header->prog_size,
+				current->header->prog_name, current->header->comment);
 		}
 	}
 }
