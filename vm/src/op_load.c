@@ -14,9 +14,11 @@
 
 void	op_live(t_carriage *car, t_war *war)
 {
+	t_champion *player;
+
 	car->last_live = war->cycle;
 	war->map[car->position]->cycles_live = war->cycle;
-	t_champion *player = find_champ(car->params[1].integer, war);
+	player = find_champ(car->params[1].integer, war);
 	if (player != NULL)
 	{
 		player->last_live = war->cycle;
@@ -58,15 +60,18 @@ void	op_ldi(t_carriage *car, t_war *war)
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->params[1].integer, &value_1) &&
-	get_value(car, 2, war, 0, &value_2) && correct_reg(reg_num = car->params[3].integer))
+	if (get_value(car, 1, war, car->position + car->params[1].integer,
+		&value_1) && get_value(car, 2, war, 0, &value_2) &&
+						correct_reg(reg_num = car->params[3].integer))
 	{
 		index = car->position + (value_1 + value_2) % IDX_MOD;
 		car->reg[reg_num] = get_from_map(war, index);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
-			ft_printf("       | -> load from %d + %d = %d (with pc and mod %d)\n",
+			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1,
+													value_2, reg_num);
+			ft_printf("       | -> load from %d + %d = %d (with pc \
+														and mod %d)\n",
 				value_1, value_2, value_1 + value_2, index);
 		}
 	}
@@ -94,15 +99,17 @@ void	op_lldi(t_carriage *car, t_war *war)
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->params[1].integer, &value_1) &&
-	get_value(car, 2, war, 0, &value_2) && correct_reg(reg_num = car->params[3].integer))
+	if (get_value(car, 1, war, car->position + car->params[1].integer,
+		&value_1) && get_value(car, 2, war, 0, &value_2) &&
+						correct_reg(reg_num = car->params[3].integer))
 	{
 		index = car->position + value_1 + value_2;
 		car->reg[reg_num] = get_from_map(war, index);
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1, value_2, reg_num);
+			ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1,
+														value_2, reg_num);
 			ft_printf("       | -> load from %d + %d = %d (with pc %d)\n",
 				value_1, value_2, value_1 + value_2, index);
 		}

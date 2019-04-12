@@ -57,8 +57,10 @@ void	op_sti(t_carriage *car, t_war *war)
 		throw_on_map(car->reg[r1], war, car, index);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, value_2, value_3);
-			ft_printf("       | -> store to %d + %d = %d (with pc and mod %d)\n",
+			ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, value_2,
+																	value_3);
+			ft_printf("       | -> store to %d + %d = %d (with pc and \
+																	mod %d)\n",
 				value_2, value_3, value_2 + value_3, index);
 		}
 	}
@@ -66,58 +68,63 @@ void	op_sti(t_carriage *car, t_war *war)
 
 void	op_fork(t_carriage *car, t_war *war)
 {
-	t_carriage *new = create_carriage(war, car->creator);
+	int			i;
+	t_carriage	*new;
+
+	new = create_carriage(war, car->creator);
 	new->position = car->position + car->params[1].integer % IDX_MOD;
 	while (new->position < 0)
 		new->position += MEM_SIZE;
 	new->position %= MEM_SIZE;
 	push_carriage(new, &war->carriages);
-	int i = -1;
+	i = -1;
 	while (++i <= REG_NUMBER)
 		new->reg[i] = car->reg[i];
 	new->last_live = car->last_live;
 	new->carry = car->carry;
-
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 		ft_printf("P %4d | fork %d (%d)\n", car->number,
-		car->params[1].integer, car->position + car->params[1].integer % IDX_MOD);
+		car->params[1].integer, car->position +
+									car->params[1].integer % IDX_MOD);
 }
 
 void	op_lfork(t_carriage *car, t_war *war)
 {
-	t_carriage *new = create_carriage(war, car->creator);
+	t_carriage	*new;
+	int			i;
+
+	new = create_carriage(war, car->creator);
 	new->position = car->position + car->params[1].integer;
 	while (new->position < 0)
 		new->position += MEM_SIZE;
 	new->position %= MEM_SIZE;
 	push_carriage(new, &war->carriages);
-	int i = -1;
+	i = -1;
 	while (++i <= REG_NUMBER)
 		new->reg[i] = car->reg[i];
 	new->last_live = car->last_live;
 	new->carry = car->carry;
-
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
-		ft_printf("P %4d | lfork %d (%d)\n", car->number, car->params[1].integer,
-			car->position + car->params[1].integer);
+		ft_printf("P %4d | lfork %d (%d)\n", car->number,
+			car->params[1].integer, car->position + car->params[1].integer);
 	}
 }
 
 void	op_zjmp(t_carriage *car, t_war *war)
 {
 	char *jump_status;
-	
+
 	if (car->carry == true)
 	{
-		car->position = (car->position + (car->params[1].integer % IDX_MOD)) % MEM_SIZE;
+		car->position = (car->position + (car->params[1].integer % IDX_MOD))
+																% MEM_SIZE;
 		if (car->position < 0)
 			car->position += MEM_SIZE;
 		jump_status = "OK";
 	}
 	else
 		jump_status = "FAILED";
-
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 		ft_printf("P %4d | zjmp %d %s\n", car->number,
 		car->params[1].integer, jump_status);
