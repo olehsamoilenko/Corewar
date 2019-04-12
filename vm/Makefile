@@ -28,7 +28,8 @@ LIST =			main \
 				verbose \
 				curses \
 				curses_print \
-				tmp
+				get_args \
+				next_cycle
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 OFF=\033[0m

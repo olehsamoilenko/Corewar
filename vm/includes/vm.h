@@ -25,6 +25,16 @@
 # define KEY_W 119
 # define KEY_E 101
 
+# define ERR_MANY_CHAMPS "Virtual machine allows up to 4 champions"
+# define ERR_NO_CHAMPS "There are any champions present"
+# define ERR_N_NUMBER "Flag -n needs a number in range of 1 to 4"
+# define ERR_N_CHAMP "Flag -n needs a champion"
+# define ERR_SAME_N "Duplication of champion's number is forbidden"
+# define ERR_CHAMP_FORMAT "Champion format must be 'name.cor'"
+# define ERR_BIG_N "Champion's number exceeds their amount"
+# define ERR_DUMP "Flag -dump needs a positive number"
+# define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
+
 typedef union	u_converter
 {
 	int				integer;
@@ -162,6 +172,7 @@ void		show_carriages(t_war *war);
 // verbose
 void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
 void		dump(t_war *war);
+void	verbose_won(t_war *war);
 
 // curses
 void		print_info(t_war *war);
@@ -195,13 +206,11 @@ void		op_lldi(t_carriage *car, t_war *war);
 void		op_lfork(t_carriage *car, t_war *war);
 void		op_aff(t_carriage *car, t_war *war);
 
-// tmp
-// void		show_args(t_war *war, t_carriage *car);
-// void		curriage_info(t_carriage *car, t_war *war);
-// char		*define_type(int type);
-// void		show_union(union converter a);
-// void		reg_info(union converter *reg, t_war *war);
-// void		print_champions(t_champion *champs[]);
+// get_args
+int			get_args(t_carriage *car, t_war *war);
+
+// next_cycle
+t_bool	next_cycle(t_war *war);
 
 static t_op		g_op_tab[] =  // [17]
 {
