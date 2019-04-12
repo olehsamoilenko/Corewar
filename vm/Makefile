@@ -48,7 +48,7 @@ $(NAME): ../libft/libft.a obj $(OBJ)
 	@echo "$(PURPLEBOLD)$(NAME)$(PURPLE) is ready$(OFF)"
 
 ../libft/libft.a:
-	make -C ../libft
+	@make -C ../libft
 
 obj:
 	@mkdir obj

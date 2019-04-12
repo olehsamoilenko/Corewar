@@ -116,7 +116,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	@make -C ft_printf/
 	@ar rc $(NAME) $(OBJ) $(OBJ_PRINTF)
-	@echo "$(YELLOW)libft.a $(YELLOWBOLD)-(OK)- $(OFF)" 
+	@echo "$(PURPLEBOLD)libft$(OFF)$(PURPLE) is ready$(OFF)" 
 
 %.o: %.c
 	@gcc $(CFLAGS) -c $< -o $@ -I $(INC_DIR)
@@ -129,6 +129,6 @@ clean:
 fclean: clean
 	@make fclean -C ft_printf/
 	@rm -rf $(NAME)
-	@echo "$(PURPLE)Binary $(REDBOLD)$(NAME)$(OFF) $(PURPLE)have been destroyed.$(OFF)"
+	@echo "$(RED)Binary $(REDBOLD)$(NAME)$(OFF) $(RED)have been destroyed.$(OFF)"
 
 re: fclean all
