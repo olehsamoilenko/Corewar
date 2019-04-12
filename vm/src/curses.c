@@ -62,15 +62,18 @@ void	over_curses(t_war *war)
 {
 	int key;
 
-	print_memory(war);
-	print_info(war);
-	mvwaddstr(war->win_info, war->last_line + 4, 3, "* WINNER * - ");
-	wattron(war->win_info, COLOR_PAIR(war->last_live->number));
-	mvwaddstr(war->win_info, war->last_line + 4, 16,
-								war->last_live->header->prog_name);
-	wattroff(war->win_info, A_COLOR);
-	wrefresh(war->win_info);
-	while ((key = getch()) != KEY_ESC)
-		;
-	over_over(war);
+	if (war->flag_visual)
+	{
+		print_memory(war);
+		print_info(war);
+		mvwaddstr(war->win_info, war->last_line + 4, 3, "* WINNER * - ");
+		wattron(war->win_info, COLOR_PAIR(war->last_live->number));
+		mvwaddstr(war->win_info, war->last_line + 4, 16,
+									war->last_live->header->prog_name);
+		wattroff(war->win_info, A_COLOR);
+		wrefresh(war->win_info);
+		while ((key = getch()) != KEY_ESC)
+			;
+		over_over(war);
+	}
 }

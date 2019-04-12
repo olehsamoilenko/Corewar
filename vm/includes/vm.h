@@ -34,6 +34,13 @@
 # define ERR_BIG_N "Champion's number exceeds their amount"
 # define ERR_DUMP "Flag -dump needs a positive number"
 # define ERR_VER_VIS "Combination of -verbose and -visual is forbidden"
+# define ERR_OPEN_CHAMP "Can't open the champion"
+# define ERR_MAGIC_HEADER "Magic header is incorrect"
+# define ERR_NULL_AFTER_NAME "There aren't empty octets after the name"
+# define ERR_NULL_AFTER_COMMENT "There aren't empty octets after the comment"
+# define ERR_BIG_CHAMP "Too big champion"
+# define ERR_SIZE_DIFFERS "File has a code size that differ from what its header says"
+# define ERR_SMALL_FILE "File is too small to be a champion"
 
 typedef union	u_converter
 {
@@ -170,7 +177,8 @@ t_war		*init();
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
 t_carriage	*create_carriage(t_war *war, t_champion *creator);
-void		show_carriages(t_war *war);
+// void		show_carriages(t_war *war);
+void	throw_basic_carriages(t_war *war);
 
 // verbose
 void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
@@ -196,6 +204,13 @@ void	run_carriages(t_war *war);
 
 // check
 void	check(t_war *war);
+
+// read_champ
+void	read_comment(int fd, char *comment);
+int		read_exec_code_size(int fd);
+int		read_null(int fd);
+void	read_name(int fd, char *name);
+int	read_magic_header(int fd);
 
 // op
 void		op_live(t_carriage *car, t_war *war);

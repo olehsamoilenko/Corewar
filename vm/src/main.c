@@ -52,12 +52,12 @@ int		main(int argc, char **argv)
 
 	parse_params(argc, argv, war = init());
 	parse_champions(war);
+	throw_basic_carriages(war);
 	introduce(war->champs, war->flag_visual);
 	init_curses(war);
 	if (war->flag_dump == 0)
 		dump(war);
 	while (true)
-	{
 		if (next_cycle(war))
 		{
 			run_carriages(war);
@@ -70,8 +70,6 @@ int		main(int argc, char **argv)
 			if (war->cycle == war->flag_dump)
 				dump(war);
 		}
-	}
-	if (war->flag_visual)
-		over_curses(war);
+	over_curses(war);
 	return (0);
 }

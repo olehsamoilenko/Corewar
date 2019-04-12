@@ -31,7 +31,8 @@ LIST =			main \
 				get_args \
 				next_cycle \
 				run_carriages \
-				check
+				check \
+				read_champ
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 OFF=\033[0m

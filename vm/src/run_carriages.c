@@ -12,7 +12,7 @@
 
 #include "vm.h"
 
-t_op		*get_command(int pos, t_map_cell **map)
+t_op	*get_command(int pos, t_map_cell **map)
 {
 	int i;
 
@@ -27,7 +27,8 @@ t_op		*get_command(int pos, t_map_cell **map)
 
 t_bool	args_ok(t_carriage *car)
 {
-	if (car->sizes[1] == 0 || (car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
+	if (car->sizes[1] == 0 ||
+		(car->op->args_type[0] | car->types[1]) != car->op->args_type[0])
 		return (false);
 	if (car->op->args > 1 && (car->sizes[2] == 0 ||
 		(car->op->args_type[1] | car->types[2]) != car->op->args_type[1]))
@@ -40,23 +41,22 @@ t_bool	args_ok(t_carriage *car)
 
 void	run_carriages(t_war *war)
 {
-	t_carriage *car;
+	t_carriage	*car;
+	int			delta;
 
 	car = war->carriages;
 	while (car)
 	{
 		if (car->op == NULL)
 		{
-			car->op = get_command(car->position, war->map);
-			if (car->op)
+			if ((car->op = get_command(car->position, war->map)))
 				car->cooldown = car->op->cooldown;
 			else
 				car->position = (car->position + 1) % MEM_SIZE;
 		}
-		car->cooldown--;
-		if (car->op && car->cooldown == 0)
+		if (car->op && --car->cooldown == 0)
 		{
-			int delta = get_args(car, war);
+			delta = get_args(car, war);
 			if (args_ok(car))
 				car->op->func(car, war);
 			if (car->carry == false || car->op->code != 0x09)
