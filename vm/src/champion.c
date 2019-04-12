@@ -21,6 +21,29 @@
 #define ERR_SIZE_DIFFERS "File has a code size that differ from what its header says"
 #define ERR_SMALL_FILE "File is too small to be a champion"
 
+t_bool		is_champion(char *name)
+{
+	t_bool	res;
+	char	*cor;
+
+	cor = ft_strsub(name, ft_strlen(name) - 4, 4);
+	if (ft_strlen(name) > 4 && ft_strequ(cor, ".cor"))
+		res = true;
+	else
+		res = false;
+	ft_strdel(&cor);
+	return (res);
+}
+
+t_champion	*create_champion(char *file)
+{
+	t_champion *champ;
+
+	champ = ft_memalloc(sizeof(t_champion));
+	champ->file = file;
+	return (champ);
+}
+
 t_champion	*find_champ(int number, t_war *war)
 {
 	int i = -1;

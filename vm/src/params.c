@@ -30,40 +30,14 @@ void	usage(void)
 	exit(0);
 }
 
-t_bool		is_champion(char *name)
-{
-	t_bool	res;
-	char	*cor;
-
-	cor = ft_strsub(name, ft_strlen(name) - 4, 4);
-	if (ft_strlen(name) > 4 && ft_strequ(cor, ".cor"))
-		res = true;
-	else
-		res = false;
-	ft_strdel(&cor);
-	return (res);
-}
-
-t_champion	*create_champion(char *file)
-{
-	t_champion *champ;
-
-	champ = ft_memalloc(sizeof(t_champion));
-	champ->file = file;
-	return (champ);
-}
-
-void	check_champs_number(t_war *war, int cur_champs)
+t_bool	*check_errors(t_war *war, int cur_champs)
 {
 	int		i;
 	int		zero_count;
-	t_bool	nums[4];
-	int		j;
+	t_bool	*nums;
 
 	i = -1;
-	if (war->champs[0] == NULL)
-		error(ERR_NO_CHAMPS);
-	ft_bzero(nums, 16);
+	nums = ft_memalloc(sizeof(t_bool) * 4);
 	zero_count = 0;
 	while (++i < cur_champs)
 	{
@@ -76,6 +50,18 @@ void	check_champs_number(t_war *war, int cur_champs)
 		else
 			nums[war->champs[i]->number - 1] = true;
 	}
+	return (nums);
+}
+
+void	check_champs_number(t_war *war, int cur_champs)
+{
+	int		i;
+	t_bool	*nums;
+	int		j;
+
+	if (war->champs[0] == NULL)
+		error(ERR_NO_CHAMPS);
+	nums = check_errors(war, cur_champs);
 	i = -1;
 	while (++i < cur_champs)
 	{
@@ -90,9 +76,10 @@ void	check_champs_number(t_war *war, int cur_champs)
 	}
 	if (war->flag_verbose && war->flag_visual)
 		error(ERR_VER_VIS);
+	free(nums);
 }
 
-void	get_n_args(int argc, char **argv, t_war *war, int *cur_champs, int *i)
+void	get_n_args(int argc, char **argv, t_war *war, int *i)
 {
 	int n;
 
@@ -103,11 +90,11 @@ void	get_n_args(int argc, char **argv, t_war *war, int *cur_champs, int *i)
 	{
 		if (!is_champion(argv[*i + 2]))
 			error(ERR_CHAMP_FORMAT);
-		if (*cur_champs == 4)
+		if (war->amount_champs == 4)
 			error(ERR_MANY_CHAMPS);
-		war->champs[*cur_champs] = create_champion(argv[*i + 2]);
-		war->champs[*cur_champs]->number = n;
-		*cur_champs += 1;
+		war->champs[war->amount_champs] = create_champion(argv[*i + 2]);
+		war->champs[war->amount_champs]->number = n;
+		war->amount_champs += 1;
 		*i += 2;
 	}
 	else
@@ -127,17 +114,15 @@ void	get_dump(int argc, char **argv, t_war *war, int *i)
 
 void	parse_params(int argc, char **argv, t_war *war)
 {
-	int cur_champs;
 	int i;
 
-	cur_champs = 0;
 	i = 0;
 	if (argc == 1)
 		usage();
 	while (++i < argc)
 	{
 		if (ft_strequ(argv[i], "-n"))
-			get_n_args(argc, argv, war, &cur_champs, &i);
+			get_n_args(argc, argv, war, &i);
 		else if (ft_strequ(argv[i], "-verbose"))
 			war->flag_verbose = true;
 		else if (ft_strequ(argv[i], "-visual"))
@@ -148,10 +133,10 @@ void	parse_params(int argc, char **argv, t_war *war)
 			usage();
 		else
 		{
-			if (cur_champs == 4)
+			if (war->amount_champs == 4)
 				error(ERR_MANY_CHAMPS);
-			war->champs[cur_champs++] = create_champion(argv[i]);
+			war->champs[war->amount_champs++] = create_champion(argv[i]);
 		}
 	}
-	check_champs_number(war, cur_champs);
+	check_champs_number(war, war->amount_champs);
 }

@@ -151,6 +151,8 @@ void		parse_params(int argc, char **argv, t_war *war);
 // champion
 void	parse_champions(t_war *war);
 t_champion	*find_champ(int number, t_war *war);
+t_bool		is_champion(char *name);
+t_champion	*create_champion(char *file);
 
 // init
 t_war		*init();
