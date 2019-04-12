@@ -170,9 +170,6 @@ t_champion	*find_champ(int number, t_war *war);
 t_bool		is_champion(char *name);
 t_champion	*create_champion(char *file);
 
-// init
-t_war		*init();
-
 // carriage
 void		push_carriage(t_carriage *car, t_carriage **list);
 t_carriage	*create_carriage(t_war *war, t_champion *creator);
@@ -183,6 +180,7 @@ void	throw_basic_carriages(t_war *war);
 void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
 void		dump(t_war *war);
 void	verbose_won(t_war *war);
+void	introduce(t_war *war, t_champion **champs, t_bool flag_visual);
 
 // curses
 void		print_info(t_war *war);

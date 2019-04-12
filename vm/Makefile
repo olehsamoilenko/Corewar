@@ -23,7 +23,6 @@ LIST =			main \
 				op_logic \
 				params \
 				champion \
-				init \
 				carriage \
 				verbose \
 				curses \

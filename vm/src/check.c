@@ -27,8 +27,8 @@ void	remove_start(t_carriage **list, t_war *war)
 		*list = (*list)->next;
 		free(del);
 	}
-
 }
+
 void	remove_carriages(t_carriage **list, t_war *war)
 {
 	t_carriage *del;
@@ -38,11 +38,13 @@ void	remove_carriages(t_carriage **list, t_war *war)
 	tmp = *list;
 	while (tmp && tmp->next)
 	{
-		if (war->cycle - tmp->next->last_live >= war->cycles_to_die || war->cycles_to_die <= 0)
+		if (war->cycle - tmp->next->last_live >= war->cycles_to_die ||
+													war->cycles_to_die <= 0)
 		{
 			if (war->flag_verbose && war->cycle >= war->flag_dump)
 				ft_printf("Process %d hasn't lived for %d cycles (CTD %d)\n",
-					tmp->next->number, war->cycle - tmp->next->last_live, war->cycles_to_die);	
+					tmp->next->number, war->cycle - tmp->next->last_live,
+														war->cycles_to_die);
 			del = tmp->next;
 			tmp->next = tmp->next->next;
 			free(del);
@@ -51,6 +53,7 @@ void	remove_carriages(t_carriage **list, t_war *war)
 			tmp = tmp->next;
 	}
 }
+
 void	check(t_war *war)
 {
 	war->cycles_after_check += 1;
