@@ -12,17 +12,23 @@
 
 #include "vm.h"
 
-t_op	*get_command(int pos, t_map_cell **map)
+void	get_command(t_war *war, t_carriage *car)
 {
 	int i;
 
-	i = -1;
-	while (g_op_tab[++i].name)
+	if (car->op == NULL)
 	{
-		if (g_op_tab[i].code == map[pos]->value)
-			return (&g_op_tab[i]);
+		i = -1;
+		while (g_op_tab[++i].name)
+		{
+			if (g_op_tab[i].code == war->map[car->position]->value)
+				car->op = &g_op_tab[i];
+		}
+		if (car->op)
+			car->cooldown = car->op->cooldown;
+		else
+			car->position = (car->position + 1) % MEM_SIZE;
 	}
-	return (NULL);
 }
 
 t_bool	args_ok(t_carriage *car)
@@ -47,13 +53,7 @@ void	run_carriages(t_war *war)
 	car = war->carriages;
 	while (car)
 	{
-		if (car->op == NULL)
-		{
-			if ((car->op = get_command(car->position, war->map)))
-				car->cooldown = car->op->cooldown;
-			else
-				car->position = (car->position + 1) % MEM_SIZE;
-		}
+		get_command(war, car);
 		if (car->op && --car->cooldown == 0)
 		{
 			delta = get_args(car, war);
