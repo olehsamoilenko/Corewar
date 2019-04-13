@@ -102,7 +102,6 @@ int			main(int argc, char const *argv[])
 		if (ft_strlen(argv[2]) < 5)
 			ft_arg_error("Missed filename");
 		disassembler(argv[2]);
-		system("leaks asm");
 		return (0);
 	}
 	extention = ft_strdup(ft_strrchr(argv[1], '.'));

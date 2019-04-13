@@ -18,10 +18,10 @@ static int		size_arg(int argument, int instruction)
 		return (1);
 	else if (argument == DIR_CODE)
 	{
-		if (g_op_tab[instruction].label_size == 1)
-			return (2);
-		else
+		if (g_op_tab[instruction - 1].label_size == 0)
 			return (4);
+		else
+			return (2);
 	}
 	else if (argument == IND_CODE)
 		return (2);
