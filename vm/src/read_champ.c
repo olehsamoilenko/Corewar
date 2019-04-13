@@ -12,11 +12,11 @@
 
 #include "vm.h"
 
-int	read_magic_header(int fd)
+int		read_magic_header(int fd)
 {
-	int i;
-	t_converter header;
-	unsigned char tmp;
+	int				i;
+	t_converter		header;
+	unsigned char	tmp;
 
 	header.integer = COREWAR_EXEC_MAGIC;
 	i = -1;
@@ -44,9 +44,9 @@ void	read_name(int fd, char *name)
 
 int		read_null(int fd)
 {
-	int i;
-	int res;
-	unsigned int tmp;
+	int				i;
+	int				res;
+	unsigned int	tmp;
 
 	i = -1;
 	res = read(fd, &tmp, 4);
@@ -57,24 +57,24 @@ int		read_null(int fd)
 
 int		read_exec_code_size(int fd)
 {
-	t_converter size;
-	int i = -1;
-	int res;
+	t_converter	size;
+	int			i;
+	int			res;
 
 	res = 0;
 	i = -1;
 	while (++i < 4)
 		res += read(fd, &size.bytes[3 - i], 1);
-	// ft_printf("%x\n", size.integer);
 	return (size.integer);
 }
 
 void	read_comment(int fd, char *comment)
 {
-	int i = -1;
+	int i;
 	int res;
 
 	res = 0;
+	i = -1;
 	while (++i < COMMENT_LENGTH)
 		res += read(fd, &comment[i], 1);
 	if (res != COMMENT_LENGTH)

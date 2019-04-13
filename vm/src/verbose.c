@@ -34,28 +34,24 @@ void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
 void	adv(t_war *war, int instr_len, t_carriage *car)
 {
 	int j;
+
 	if (war->flag_verbose && war->cycle >= war->flag_dump)
 	{
 		ft_printf("ADV %d (", instr_len);
-		
 		if (car->position == 0)
 			ft_printf("0x0000");
 		else
 			ft_printf("%#06x", car->position);
-
 		ft_printf(" -> ");
-		
 		if (car->position + instr_len == 0)
 			ft_printf("0x0000");
 		else
 			ft_printf("%#06x", car->position + instr_len);
-		
 		ft_printf(") ");
 		j = -1;
 		while (++j < instr_len)
 			ft_printf("%02x ", war->map[(car->position + j) % MEM_SIZE]->value);
 		ft_printf("\n");
-
 	}
 }
 
@@ -69,11 +65,11 @@ void	verbose_won(t_war *war)
 	}
 }
 
-
 void	dump(t_war *war)
 {
-	int i = -1;
+	int i;
 
+	i = -1;
 	if (!war->flag_visual && !war->flag_verbose)
 	{
 		while (++i < MEM_SIZE)
@@ -85,7 +81,6 @@ void	dump(t_war *war)
 				else
 					ft_printf("\n%#06x : ", i);
 			}
-				
 			ft_printf("%02x ", war->map[i]->value);
 		}
 		ft_printf("\n");
