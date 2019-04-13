@@ -87,7 +87,8 @@ void		parse_champions(t_war *war)
 		if (!read_null(fd))
 			error(ERR_NULL_AFTER_COMMENT);
 		read_exec_code(fd, war->champs[i], war);
-		war->last_live = war->champs[i];
+		if (war->champs[i]->number == war->amount_champs)
+			war->last_live = war->champs[i];
 		close(fd);
 	}
 }
