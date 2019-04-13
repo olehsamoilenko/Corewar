@@ -1,0 +1,11 @@
+1)
+
+cc2:
+ live live, live, live, ld, fork, %4342342
+
+
+2)
+ sti  r1, %:cc2, %hehrehehehre
+
+3)
+ sti  r1, %r1, r1

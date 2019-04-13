@@ -91,6 +91,7 @@ int			main(int argc, char const *argv[])
 
 	if (argc != 2 && argc != 3)
 		ft_arg_error("Usage: ./asm [-d] champion.s\n\t-d\tdisassembler");
+	g_fd = 2;
 	if ((check_for_disasm(argv)))
 	{
 		if (argc != 3)
@@ -101,16 +102,15 @@ int			main(int argc, char const *argv[])
 		if (ft_strlen(argv[2]) < 5)
 			ft_arg_error("Missed filename");
 		disassembler(argv[2]);
-		// system("leaks asm");
+		system("leaks asm");
 		return (0);
 	}
-	g_fd = 2;
 	extention = ft_strdup(ft_strrchr(argv[1], '.'));
 	if (!ft_strequ(extention, ".s"))
 		ft_arg_error("Extention of the file must be .s");
 	if (ft_strlen(argv[1]) < 3)
 		ft_arg_error("Missed filename");
 	assembler(argv[1]);
-	// system("leaks asm");
+	system("leaks asm");
 	return (0);
 }

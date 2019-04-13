@@ -12,6 +12,20 @@
 
 #include "asm.h"
 
+int			check_for_digits(char *nbr)
+{
+	size_t i;
+
+	i = 0;
+	while (i < ft_strlen(nbr))
+	{
+		if (!ft_isdigit(nbr[i]))
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 void		process_direct_arg(t_codage *codage,
 							t_instruction *instruction_args, t_word *current)
 {

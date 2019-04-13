@@ -197,6 +197,7 @@ void			process_indirect_arg(t_codage *codage,
 void			process_register_arg(t_codage *codage,
 							t_instruction *instruction_args, t_word *current);
 t_codage		*init_codage(void);
+int				check_for_digits(char *nbr);
 
 /*
 **	write_args.c

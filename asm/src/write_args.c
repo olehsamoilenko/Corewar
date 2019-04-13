@@ -29,6 +29,8 @@ void	write_ind_arg(t_asm *asm_parsing, int i,
 	}
 	else
 	{
+		if (!check_for_digits(instruction_args->args[i]->name))
+			error_word2(instruction_args->args[i], "Agument is not number");
 		number = ft_atoi(instruction_args->args[i]->name);
 		write_int_to_byte(asm_parsing, number, 2);
 	}
@@ -62,6 +64,8 @@ void	write_dir_arg(t_asm *asm_parsing, int i,
 		if_exist_label(asm_parsing, i, instruction_args, position_of_instruct);
 	else
 	{
+		if (!check_for_digits(&instruction_args->args[i]->name[1]))
+			error_word2(instruction_args->args[i], "Agument is not number");
 		number = ft_atoi(&instruction_args->args[i]->name[1]);
 		if (g_op_tab[instruction_args->opcode].label_size == 1)
 			write_int_to_byte(asm_parsing, number, 2);

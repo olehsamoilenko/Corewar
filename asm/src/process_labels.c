@@ -90,7 +90,7 @@ t_word	*process_label(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == SEPARATOR)
 			current = current->next;
 		else
-			error_word2(current, "Separator is missed");
+			error_word2(current, "Wrong instruction");
 	}
 	count_bytes(asm_parsing, codage, instruction_args, current);
 	return (current);

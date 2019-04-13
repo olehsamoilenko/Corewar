@@ -24,6 +24,8 @@ t_word	*process_args(t_word *current, t_codage *codage,
 	else if (current->word_type == REGISTER &&
 			codage->count_args < g_op_tab[codage->instruction].count_args)
 		process_register_arg(codage, instruction_args, current);
+	if (current->word_type == INSTRUCTION)
+		error_word2(current, "Not valid argument");
 	current = current->next;
 	if (codage->count_args == g_op_tab[codage->instruction].count_args)
 	{
