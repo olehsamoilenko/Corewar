@@ -160,6 +160,7 @@ typedef struct	s_op
 
 // main
 void		error(char *message);
+void	usage(void);
 
 // params
 void		parse_params(int argc, char **argv, t_war *war);
@@ -177,7 +178,7 @@ t_carriage	*create_carriage(t_war *war, t_champion *creator);
 void	throw_basic_carriages(t_war *war);
 
 // verbose
-void		adv(t_war *war, t_op *op, int instr_len, t_carriage *car);
+void	adv(t_war *war, int instr_len, t_carriage *car);
 void		dump(t_war *war);
 void	verbose_won(t_war *war);
 void	introduce(t_war *war, t_champion **champs, t_bool flag_visual);

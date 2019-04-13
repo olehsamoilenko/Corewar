@@ -19,7 +19,7 @@ void	handle_key(int key, t_war *war)
 	if (key == KEY_W)
 	{
 		if (war->cycles_in_second > 1)
-			war->cycles_in_second -= 1;			
+			war->cycles_in_second -= 1;
 	}
 	if (key == KEY_E)
 		war->cycles_in_second += 1;
@@ -34,12 +34,14 @@ t_bool	cyc_inc_alowed(int key, t_war *war)
 	success = false;
 	if (!war->flag_visual || key == KEY_S ||
 	war->cycle < war->flag_dump || (war->flag_run &&
-	((float)clock() / CLOCKS_PER_SEC - war->time >= 1.0 / war->cycles_in_second)))
+	((float)clock() / CLOCKS_PER_SEC - war->time >=
+	1.0 / war->cycles_in_second)))
 	{
 		war->cycle += 1;
 		success = true;
 		if (war->flag_visual &&
-		(!war->flag_run || war->cycle - war->last_print >= war->cycles_in_second))
+		(!war->flag_run ||
+		war->cycle - war->last_print >= war->cycles_in_second))
 		{
 			war->time = (float)clock() / CLOCKS_PER_SEC;
 			war->last_print = war->cycle;
@@ -54,6 +56,7 @@ t_bool	next_cycle(t_war *war)
 	int		key;
 	t_bool	success;
 
+	key = 0;
 	if (war->flag_visual && war->cycle >= war->flag_dump)
 	{
 		handle_key(key = getch(), war);

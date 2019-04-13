@@ -1,5 +1,5 @@
-/*                                                                            */
 /* ************************************************************************** */
+/*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
@@ -33,7 +33,7 @@ t_war	*init(void)
 	return (war);
 }
 
-void	error(char *message) // .h
+void	error(char *message)
 {
 	ft_putstr_fd("Error: ", 2);
 	ft_putendl_fd(message, 2);
@@ -41,7 +41,15 @@ void	error(char *message) // .h
 	exit(0);
 }
 
-int		main(int argc, char **argv) 
+void	usage(void)
+{
+	ft_printf("Usage: ./corewar <[-n number] champion1.cor> <...> [-verbose] \
+									[-visual] [-dev] [-dump cycle_number]\n");
+	system("leaks corewar | grep 'leaked bytes'");
+	exit(0);
+}
+
+int		main(int argc, char **argv)
 {
 	t_war *war;
 

@@ -58,8 +58,6 @@ void	print_info_players(t_war *war)
 
 void	print_info(t_war *war)
 {
-	char	*itoa;
-
 	wresize(war->win_mem, 68, 197);
 	wresize(war->win_info, 68, 60);
 	wattron(war->win_mem, COLOR_PAIR(15));

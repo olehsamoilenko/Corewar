@@ -31,7 +31,7 @@ void	introduce(t_war *war, t_champion **champs, t_bool flag_visual)
 	}
 }
 
-void	adv(t_war *war, t_op *op, int instr_len, t_carriage *car)
+void	adv(t_war *war, int instr_len, t_carriage *car)
 {
 	int j;
 	if (war->flag_verbose && war->cycle >= war->flag_dump)

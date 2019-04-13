@@ -50,8 +50,7 @@ t_champion	*find_champ(int number, t_war *war)
 
 void		read_exec_code(int fd, t_champion *champ, t_war *war)
 {
-	int				i;
-	unsigned char	tmp;
+	unsigned int	i;
 	int				mem_start;
 
 	mem_start = (champ->number - 1) * (MEM_SIZE / war->amount_champs);

@@ -15,7 +15,7 @@ HEADER =		./includes/vm.h
 INC =			-I ./includes \
 				-I ../libft/includes
 LIB =			-lncurses -lft -L ../libft
-FLAGS =			#-Wall -Wextra -Werror
+FLAGS =			-Wall -Wextra -Werror
 LIST =			main \
 				op_general \
 				op_load \

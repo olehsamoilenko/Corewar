@@ -29,7 +29,7 @@ int		define_size(int arg_code, int label)
 		return (0);
 }
 
-int		get_bytes(int start, int amount, int type, t_map_cell *map[])
+int		get_bytes(int start, int amount, t_map_cell *map[])
 {
 	int res;
 	int i;
@@ -81,10 +81,10 @@ int		get_args(t_carriage *car, t_war *war)
 	car->size[3] = car->op->args > 2 ?
 		define_size(car->type[3], car->op->label) : 0;
 	car->param[1].integer = get_bytes(car->position + car->op->codage + 1,
-	car->size[1], car->type[1], war->map);
+	car->size[1], war->map);
 	car->param[2].integer = get_bytes(car->position + car->op->codage + 1 +
-	car->size[1], car->size[2], car->type[2], war->map);
+	car->size[1], car->size[2], war->map);
 	car->param[3].integer = get_bytes(car->position + car->op->codage + 1 +
-	car->size[1] + car->size[2], car->size[3], car->type[3], war->map);
+	car->size[1] + car->size[2], car->size[3], war->map);
 	return (car->op->codage + 1 + car->size[1] + car->size[2] + car->size[3]);
 }

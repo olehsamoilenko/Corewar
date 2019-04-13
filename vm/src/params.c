@@ -12,16 +12,6 @@
 
 #include "vm.h"
 
-
-
-void	usage(void)
-{
-	ft_printf("Usage: ./corewar <[-n number] champion1.cor> <...> [-verbose] \
-									[-visual] [-dev] [-dump cycle_number]\n");
-	system("leaks corewar | grep 'leaked bytes'");
-	exit(0);
-}
-
 t_bool	*check_errors(t_war *war, int cur_champs)
 {
 	int		i;

@@ -61,7 +61,7 @@ void	run_carriages(t_war *war)
 				car->op->func(car, war);
 			if (car->carry == false || car->op->code != 0x09)
 			{
-				adv(war, car->op, delta, car);
+				adv(war, delta, car);
 				car->position = (car->position + delta) % MEM_SIZE;
 			}
 			car->op = NULL;

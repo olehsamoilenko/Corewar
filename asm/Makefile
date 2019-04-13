@@ -15,7 +15,7 @@ HEADER =		./includes/asm.h
 INC =			-I ./includes \
 				-I ../libft/includes
 LIB =			-lft -L ../libft
-FLAGS =			#-Wall -Wextra -Werror
+FLAGS =			-Wall -Wextra -Werror
 LIST =			main \
 				list_of_words \
 				list_of_labels \
