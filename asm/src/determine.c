@@ -82,7 +82,7 @@ void	determine_instructions(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == INSTRUCTION)
 			current = process_instruction(asm_parsing, current);
 		else
-			error_word2(current, "INCORRECT");
+			error_word2(current, "Incorrect");
 	}
 }
 
@@ -139,6 +139,6 @@ void	determine_labels(t_asm *asm_parsing, t_word *current)
 		else if (current->word_type == INSTRUCTION)
 			current = process_label(asm_parsing, current);
 		else
-			error_word2(current, "INCORRECT");
+			error_word2(current, "Incorrect");
 	}
 }

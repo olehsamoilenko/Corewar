@@ -17,6 +17,8 @@ int			check_for_digits(char *nbr)
 	size_t i;
 
 	i = 0;
+	if (nbr[i] == '-')
+		i++;
 	while (i < ft_strlen(nbr))
 	{
 		if (!ft_isdigit(nbr[i]))

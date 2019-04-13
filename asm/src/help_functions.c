@@ -14,7 +14,8 @@
 
 void			ignore_comment(t_asm *asm_parsing, char *line)
 {
-	if (line[asm_parsing->symbol] == COMMENT_CHAR)
+	if (line[asm_parsing->symbol] == COMMENT_CHAR ||
+											line[asm_parsing->symbol] == ';')
 		while (line[asm_parsing->symbol])
 			asm_parsing->symbol++;
 }

@@ -41,7 +41,7 @@ void	check_for_doubles(t_asm *asm_parsing, char *line, char *substring)
 	{
 		if (ft_isspace(line[pos]))
 			pos++;
-		else if (line[pos] == '#')
+		else if (line[pos] == COMMENT_CHAR || line[pos] == ';')
 			break ;
 		else
 			error_word(asm_parsing, &line[pos]);

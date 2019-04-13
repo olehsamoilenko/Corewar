@@ -111,6 +111,5 @@ int			main(int argc, char const *argv[])
 	if (ft_strlen(argv[1]) < 3)
 		ft_arg_error("Missed filename");
 	assembler(argv[1]);
-	system("leaks asm");
 	return (0);
 }
