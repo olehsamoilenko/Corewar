@@ -77,8 +77,10 @@ void	print_info(t_war *war)
 													war->processes_amount);
 	wattron(war->win_info, A_BOLD);
 	print_info_players(war);
-	mvwprintw(war->win_info, war->last_line + 2, 3,
-						"CYCLE_TO_DIE : %d              ", war->cycles_to_die);
+	mvwprintw(war->win_info, war->last_line + 2, 3, "CYCLE_TO_DIE : %4d/%d      ",
+	war->cycles_after_check, war->cycles_to_die);
+	mvwprintw(war->win_info, war->last_line + 4, 3, "MAX_CHECKS : %6d/%d     ",
+	war->checks, MAX_CHECKS);
 	wrefresh(war->win_info);
 }
 

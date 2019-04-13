@@ -27,7 +27,8 @@ void	error_dis(char *message)
 
 void	ft_error(t_asm *asm_parsing)
 {
-	ft_printf("Not valid word on row %d in symbol %d\n", asm_parsing->row, asm_parsing->symbol);
+	ft_printf("Not valid word on row %d in symbol %d\n", asm_parsing->row,
+	asm_parsing->symbol);
 	// system("leaks asm");
 	exit(1);
 }

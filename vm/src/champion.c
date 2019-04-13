@@ -72,7 +72,7 @@ void		parse_champions(t_war *war)
 	i = -1;
 	while (war->champs[++i] != NULL)
 	{
-		war->champs[i]->header = ft_memalloc(sizeof(header_t));
+		war->champs[i]->header = ft_memalloc(sizeof(t_header));
 		if ((fd = open(war->champs[i]->file, O_RDONLY)) == -1)
 			error(ERR_OPEN_CHAMP);
 		if (!read_magic_header(fd))

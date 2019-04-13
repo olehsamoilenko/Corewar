@@ -44,8 +44,8 @@ void	op_ld(t_carriage *car, t_war *war)
 	if (correct_reg(reg_num = car->param[2].integer))
 	{
 		get_value(car, 1, war,
-			car->position + car->param[1].integer % IDX_MOD,
-			&car->reg[reg_num].integer);
+			car->position + car->param[1].integer % IDX_MOD);
+		car->reg[reg_num].integer = car->value[1];
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("P %4d | ld %d r%d\n", car->number,
@@ -55,23 +55,21 @@ void	op_ld(t_carriage *car, t_war *war)
 
 void	op_ldi(t_carriage *car, t_war *war)
 {
-	int value_1;
-	int value_2;
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->param[1].integer,
-		&value_1) && get_value(car, 2, war, 0, &value_2) &&
+	if (get_value(car, 1, war, car->position + car->param[1].integer) &&
+	get_value(car, 2, war, 0) &&
 						correct_reg(reg_num = car->param[3].integer))
 	{
-		index = car->position + (value_1 + value_2) % IDX_MOD;
+		index = car->position + (car->value[1] + car->value[2]) % IDX_MOD;
 		car->reg[reg_num] = get_from_map(war, index);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | ldi %d %d r%d\n", car->number, value_1,
-													value_2, reg_num);
+			ft_printf("P %4d | ldi %d %d r%d\n", car->number, car->value[1],
+													car->value[2], reg_num);
 			ft_printf("       | -> load from %d + %d = %d ",
-				value_1, value_2, value_1 + value_2);
+				car->value[1], car->value[2], car->value[1] + car->value[2]);
 			ft_printf("(with pc and mod %d)\n", index);
 		}
 	}
@@ -82,9 +80,9 @@ void	op_lld(t_carriage *car, t_war *war)
 	int reg_num;
 
 	if (correct_reg(reg_num = car->param[2].integer) &&
-	get_value(car, 1, war, car->position + car->param[1].integer,
-	&car->reg[reg_num].integer))
+	get_value(car, 1, war, car->position + car->param[1].integer))
 	{
+		car->reg[reg_num].integer = car->value[1];
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 			ft_printf("P %4d | lld %d r%d\n", car->number,
@@ -94,24 +92,23 @@ void	op_lld(t_carriage *car, t_war *war)
 
 void	op_lldi(t_carriage *car, t_war *war)
 {
-	int value_1;
-	int value_2;
 	int reg_num;
 	int index;
 
-	if (get_value(car, 1, war, car->position + car->param[1].integer,
-		&value_1) && get_value(car, 2, war, 0, &value_2) &&
+	if (get_value(car, 1, war, car->position + car->param[1].integer) &&
+	get_value(car, 2, war, 0) &&
 						correct_reg(reg_num = car->param[3].integer))
 	{
-		index = car->position + value_1 + value_2;
+		index = car->position + car->value[1] + car->value[2];
 		car->reg[reg_num] = get_from_map(war, index);
 		car->carry = car->reg[reg_num].integer == 0 ? true : false;
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | lldi %d %d r%d\n", car->number, value_1,
-														value_2, reg_num);
+			ft_printf("P %4d | lldi %d %d r%d\n", car->number, car->value[1],
+													car->value[2], reg_num);
 			ft_printf("       | -> load from %d + %d = %d (with pc %d)\n",
-				value_1, value_2, value_1 + value_2, index);
+				car->value[1], car->value[2], car->value[1] + car->value[2],
+																	index);
 		}
 	}
 }

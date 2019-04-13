@@ -43,24 +43,22 @@ void	op_st(t_carriage *car, t_war *war)
 void	op_sti(t_carriage *car, t_war *war)
 {
 	int r1;
-	int value_2;
-	int value_3;
 	int index;
 
 	if (get_value(car, 2, war, car->position +
-	car->param[2].integer % IDX_MOD, &value_2) &&
+	car->param[2].integer % IDX_MOD) &&
 	get_value(car, 3, war, car->position +
-	car->param[2].integer % IDX_MOD, &value_3) &&
+	car->param[2].integer % IDX_MOD) &&
 	correct_reg(r1 = car->param[1].integer))
 	{
-		index = car->position + (value_2 + value_3) % IDX_MOD;
+		index = car->position + (car->value[2] + car->value[3]) % IDX_MOD;
 		throw_on_map(car->reg[r1], war, car, index);
 		if (war->flag_verbose && war->cycle >= war->flag_dump)
 		{
-			ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, value_2,
-																	value_3);
+			ft_printf("P %4d | sti r%d %d %d\n", car->number, r1, car->value[2],
+																car->value[3]);
 			ft_printf("       | -> store to %d + %d = %d ",
-				value_2, value_3, value_2 + value_3);
+				car->value[2], car->value[3], car->value[2] + car->value[3]);
 			ft_printf("(with pc and mod %d)\n", index);
 		}
 	}
