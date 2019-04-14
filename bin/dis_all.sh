@@ -86,5 +86,3 @@ for i in ${list[@]}; do
 	echo "\t"$i
 	sh bin/disassembler.sh resources/champs/cor/$i
 done;
-rm resources/champs/dis_test/*.s
-rm resources/champs/dis_test/*.cor
