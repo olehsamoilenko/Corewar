@@ -84,5 +84,5 @@ ultimate-surrender.cor			# 3071 OK
 
 for i in ${list[@]}; do
 	echo "\t"$i
-	sh bin/bool.sh resources/champs/cor/$i
+	sh bin/vm_bool.sh resources/champs/cor/$i
 done;

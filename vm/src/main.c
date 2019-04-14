@@ -37,7 +37,6 @@ void	error(char *message)
 {
 	ft_putstr_fd("Error: ", 2);
 	ft_putendl_fd(message, 2);
-	system("leaks corewar");
 	exit(0);
 }
 
@@ -45,7 +44,6 @@ void	usage(void)
 {
 	ft_printf("Usage: ./corewar <[-n number] champion1.cor> <...> [-verbose] \
 [-visual] [-dump cycle_number]\n");
-	system("leaks corewar");
 	exit(0);
 }
 
@@ -74,6 +72,5 @@ int		main(int argc, char **argv)
 				dump(war);
 		}
 	over_curses(war);
-	system("leaks corewar");
 	return (0);
 }

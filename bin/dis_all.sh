@@ -1,88 +1,87 @@
 list=(
-# 42.cor						# big
-# barriere.cor					# big
-Asombra.cor						# 30360 OK
-Bazou.cor						# 59490 OK
-Code_eater.cor					# 240335 OK
-Eraser.cor						# 3071 OK
-Explosive_Kitty.cor				# 39217 OK
-Gagnant.cor						# 26023 OK
-Hidden.cor						# 27438 OK
-Horace.cor						# 59837 OK
-Izi_Miaou.cor					# 239777 OK
-Kappa.cor						# 25902 OK
-Kitty_Miaou.cor					# 239777 OK
-Kittystrophic.cor				# 116171 OK
-Machine-gun.cor					# 3071 OK
-MarineKing.cor					# 27438 OK
-Misaka_Mikoto.cor				# 27848 OK
-NoIdea.cor						# 25541 OK
-O-Maley_Miaou.cor				# 239777 OK
-Rainbow_dash.cor				# 83333 OK
-Stargate0_1.cor					# 29109 OK
-THUNDER.cor						# 52680 OK
-TheHarvester.cor				# 3071 OK
-Varimathras.cor					# 76223 OK
-Wall.cor						# 27438 OK
-_.cor							# 27438 OK
-_honeybadger.cor				# 1535 OK
-bigzork.cor						# 28362 OK
-ex.cor							# 3071 OK
-fluttershy.cor					# 25902 OK
-jumper.cor						# 24690 OK
-mortel.cor						# 7429 OK
-toto.cor						# 26023 OK
-turtle.cor						# 40480 OK
-casimir.cor						# 28151 OK
-champ.cor						# 241759 OK
-corelol.cor						# 57954 OK
-darksasuke.cor					# 32022 OK
-doge.cor						# 26226 OK
-dubo.cor						# 3071 OK
-echo.cor						# 3071 OK
-fast.cor						# 13173 OK
-gateau.cor						# 29009 OK
-gedeon.cor						# 25902 OK
-zork.cor						# 57954 OK
-justin_bee.cor					# 27000 OK
-kamelkaze.cor					# 3071 OK
-katchup.cor						# 127415 OK
-lapsang.cor						# 31697 OK
-le_pet_de_nonne.cor				# 3071 OK
-live.cor						# 20439 OK
-loose.cor						# 29237 OK
-lou_forktologue.cor				# 27000 OK
-littlepuppy.cor					# 3071 OK
-master_of_puppets.cor			# 29760 OK
-maxidef.cor						# 25901 OK
-salamahenagalabadoun.cor		# 3071 OK
-overwatch.cor					# 27438 OK
-pai_mu_tan.cor					# 239963 OK
-run_Kitty_RUN.cor				# 127189 OK
-sam_2.0.cor						# 111225 OK
-sencha.cor						# 239777 OK
-skynet.cor						# 25902 OK
-slider2.cor						# 25902 OK
-tchupka.cor						# 127415 OK
-terminator.cor					# 22755 OK
-ultima.cor						# 28224 OK
-ultimate-surrender.cor			# 3071 OK
-Car.cor						# very long
-mandragore.cor				# very long
-jinx.cor						# 24366 OK
-youforkmytralala.cor			# 24827 OK
-big_feet.cor					# 25901 OK
-wave.cor						# 27438 OK
-meowluigi.cor					# 27438 OK
-mise_a_jour_windows95.cor		# 27438 OK
-Douceur_power.cor				# 27438 OK
-ForgottenOne.cor				# 27438 OK
-Octobre_Rouge_V4.2.cor		# 27438 OK
-helltrain.cor					# 27438 OK
-bee_gees.cor					# 27438 OK
+42.cor				
+barriere.cor			
+Asombra.cor				
+Bazou.cor				
+Code_eater.cor			
+Eraser.cor				
+Explosive_Kitty.cor		
+Gagnant.cor				
+Hidden.cor				
+Horace.cor				
+Izi_Miaou.cor			
+Kappa.cor				
+Kitty_Miaou.cor			
+Kittystrophic.cor		
+Machine-gun.cor			
+MarineKing.cor			
+Misaka_Mikoto.cor		
+NoIdea.cor				
+O-Maley_Miaou.cor		
+Rainbow_dash.cor		
+Stargate0_1.cor			
+THUNDER.cor				
+TheHarvester.cor		
+Varimathras.cor			
+Wall.cor				
+_.cor					
+_honeybadger.cor		
+bigzork.cor				
+ex.cor					
+fluttershy.cor			
+jumper.cor				
+mortel.cor				
+toto.cor				
+turtle.cor				
+casimir.cor				
+champ.cor				
+corelol.cor				
+darksasuke.cor			
+doge.cor				
+dubo.cor				
+echo.cor				
+fast.cor				
+gateau.cor				
+gedeon.cor				
+zork.cor				
+justin_bee.cor			
+kamelkaze.cor			
+katchup.cor				
+lapsang.cor				
+le_pet_de_nonne.cor		
+live.cor				
+loose.cor				
+lou_forktologue.cor		
+littlepuppy.cor			
+master_of_puppets.cor	
+maxidef.cor				
+salamahenagalabadoun.cor
+overwatch.cor			
+pai_mu_tan.cor			
+run_Kitty_RUN.cor		
+sam_2.0.cor				
+sencha.cor				
+skynet.cor				
+slider2.cor				
+tchupka.cor				
+terminator.cor			
+ultima.cor				
+ultimate-surrender.cor	
+Car.cor					
+mandragore.cor			
+jinx.cor				
+youforkmytralala.cor	
+big_feet.cor			
+wave.cor				
+meowluigi.cor			
+mise_a_jour_windows95.cor
+Douceur_power.cor		
+ForgottenOne.cor		
+Octobre_Rouge_V4.2.cor	
+helltrain.cor			
+bee_gees.cor			
 )
 
 for i in ${list[@]}; do
-	echo "\t"$i
 	sh bin/disassembler.sh resources/champs/cor/$i
 done;

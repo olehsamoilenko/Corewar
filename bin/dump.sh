@@ -6,8 +6,8 @@ else
 	./resources/corewar $1 -d $2 > bin/origin
 	if [ "$(diff -u bin/my bin/origin)" == "" ]
 	then
-		echo DUMP $2 OK
+		echo "\033[1;32mDUMP $2 OK\033[0m"
 	else
-		echo DUMP $2 KO
+		echo "\033[31mDUMP $2 KO\033[0m"
 	fi
 fi
