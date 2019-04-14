@@ -17,7 +17,8 @@ t_word	*determine_commands(t_asm *asm_parsing)
 	t_word *current;
 
 	current = asm_parsing->words;
-	while (asm_parsing->name_champ == NULL || asm_parsing->comment == NULL)
+	while (current && (asm_parsing->name_champ == NULL ||
+												asm_parsing->comment == NULL))
 	{
 		if (current->word_type == COMMAND)
 		{
@@ -30,6 +31,9 @@ t_word	*determine_commands(t_asm *asm_parsing)
 			error_word2(current, "Name or comment is missed");
 		current = current->next;
 	}
+	if (asm_parsing->name_champ == NULL || asm_parsing->comment == NULL)
+		ft_arg_error("Name or comment is missed");
+	current == NULL ? ft_arg_error("Missed next line") : 0;
 	if (ft_strlen(asm_parsing->name_champ) - 2 > PROG_NAME_LENGTH)
 		ft_arg_error("Length of the name is bigger than 128");
 	if (ft_strlen(asm_parsing->comment) - 2 > COMMENT_LENGTH)
