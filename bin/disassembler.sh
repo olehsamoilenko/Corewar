@@ -4,8 +4,8 @@ then
 else
 	cp $1 bin
 	filename=$(basename $1 .cor)
-	./asm/asm -d bin/$filename.cor > tmp
-	./asm/asm bin/$filename.s > tmp
+	./asm/asm -d bin/$filename.cor > bin/tmp
+	./asm/asm bin/$filename.s > bin/tmp
 	hexdump -vC bin/$filename.cor > bin/my
 	hexdump -vC $1 > bin/origin
 	if [ "$(diff -u bin/my bin/origin)" == "" ]
