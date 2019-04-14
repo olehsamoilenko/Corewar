@@ -54,7 +54,6 @@ void	over_over(t_war *war)
 	delwin(war->win_mem);
 	delwin(war->win_info);
 	endwin();
-	system("leaks corewar");
 	exit(0);
 }
 
